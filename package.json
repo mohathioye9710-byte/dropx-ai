@@ -1,0 +1,33 @@
+{
+  "name": "dropshipping",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "cheerio": "^1.2.0",
+    "firebase": "^12.15.0",
+    "lucide-react": "^1.21.0",
+    "next": "16.2.9",
+    "next-auth": "^4.24.14",
+    "nodemailer": "^7.0.13",
+    "openai": "^6.44.0",
+    "pg": "^8.22.0",
+    "prisma": "^7.8.0",
+    "puppeteer": "^25.2.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "stripe": "^22.3.0"
+  },
+  "devDependencies": {
+    "dotenv": "^17.4.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.9"
+  }
+}

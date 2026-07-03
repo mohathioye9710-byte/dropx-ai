@@ -1,0 +1,16 @@
+# Dropshipping App Task List
+
+- `[x]` Phase 1: Foundation & Dashboard UI
+  - `[x]` Setup Next.js framework
+  - `[ ]` Configure Firebase integration
+  - `[ ]` Build layout (Sidebar, Topbar)
+  - `[ ]` Create "Winning Product Analyzer" UI
+  - `[ ]` Create "How do you want to sell it?" Quiz UI
+- `[ ]` Phase 2: AI & OpenAI Integration
+  - `[ ]` "Let AI Decide" backend pipeline
+  - `[ ]` AI description, pricing, and bundle generation
+  - `[ ]` Mock realistic reviews generation
+- `[ ]` Phase 3: External Integrations
+  - `[ ]` Shopify Admin API for 1-click publishing
+  - `[ ]` Social Media API keys dashboard
+  - `[ ]` AliExpress/Shopify import logic
