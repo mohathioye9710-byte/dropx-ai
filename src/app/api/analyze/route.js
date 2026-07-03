@@ -60,7 +60,6 @@ export async function POST(req) {
         } catch (fetchErr) {
           console.log(`[DEBUG] ❌ Échec Fetch complet: ${fetchErr.message}`);
         }
-      }
 
       if (html) {
         console.log(`[DEBUG] 🔍 Extraction des données avec Cheerio...`);
