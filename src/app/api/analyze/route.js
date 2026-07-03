@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
 import OpenAI from 'openai';
-import puppeteer from 'puppeteer';
 
 export async function POST(req) {
   try {
@@ -37,39 +36,12 @@ export async function POST(req) {
        console.log(`[DEBUG] ⚠️ Mode Demo détecté pour ce lien spécifique.`);
        title = "Electric Portable Dehumidifier Air Purifier USB Mute Moisture Absorbers Air Dryer For Home Room Office Kitchen Deodorizer Dryer";
        extractedPrice = "$56.78";
-       image = "https://ae-pic-a1.aliexpress-media.com/kf/S7f0dbb7d4554473ba85a4c2190c67d5f9.png"; // Original high-resolution AliExpress image
+       image = "https://ae-pic-a1.aliexpress-media.com/kf/S7f0dbb7d4554473ba85a4c2190c67d5f9.png"; 
        imageList = [image];
        console.log(`[DEBUG] ✅ Données de démo chargées avec succès.`);
     } else {
-      console.log(`[DEBUG] 🌐 Lancement du scraping avec Puppeteer (Bypass Anti-Bot)...`);
-      try {
-        const browser = await puppeteer.launch({ headless: 'new' });
-        const page = await browser.newPage();
-        
-        // Utiliser domcontentloaded au lieu de networkidle2 car AliExpress charge des scripts en boucle
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        
-        // Attendre 3 secondes supplémentaires pour que les données du produit (titre, image) s'affichent
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        productOptions = await page.evaluate(() => {
-          try {
-            return window.runParams.data.skuModule.productSKUPropertyList.map(p => ({
-              name: p.skuPropertyName,
-              values: p.skuPropertyValues.map(v => v.propertyValueDefinitionName).filter(Boolean)
-            })).filter(o => o.values.length > 0);
-          } catch(e) {
-            return [];
-          }
-        }) || [];
-
-        html = await page.content();
-        await browser.close();
-        console.log(`[DEBUG] ✅ Scraping Puppeteer réussi. Taille HTML: ${html.length} octets.`);
-      } catch (puppeteerError) {
-        console.log(`[DEBUG] ❌ Échec Puppeteer: ${puppeteerError.message}`);
-        console.log(`[DEBUG] 🌐 Tentative de secours avec Fetch standard...`);
-        
+        // Fallback to fast Cheerio scraping for MVP (No Puppeteer due to Vercel 50MB limit)
+        console.log(`[DEBUG] 🌐 Lancement du scraping rapide avec Cheerio...`);
         try {
           const response = await fetch(url, {
             headers: {
