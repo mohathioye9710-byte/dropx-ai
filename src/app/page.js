@@ -25,6 +25,23 @@ export default async function Dashboard() {
         <p className={styles.subtitle}>Welcome back, <strong style={{ color: '#fff' }}>{session.user.name.split(' ')[0]}</strong>! Here's what's happening today.</p>
       </header>
 
+      <div style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '20px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
+        <div>
+          <h2 style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Zap size={20} color="#a855f7" /> Analyser un nouveau produit
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', maxWidth: '500px' }}>
+            Collez le lien d'un produit (AliExpress, Amazon, Temu...) pour laisser notre IA générer votre boutique, votre copywriting et vos publicités en quelques secondes.
+          </p>
+        </div>
+        <a 
+          href="/analyzer" 
+          style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', color: '#fff', padding: '14px 24px', borderRadius: '12px', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(99, 102, 241, 0.4)' }}
+        >
+          <Zap size={16} /> Lancer l'analyse IA
+        </a>
+      </div>
+
       <div className={styles.statsGrid}>
         <div className={`${styles.statCard} ${styles.cardViolet} delay-1`}>
           <div className={styles.statIconWrapper} style={{ background: 'rgba(139, 92, 246, 0.15)', border: '1px solid rgba(139, 92, 246, 0.3)' }}>

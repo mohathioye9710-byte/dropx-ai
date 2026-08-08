@@ -73,9 +73,10 @@ export default function Sidebar() {
           <>
             <div style={{ position: 'relative' }}>
               <img 
-                src={session.user.image || ''} 
+                src={`https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${session.user?.email || session.user?.name || 'DropX'}`} 
                 alt="Profile" 
-                className={styles.userAvatar} 
+                className={styles.userAvatar}
+                style={{ background: 'rgba(255,255,255,0.1)' }}
               />
               <div style={{ position: 'absolute', bottom: -2, right: -2, background: '#10b981', border: '2px solid #0a0a1a', borderRadius: '50%', width: 12, height: 12 }}></div>
             </div>

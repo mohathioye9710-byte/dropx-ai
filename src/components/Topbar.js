@@ -2,10 +2,12 @@
 
 import { Bell, Search, LogOut } from 'lucide-react';
 import { useSession, signOut } from "next-auth/react";
+import { useState } from "react";
 import styles from './Topbar.module.css';
 
 export default function Topbar() {
   const { data: session } = useSession();
+  const [showNotifications, setShowNotifications] = useState(false);
   return (
     <header className={styles.topbar}>
       <div className={styles.searchContainer}>
@@ -18,16 +20,29 @@ export default function Topbar() {
       </div>
       
       <div className={styles.actions}>
-        <button className={styles.iconButton}>
-          <Bell size={20} />
-          <span className={styles.badge}>3</span>
-        </button>
+        <div style={{ position: 'relative' }}>
+          <button 
+            className={styles.iconButton}
+            onClick={() => setShowNotifications(!showNotifications)}
+          >
+            <Bell size={20} />
+            <span className={styles.badge}>0</span>
+          </button>
+          
+          {showNotifications && (
+            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', background: 'rgba(15, 15, 30, 0.95)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '16px', width: '280px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', zIndex: 50 }}>
+              <h4 style={{ color: '#fff', fontSize: '14px', marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>Notifications</h4>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textAlign: 'center', padding: '12px 0' }}>Aucune nouvelle notification.</p>
+            </div>
+          )}
+        </div>
+        
         {session && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '16px', paddingLeft: '16px', borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
             <img 
-              src={session.user?.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user?.email}`} 
+              src={`https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${session.user?.email || session.user?.name || 'DropX'}`} 
               alt="Profile" 
-              style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)' }} 
+              style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)' }} 
             />
             <button 
               onClick={() => signOut({ callbackUrl: '/' })}

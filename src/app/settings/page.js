@@ -71,7 +71,7 @@ export default function SettingsPage() {
                 <h2 className={styles.sectionTitle}>Profil Public</h2>
                 <div className={styles.profileCard}>
                   <div className={styles.avatarWrapper}>
-                    <img src={session?.user?.image || 'https://api.dicebear.com/7.x/avataaars/svg?seed=fallback'} alt="Avatar" className={styles.avatar} />
+                    <img src={`https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${session?.user?.email || session?.user?.name || 'DropX'}`} alt="Avatar" className={styles.avatar} style={{ background: 'rgba(255,255,255,0.1)' }} />
                     <button className={styles.editAvatar}>Modifier</button>
                   </div>
                   <div className={styles.formGroup}>
