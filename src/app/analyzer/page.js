@@ -267,10 +267,10 @@ export default function Analyzer() {
         <>
           <header className={styles.header}>
             <h1 className={styles.title}>Générer ma boutique</h1>
-            <p className={styles.subtitle}>Colle un lien AliExpress, Shopify ou concurrent pour générer ta boutique.</p>
+            <p className={styles.subtitle}>Colle un lien AliExpress, Amazon, Temu ou Alibaba pour générer ta boutique.</p>
           </header>
           <div className={styles.searchBox}>
-            <input type="text" placeholder="https://fr.aliexpress.com/item/100500..." className={styles.input} value={url} onChange={(e) => setUrl(e.target.value)} />
+            <input type="text" placeholder="https://amazon.fr/... ou AliExpress, Temu..." className={styles.input} value={url} onChange={(e) => setUrl(e.target.value)} />
             <button className={`primary-button ${styles.analyzeBtn}`} onClick={handleAnalyze}>
               <Search size={20} />
               Générer ma boutique

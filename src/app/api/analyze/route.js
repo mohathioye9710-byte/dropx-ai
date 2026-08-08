@@ -65,9 +65,9 @@ export async function POST(req) {
         console.log(`[DEBUG] 🔍 Extraction des données avec Cheerio...`);
         const $ = cheerio.load(html);
 
-        title = $('meta[property="og:title"]').attr('content') || $('title').text() || 'Unknown Product';
-        description = $('meta[property="og:description"]').attr('content') || '';
-        image = $('meta[property="og:image"]').attr('content') || $('meta[property="og:image:secure_url"]').attr('content') || '';
+        title = $('meta[property="og:title"]').attr('content') || $('#productTitle').text().trim() || $('.product-title').text().trim() || $('h1').text().trim() || $('title').text().trim() || 'Unknown Product';
+        description = $('meta[property="og:description"]').attr('content') || $('#feature-bullets').text().trim() || '';
+        image = $('meta[property="og:image"]').attr('content') || $('meta[property="og:image:secure_url"]').attr('content') || $('#landingImage').attr('src') || $('#imgBlkFront').attr('src') || $('.main-image img').attr('src') || '';
         
         imageList = [image].filter(Boolean);
         const imagePathMatch = html.match(/"imagePathList":\[(.*?)\]/);
@@ -81,7 +81,7 @@ export async function POST(req) {
         }
         image = imageList[0] || '';
         
-        extractedPrice = $('meta[property="product:price:amount"]').attr('content');
+        extractedPrice = $('meta[property="product:price:amount"]').attr('content') || $('.a-price .a-offscreen').first().text().trim() || $('#priceblock_ourprice').text().trim() || $('.ma-ref-price span').text().trim() || $('.price').text().trim() || $('._3-p1zM').text().trim();
         if (!extractedPrice) {
            const titlePriceMatch = title.match(/(?:US\s*\$|€|£)\s*([0-9,.]+)/i);
            if (titlePriceMatch) extractedPrice = titlePriceMatch[0];
