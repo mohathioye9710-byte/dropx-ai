@@ -61,8 +61,8 @@ export const authOptions = {
       if (user && user.email) {
         const dbUser = await prisma.user.upsert({
           where: { email: user.email },
-          update: { name: user.name, image: user.image },
-          create: { email: user.email, name: user.name, image: user.image }
+          update: { name: user.name || null, image: user.image || null },
+          create: { email: user.email, name: user.name || user.email.split('@')[0], image: user.image || null }
         });
         user.id = dbUser.id;
       }
@@ -80,7 +80,7 @@ export const authOptions = {
           const dbUser = await prisma.user.upsert({
             where: { email: session.user.email },
             update: {},
-            create: { email: session.user.email, name: session.user.name, image: session.user.image }
+            create: { email: session.user.email, name: session.user.name || session.user.email.split('@')[0], image: session.user.image || null }
           });
           session.user.id = dbUser.id;
         } catch (e) {
