@@ -1,25 +1,39 @@
+/* ============================================
+   DASHBOARD — PREMIUM GLASSMORPHISM
+   ============================================ */
+
 .container {
   display: flex;
   flex-direction: column;
   gap: 32px;
+  position: relative;
+  z-index: 2;
 }
 
 .header {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-bottom: 8px;
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
   color: var(--text-secondary);
   font-size: 15px;
 }
+
+/* ============================================
+   STAT CARDS
+   ============================================ */
 
 .statsGrid {
   display: grid;
@@ -32,44 +46,84 @@
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  transition: transform 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
 .statCard:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.statCard:hover::before {
+  opacity: 1;
 }
 
 .statIconWrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
+
+/* Specific card accents */
+.cardViolet:hover { border-color: rgba(139, 92, 246, 0.3); box-shadow: 0 12px 40px rgba(139, 92, 246, 0.15); }
+.cardBlue:hover { border-color: rgba(59, 130, 246, 0.3); box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15); }
+.cardEmerald:hover { border-color: rgba(16, 185, 129, 0.3); box-shadow: 0 12px 40px rgba(16, 185, 129, 0.15); }
+.cardPink:hover { border-color: rgba(236, 72, 153, 0.3); box-shadow: 0 12px 40px rgba(236, 72, 153, 0.15); }
 
 .statInfo {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  flex: 1;
 }
 
 .statLabel {
   color: var(--text-secondary);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .statValue {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 800;
   color: #fff;
+  letter-spacing: -0.5px;
 }
 
 .statChange {
   font-size: 12px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
+
+/* ============================================
+   MAIN SECTIONS (CHART & ACTIVITY)
+   ============================================ */
 
 .mainGrid {
   display: grid;
@@ -79,62 +133,118 @@
 
 .sectionTitle {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 24px;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.chartSection {
-  padding: 24px;
+.chartSection, .activitySection {
+  padding: 28px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  backdrop-filter: blur(20px);
 }
+
+/* ============================================
+   ANIMATED CHART
+   ============================================ */
 
 .placeholderChart {
-  height: 300px;
+  height: 280px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   padding-top: 40px;
-  gap: 16px;
+  gap: 12px;
+  position: relative;
+}
+
+.placeholderChart::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .chartBar {
   flex: 1;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.6));
-  border-radius: 6px 6px 0 0;
-  transition: height 1s ease;
-  min-width: 20px;
+  background: linear-gradient(to top, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.8));
+  border-radius: 8px 8px 0 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 16px;
+  position: relative;
+  overflow: hidden;
+  animation: growUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: bottom;
+  opacity: 0;
+}
+
+.chartBar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 20%);
 }
 
 .chartBar:hover {
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.9));
+  background: linear-gradient(to top, rgba(168, 85, 247, 0.4), rgba(139, 92, 246, 1));
+  transform: scaleY(1.05);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
 
-.activitySection {
-  padding: 24px;
+@keyframes growUp {
+  from { transform: scaleY(0); opacity: 0; }
+  to { transform: scaleY(1); opacity: 1; }
 }
+
+/* ============================================
+   ACTIVITY LIST
+   ============================================ */
 
 .activityList {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .activityItem {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: all 0.3s ease;
 }
 
-.activityDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent-color);
-  margin-top: 6px;
-  box-shadow: 0 0 10px var(--accent-glow);
+.activityItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+}
+
+.activityIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .activityDetails {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -142,21 +252,14 @@
 
 .activityTitle {
   font-size: 14px;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: #fff;
   line-height: 1.4;
 }
 
 .activityTime {
   font-size: 12px;
   color: var(--text-secondary);
-}
-
-.activityStatus {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
 }
 
 @media (max-width: 1024px) {

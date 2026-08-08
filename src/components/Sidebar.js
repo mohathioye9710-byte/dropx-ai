@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, PackageSearch, Sparkles, BarChart2, Settings, Store, PlusSquare, Share2, LogOut, LogIn, Palette } from 'lucide-react';
+import { Home, PackageSearch, Sparkles, BarChart2, Settings, Store, PlusSquare, Share2, LogOut, LogIn, Palette, CheckCircle2 } from 'lucide-react';
 import { useSession, signIn, signOut } from "next-auth/react";
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -71,14 +71,19 @@ export default function Sidebar() {
       <div className={styles.userCard}>
         {session ? (
           <>
-            <img 
-              src={session.user.image || ''} 
-              alt="Profile" 
-              className={styles.userAvatar} 
-              style={{width: '36px', height: '36px', borderRadius: '10px'}} 
-            />
+            <div style={{ position: 'relative' }}>
+              <img 
+                src={session.user.image || ''} 
+                alt="Profile" 
+                className={styles.userAvatar} 
+              />
+              <div style={{ position: 'absolute', bottom: -2, right: -2, background: '#10b981', border: '2px solid #0a0a1a', borderRadius: '50%', width: 12, height: 12 }}></div>
+            </div>
             <div className={styles.userInfo}>
-              <p className={styles.userName}>{session.user.name}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <p className={styles.userName}>{session.user.name.split(' ')[0]}</p>
+                <span className="badge-pro">PRO</span>
+              </div>
               <button onClick={() => signOut()} className={styles.signOutBtn}>
                 <LogOut size={11} /> Déconnexion
               </button>
