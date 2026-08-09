@@ -52,3 +52,36 @@ export async function POST(req) {
     return NextResponse.json({ error: "Failed to save integration" }, { status: 500 });
   }
 }
+
+export async function GET(req) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const integration = await prisma.integration.findUnique({
+      where: {
+        userId_platform: {
+          userId: session.user.id,
+          platform: 'shopify'
+        }
+      }
+    });
+
+    if (!integration) {
+      return NextResponse.json({ connected: false });
+    }
+
+    const keyData = JSON.parse(integration.keyData || '{}');
+    return NextResponse.json({ 
+      connected: true, 
+      domain: keyData.domain 
+    });
+
+  } catch (error) {
+    console.error("Integration fetch error:", error);
+    return NextResponse.json({ error: "Failed to fetch integration" }, { status: 500 });
+  }
+}
