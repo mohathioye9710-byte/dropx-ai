@@ -4,6 +4,10 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import OpenAI from 'openai';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 async function getShopifyCredentials(userId) {
   const integration = await prisma.integration.findUnique({
     where: { userId_platform: { userId, platform: "shopify" } }
