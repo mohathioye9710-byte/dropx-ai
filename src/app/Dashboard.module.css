@@ -1,155 +1,192 @@
 /* ============================================
-   DASHBOARD — ANALYTICS PRO
+   DASHBOARD — ULTRA ANALYTICS PRO
    ============================================ */
 
 .container {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 28px;
   position: relative;
   z-index: 2;
-  padding-bottom: 40px;
+  padding-bottom: 60px;
 }
+
+/* ============================================
+   HEADER
+   ============================================ */
 
 .header {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 8px;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.title {
-  font-size: 32px;
+.headerLeft h1 {
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: -1px;
-  background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.subtitle {
-  color: var(--text-secondary);
-  font-size: 15px;
+.headerLeft p {
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.periodTabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.periodTab {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.periodTabActive {
+  background: rgba(139, 92, 246, 0.3);
+  color: #fff;
+  border: 1px solid rgba(139, 92, 246, 0.5);
 }
 
 /* ============================================
-   KPI CARDS (Top Metrics)
+   KPI CARDS ROW
    ============================================ */
 
-.kpiGrid {
+.kpiRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
 }
 
 .kpiCard {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
+  padding: 20px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .kpiCard:hover {
-  background: rgba(255, 255, 255, 0.04);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+  background: rgba(255,255,255,0.04);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
 }
 
-/* Gradients on top edge */
 .kpiCard::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-  opacity: 0.7;
+  top: 0; left: 0; right: 0;
+  height: 3px;
 }
 
-.kpiRevenue::before { background: linear-gradient(90deg, #6366f1, #a855f7); }
-.kpiProfit::before { background: linear-gradient(90deg, #10b981, #34d399); }
-.kpiCPA::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-.kpiROAS::before { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+.kpiViolet::before { background: linear-gradient(90deg, #6366f1, #a855f7); }
+.kpiGreen::before { background: linear-gradient(90deg, #10b981, #34d399); }
+.kpiYellow::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.kpiPink::before { background: linear-gradient(90deg, #ec4899, #f472b6); }
+.kpiBlue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
 
-.kpiHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.kpiTitle {
-  color: var(--text-secondary);
-  font-size: 14px;
+.kpiLabel {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
 }
 
-.kpiIconWrapper {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+.kpiValueRow {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .kpiValue {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 800;
   color: #fff;
-  letter-spacing: -1px;
+  letter-spacing: -0.5px;
 }
 
-.kpiTrend {
+.kpiBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 500;
+  gap: 3px;
+  white-space: nowrap;
 }
-.trendUp { color: #10b981; }
-.trendDown { color: #ef4444; }
-.trendNeutral { color: #94a3b8; }
+
+.badgeUp {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.badgeDown {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* Mini sparkline in KPI */
+.miniSparkline {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 32px;
+  margin-top: 12px;
+}
+
+.sparkBar {
+  flex: 1;
+  border-radius: 2px;
+  min-width: 4px;
+  animation: growUp 0.8s ease forwards;
+  opacity: 0;
+  transform-origin: bottom;
+}
 
 /* ============================================
-   MAIN CHARTS & SPLIT LAYOUT
+   SECTION BOXES
    ============================================ */
 
-.mainGrid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-}
-
-.donutGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-top: 24px;
-}
-
 .sectionBox {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
   padding: 24px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 24px;
-  backdrop-filter: blur(20px);
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .sectionTitle {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: -0.5px;
   color: #fff;
   display: flex;
   align-items: center;
@@ -157,70 +194,147 @@
 }
 
 /* ============================================
-   DONUT CHARTS
+   MAIN 2-COL GRID
    ============================================ */
 
-.donutContainer {
+.grid2col {
+  display: grid;
+  grid-template-columns: 5fr 3fr;
+  gap: 20px;
+}
+
+.grid3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+/* ============================================
+   BAR CHART
+   ============================================ */
+
+.barChart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 220px;
+  padding-bottom: 28px;
+  position: relative;
+}
+
+.barChart::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 43px,
+    rgba(255,255,255,0.04) 43px,
+    rgba(255,255,255,0.04) 44px
+  );
+  pointer-events: none;
+}
+
+.barCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 1;
+}
+
+.bar {
+  width: 70%;
+  max-width: 28px;
+  border-radius: 5px 5px 0 0;
+  animation: growUp 1s cubic-bezier(.16,1,.3,1) forwards;
+  opacity: 0;
+  transform-origin: bottom;
+  position: relative;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.bar:hover {
+  filter: brightness(1.4);
+}
+
+.barLabel {
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ============================================
+   DONUT CHART
+   ============================================ */
+
+.donutCard {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
 }
 
-.donutWrapper {
-  width: 140px;
-  height: 140px;
+.donut {
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Conic gradient is applied inline in JS based on data */
+  box-shadow: 0 0 30px rgba(0,0,0,0.3);
 }
 
-.donutHole {
+.donutCenter {
   width: 100px;
   height: 100px;
-  background-color: #0b0c16; /* Matches standard dark bg */
+  background: #0c0d1a;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 2;
-  box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
 }
 
-.donutTotal {
-  font-size: 20px;
+.donutCenterValue {
+  font-size: 22px;
   font-weight: 800;
   color: #fff;
 }
 
-.donutLabelInner {
+.donutCenterLabel {
   font-size: 11px;
-  color: var(--text-secondary);
+  color: rgba(255,255,255,0.4);
 }
 
-.donutLegend {
+.legend {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 100%;
 }
 
-.legendItem {
+.legendRow {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  font-size: 13px;
+  align-items: center;
 }
 
-.legendName {
+.legendLeft {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #fff;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
 }
 
 .legendDot {
@@ -229,89 +343,138 @@
   border-radius: 50%;
 }
 
-.legendValue {
-  color: var(--text-secondary);
-  font-weight: 500;
+.legendRight {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
 }
 
 /* ============================================
-   ADVANCED FAKE CHART
+   HORIZONTAL PROGRESS BARS
    ============================================ */
 
-.chartContainer {
-  height: 300px;
-  width: 100%;
-  position: relative;
+.progressList {
   display: flex;
-  align-items: flex-end;
-  padding-bottom: 20px;
-  gap: 8px;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.chartContainer::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
-  background-size: 100% 50px;
-  z-index: 0;
-  pointer-events: none;
+.progressItem {}
+
+.progressTop {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
 }
 
-.chartColumn {
-  flex: 1;
+.progressName {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
+
+.progressPercent {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.progressTrack {
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
   height: 100%;
+  border-radius: 4px;
+  animation: fillBar 1.2s ease forwards;
+  transform-origin: left;
+}
+
+@keyframes fillBar {
+  from { width: 0; }
+}
+
+/* ============================================
+   ACTIVITY TABLE
+   ============================================ */
+
+.activityTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.activityTable th {
+  text-align: left;
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 12px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.activityTable td {
+  padding: 12px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
+
+.activityTable tbody tr {
+  background: rgba(255,255,255,0.02);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.activityTable tbody tr:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.activityTable tbody tr td:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.activityTable tbody tr td:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+/* ============================================
+   AREA CHART APPROX (CSS)
+   ============================================ */
+
+.areaChart {
+  position: relative;
+  height: 180px;
   display: flex;
   align-items: flex-end;
-  justify-content: center;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.15);
+}
+
+.areaSlice {
+  flex: 1;
   position: relative;
   z-index: 1;
-}
-
-.chartBarFill {
-  width: 60%;
-  max-width: 30px;
-  background: linear-gradient(to top, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.8));
-  border-radius: 6px 6px 0 0;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  animation: growUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: growUp 1.2s ease forwards;
+  opacity: 0;
   transform-origin: bottom;
-  opacity: 0;
 }
 
-.chartBarFill:hover {
-  background: linear-gradient(to top, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 1));
-  transform: scaleY(1.05);
-  box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
-}
-
-.chartTooltip {
-  position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fff;
-  color: #000;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: bold;
-  opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
-  white-space: nowrap;
-}
-.chartColumn:hover .chartTooltip {
-  opacity: 1;
-}
-
-.chartLabel {
-  position: absolute;
-  bottom: -25px;
-  font-size: 11px;
-  color: var(--text-secondary);
-}
+/* ============================================
+   ANIMATIONS
+   ============================================ */
 
 @keyframes growUp {
   from { transform: scaleY(0); opacity: 0; }
@@ -319,145 +482,19 @@
 }
 
 /* ============================================
-   FUNNEL (ENTONNOIR DE CONVERSION)
+   RESPONSIVE
    ============================================ */
 
-.funnelContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+@media (max-width: 1200px) {
+  .kpiRow { grid-template-columns: repeat(3, 1fr); }
+  .grid3col { grid-template-columns: 1fr; }
 }
 
-.funnelStep {
-  background: rgba(0,0,0,0.2);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
+@media (max-width: 900px) {
+  .kpiRow { grid-template-columns: repeat(2, 1fr); }
+  .grid2col { grid-template-columns: 1fr; }
 }
 
-.funnelBg {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  background: rgba(99, 102, 241, 0.1);
-  z-index: 0;
-  border-radius: 12px 0 0 12px;
-}
-
-.funnelInfo {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.funnelIcon {
-  width: 32px;
-  height: 32px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.funnelName {
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-}
-
-.funnelRate {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.funnelValue {
-  position: relative;
-  z-index: 1;
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-}
-
-/* ============================================
-   TOP PRODUCTS LIST
-   ============================================ */
-
-.topProductsGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.productRow {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 16px;
-  transition: all 0.3s ease;
-}
-
-.productRow:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.productImg {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  object-fit: cover;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.productInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.productTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.productMetrics {
-  display: flex;
-  gap: 16px;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.productMetricItem {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.productRevenue {
-  font-size: 15px;
-  font-weight: 700;
-  color: #10b981;
-}
-
-@media (max-width: 1024px) {
-  .mainGrid, .donutGrid {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 600px) {
+  .kpiRow { grid-template-columns: 1fr; }
 }
