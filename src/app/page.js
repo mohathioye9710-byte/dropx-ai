@@ -132,15 +132,15 @@ export default function Dashboard() {
 
   // Derive display values from API data
   const kpis = analytics ? [
-    { label: 'Chiffre d\'Affaires', value: `€${analytics.kpis.revenue.toLocaleString('fr-FR', {maximumFractionDigits:0})}`, change: '+18.2%', up: analytics.kpis.revenue > 0, color: '#a78bfa',
+    { label: 'Chiffre d\'Affaires', value: `€${analytics.kpis.revenue.toLocaleString('fr-FR', {maximumFractionDigits:0})}`, change: '', up: analytics.kpis.revenue > 0, color: '#a78bfa',
       spark: analytics.revenueData?.map(d => Number(d.rev)) || [] },
-    { label: 'Bénéfice Net', value: `€${analytics.kpis.profit.toLocaleString('fr-FR', {maximumFractionDigits:0})}`, change: analytics.kpis.profit >= 0 ? '+' : '', up: analytics.kpis.profit >= 0, color: '#34d399',
+    { label: 'Bénéfice Net', value: `€${analytics.kpis.profit.toLocaleString('fr-FR', {maximumFractionDigits:0})}`, change: '', up: analytics.kpis.profit >= 0, color: '#34d399',
       spark: analytics.revenueData?.map(d => Math.max(Number(d.rev) - Number(d.ads), 0)) || [] },
-    { label: 'Commandes', value: analytics.kpis.ordersCount.toLocaleString('fr-FR'), change: '+24.1%', up: true, color: '#60a5fa',
+    { label: 'Commandes', value: analytics.kpis.ordersCount.toLocaleString('fr-FR'), change: '', up: true, color: '#60a5fa',
       spark: analytics.revenueData?.map(d => Number(d.rev) * 0.3) || [] },
-    { label: 'Taux Conversion', value: `${analytics.kpis.convRate.toFixed(1)}%`, change: analytics.kpis.convRate > 3 ? '+0.5%' : '-0.3%', up: analytics.kpis.convRate > 3, color: '#fbbf24',
+    { label: 'Taux Conversion', value: `${analytics.kpis.convRate.toFixed(1)}%`, change: '', up: analytics.kpis.convRate > 3, color: '#fbbf24',
       spark: analytics.revenueData?.map(() => analytics.kpis.convRate + (Math.random() - 0.5) * 2) || [] },
-    { label: 'Panier Moyen', value: `€${analytics.kpis.aov.toFixed(2)}`, change: '+5.4%', up: true, color: '#f472b6',
+    { label: 'Panier Moyen', value: `€${analytics.kpis.aov.toFixed(2)}`, change: '', up: true, color: '#f472b6',
       spark: analytics.revenueData?.map(() => analytics.kpis.aov + (Math.random() - 0.5) * 10) || [] },
   ] : [];
 
@@ -180,6 +180,22 @@ export default function Dashboard() {
     );
   }
 
+  if (analytics && analytics.hasShopifyIntegration === false) {
+    return (
+      <div className={styles.container} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', textAlign: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(99,102,241,0.1) 100%)', padding: '40px', borderRadius: '24px', border: '1px solid rgba(168,85,247,0.2)', maxWidth: '500px' }}>
+          <h2 style={{ fontSize: '28px', marginBottom: '16px', color: '#fff' }}>Connectez votre Boutique</h2>
+          <p style={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: '32px' }}>
+            Vous n'avez pas encore connecté de boutique Shopify. Pour que le dashboard affiche vos vraies ventes et statistiques en temps réel, veuillez paramétrer l'intégration.
+          </p>
+          <a href="/settings" style={{ background: '#a855f7', color: '#fff', padding: '12px 24px', borderRadius: '12px', fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
+            Aller aux Intégrations
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`${styles.container} animate-fade-in`}>
 
@@ -214,10 +230,12 @@ export default function Dashboard() {
             <div className={styles.kpiLabel}>{kpi.label}</div>
             <div className={styles.kpiValueRow}>
               <span className={styles.kpiValue}>{kpi.value}</span>
-              <span className={`${styles.kpiBadge} ${kpi.up ? styles.badgeUp : styles.badgeDown}`}>
-                {kpi.up ? <ArrowUpRight size={12}/> : <ArrowDownRight size={12}/>}
-                {kpi.change}
-              </span>
+              {kpi.change && (
+                <span className={`${styles.kpiBadge} ${kpi.up ? styles.badgeUp : styles.badgeDown}`}>
+                  {kpi.up ? <ArrowUpRight size={12}/> : <ArrowDownRight size={12}/>}
+                  {kpi.change}
+                </span>
+              )}
             </div>
             <MiniSparkline data={kpi.spark} color={kpi.color} />
           </div>
@@ -678,10 +696,10 @@ export default function Dashboard() {
         </div>
         <div className={styles.customerGrid}>
           {[
-            { val: `${analytics?.kpis.ordersCount || 0}`, label: 'Commandes ce mois', color: '#a855f7' },
-            { val: `${Math.round((analytics?.kpis.ordersCount || 0) * 0.87)}`, label: 'Expédiées', color: '#10b981' },
-            { val: `${Math.round((analytics?.kpis.ordersCount || 0) * 0.09)}`, label: 'En cours', color: '#3b82f6' },
-            { val: `${Math.round((analytics?.kpis.ordersCount || 0) * 0.04)}`, label: 'En attente', color: '#f59e0b' },
+            { val: `${analytics?.shippingData?.orders || 0}`, label: 'Commandes ce mois', color: '#a855f7' },
+            { val: `${analytics?.shippingData?.shipped || 0}`, label: 'Expédiées', color: '#10b981' },
+            { val: `${analytics?.shippingData?.inProgress || 0}`, label: 'En cours', color: '#3b82f6' },
+            { val: `${analytics?.shippingData?.pending || 0}`, label: 'En attente', color: '#f59e0b' },
           ].map((m, i) => (
             <div key={i} className={styles.customerMetric}>
               <div className={styles.customerMetricValue} style={{ color: m.color }}>{m.val}</div>
@@ -691,9 +709,9 @@ export default function Dashboard() {
         </div>
         <div className={styles.progressList} style={{ marginTop: '20px' }}>
           {[
-            { name: 'Taux d\'expédition à temps', pct: 94, color: '#10b981' },
-            { name: 'Livraisons réussies', pct: 97, color: '#3b82f6' },
-            { name: 'Colis retournés', pct: 3, color: '#ef4444' },
+            { name: 'Taux d\'expédition à temps', pct: analytics?.shippingData?.onTime || 0, color: '#10b981' },
+            { name: 'Livraisons réussies', pct: analytics?.shippingData?.success || 0, color: '#3b82f6' },
+            { name: 'Colis retournés', pct: analytics?.shippingData?.returns || 0, color: '#ef4444' },
           ].map((obj, i) => (
             <div key={i} className={styles.progressItem}>
               <div className={styles.progressTop}>
