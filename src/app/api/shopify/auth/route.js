@@ -29,7 +29,7 @@ export async function GET(req) {
     const redirectUri = `${baseUrl}/api/shopify/callback`;
 
     // Scopes needed for analytics
-    const scopes = 'read_orders,read_products';
+    const scopes = 'read_orders,read_products,write_products,read_themes,write_themes,read_script_tags,write_script_tags';
 
     // Build the Shopify OAuth authorization URL
     const authUrl = `https://${cleanShop}/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}`;
