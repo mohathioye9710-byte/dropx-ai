@@ -87,41 +87,43 @@ export async function POST(req) {
       } catch (e) { console.error('[Store Design] Products error:', e.message); }
 
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const prompt = `You are an expert Shopify store designer and brand strategist.
+      const prompt = `You are an expert Shopify store designer, brand strategist, and elite UI/UX designer.
 
 The user has a Shopify store:
 - Current name: "${shopName}"
 - ACTUAL PRODUCTS in the store: ${products.length > 0 ? products.join(', ') : 'No products yet'}
 - Niche/style hint: "${niche}"
 
-IMPORTANT: Base your branding on the ACTUAL PRODUCTS listed above. If the products are laser pointers or tech gadgets, the branding must be about that — NOT about animals or pets.
+IMPORTANT: Base your branding on the ACTUAL PRODUCTS listed above. 
 
-Generate a complete premium brand redesign. Return ONLY valid JSON:
+Generate a complete, BREATHTAKING, ULTRA-PREMIUM brand redesign. 
+We want modern, futuristic, luxury, or neon aesthetics. NEVER output boring, flat, or generic colors like standard red (#FF0000) or plain gray. Use vibrant neon accents, deep rich dark backgrounds, or sleek monochromatic palettes.
+
+Return ONLY valid JSON:
 {
-  "storeName": "Catchy premium store name (max 25 chars, fits the niche, NOT generic)",
-  "announcementText": "Short announcement bar in French (e.g. '🚚 Livraison GRATUITE dès 30€ | ⚡ Expédition 24h')",
-  "heroTitle": "Compelling hero headline in French (max 8 words, punchy)",
-  "heroSubtitle": "Hero subtitle in French (1 short sentence, max 15 words)",
-  "aboutText": "Premium 'About' paragraph in French (2-3 sentences, brand story)",
+  "storeName": "Catchy premium store name (max 25 chars, fits the niche)",
+  "announcementText": "Short announcement bar in French with an emoji (e.g. '✨ Nouvelle Collection | ⚡ Expédition 24h')",
+  "heroTitle": "Extremely punchy, modern hero headline in French (max 6 words, Apple-style copywriting)",
+  "heroSubtitle": "Hero subtitle in French (1 short sentence, max 12 words, very impactful)",
+  "aboutText": "Premium 'About' paragraph in French (2-3 sentences, emotional brand story)",
   "colors": {
-    "primary": "#hex (vibrant accent color for buttons and highlights)",
-    "secondary": "#hex (complementary accent, subtle)",
-    "background": "#hex (ONE single solid dark color. Examples: #0F0F0F, #1A1A2E, #0D1117, #141414. Must be very dark. NO gradients, NO white.)",
-    "text": "#hex (MUST be white or very light gray like #FFFFFF or #F0F0F0 to contrast with the dark background)",
-    "buttonBg": "#hex (CTA button, should pop against dark bg)",
-    "buttonText": "#hex (button text — MUST contrast with buttonBg. Use #FFFFFF for dark buttons, #000000 for light buttons)",
-    "announcementBg": "#hex (top bar bg, slightly different from background)",
-    "announcementText": "#hex (top bar text, must be readable)"
+    "primary": "#hex (A VIBRANT, glowing neon accent color like Cyberpunk Pink, Electric Blue, Emerald Green, or Luxury Gold)",
+    "secondary": "#hex (A complementary rich color, slightly darker or lighter than primary)",
+    "background": "#hex (MUST be extremely dark. e.g., #05050A for deep space, #0A0A0A for sleek black, #09090E for dark tech. NO light backgrounds.)",
+    "text": "#hex (MUST be crisp white #FFFFFF or very light silver #F3F4F6 for max readability)",
+    "buttonBg": "#hex (Same as primary or a vivid gradient-ready color)",
+    "buttonText": "#hex (MUST contrast perfectly with buttonBg. e.g. #000000 if button is bright neon, #FFFFFF if button is dark)",
+    "announcementBg": "#hex (Slightly lighter than background, e.g., #11111A)",
+    "announcementText": "#hex (Same as text)"
   },
-  "font": "One of: Montserrat, Poppins, Outfit, DM Sans, Plus Jakarta Sans. Best fit for the vibe.",
-  "vibe": "One word (e.g. Premium, Futuristic, Cozy, Bold, Minimal)"
+  "font": "One of: 'Outfit', 'Space Grotesk', 'Syne', 'Clash Display', 'Inter'. Pick the coolest modern font.",
+  "vibe": "One word (e.g. Cyberpunk, Minimalist, Luxury, Futuristic, Ethereal)"
 }
 
-CRITICAL CONTRAST RULES:
-- The background MUST be a single solid very dark color (no gradients)
-- ALL text colors must be light (white/light gray) to be readable on dark backgrounds
-- Button text MUST be clearly visible on the button background (if button is bright, use dark text; if button is dark, use white text)
-- This is a premium dark-mode store. Think Apple.com dark mode or luxury brands.`;
+CRITICAL RULES:
+- The design must scream "2026 Premium Web3/Tech startup" or "High-End Luxury".
+- The background MUST be a single solid very dark color.
+- All text must be highly readable on the dark background.`;
 
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
@@ -197,9 +199,10 @@ CRITICAL CONTRAST RULES:
         let uploadedImageKey = null;
         try {
           console.log('[Store Design] Generating Hero Image via DALL-E...');
-          const imagePrompt = `A highly professional, premium, and clean hero banner image for an e-commerce store. 
-          The store sells these actual products: ${products.length > 0 ? products.join(', ') : (niche || branding.storeName)}. 
-          The vibe is ${branding.vibe}. It should look like a modern cinematic product lifestyle photo featuring the products mentioned above without any text. High resolution.`;
+          const imagePrompt = `An ultra-premium, breathtaking hero banner image for a luxury or futuristic e-commerce store. 
+          Products: ${products.length > 0 ? products.join(', ') : (niche || branding.storeName)}. 
+          Vibe: ${branding.vibe}. 
+          Style: Cinematic lighting, hyper-realistic, 8k octane render, extremely sleek, glossy, modern aesthetic. Dark mood with striking neon or elegant rim lighting. NO TEXT anywhere in the image. High-end editorial product photography style.`;
           
           const imageRes = await openai.images.generate({
             model: "dall-e-3",
