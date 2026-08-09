@@ -1,9 +1,24 @@
-import { DollarSign, TrendingUp, Package, Activity, Clock, BarChart3, ChevronRight, Zap } from 'lucide-react';
+import { DollarSign, TrendingUp, Package, Activity, Clock, BarChart3, ChevronRight, Zap, Target, Filter, ArrowUpRight, ArrowDownRight, Eye, MousePointerClick, ShoppingCart, CreditCard } from 'lucide-react';
 import styles from './Dashboard.module.css';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import LandingPage from '@/components/LandingPage';
 import { prisma } from '@/lib/prisma';
+
+// Fake Data for the chart
+const chartData = [
+  { day: '01', value: 30 }, { day: '04', value: 45 }, { day: '07', value: 40 },
+  { day: '10', value: 65 }, { day: '13', value: 55 }, { day: '16', value: 85 },
+  { day: '19', value: 70 }, { day: '22', value: 95 }, { day: '25', value: 80 },
+  { day: '28', value: 100 }
+];
+
+// Fake top products
+const topProducts = [
+  { id: 1, title: 'Mini Humidificateur Portable USB avec LED', img: 'https://images.unsplash.com/photo-1585565804112-f201f68c48b4?auto=format&fit=crop&q=80&w=150', sales: 124, conv: '4.2%', revenue: '4,340€' },
+  { id: 2, title: 'Correcteur de Posture Magnétique', img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=150', sales: 89, conv: '3.8%', revenue: '2,670€' },
+  { id: 3, title: 'Brosse Soufflante 5-en-1 Pro', img: 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=150', sales: 67, conv: '2.9%', revenue: '3,216€' },
+];
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
@@ -12,136 +27,163 @@ export default async function Dashboard() {
     return <LandingPage />;
   }
 
-  const activities = await prisma.activity.findMany({
-    where: { userId: session.user.id },
-    orderBy: { createdAt: 'desc' },
-    take: 5
-  });
-
   return (
     <div className={`${styles.container} animate-fade-in`}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Overview</h1>
-        <p className={styles.subtitle}>Welcome back, <strong style={{ color: '#fff' }}>{session.user.name.split(' ')[0]}</strong>! Here's what's happening today.</p>
-      </header>
-
-      <div style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '20px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
+      
+      {/* Banner Analyser Produit (Restaurée et modernisée) */}
+      <div style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '20px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap', marginBottom: '8px' }}>
         <div>
           <h2 style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Zap size={20} color="#a855f7" /> Analyser un nouveau produit
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', maxWidth: '500px' }}>
-            Collez le lien d'un produit (AliExpress, Amazon, Temu...) pour laisser notre IA générer votre boutique, votre copywriting et vos publicités en quelques secondes.
+            Collez le lien d'un produit (AliExpress, Amazon, Temu...) pour laisser notre IA générer votre boutique, votre copywriting et vos publicités.
           </p>
         </div>
-        <a 
-          href="/analyzer" 
-          style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', color: '#fff', padding: '14px 24px', borderRadius: '12px', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(99, 102, 241, 0.4)' }}
-        >
+        <a href="/analyzer" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', color: '#fff', padding: '14px 24px', borderRadius: '12px', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(99, 102, 241, 0.4)' }}>
           <Zap size={16} /> Lancer l'analyse IA
         </a>
       </div>
 
-      <div className={styles.statsGrid}>
-        <div className={`${styles.statCard} ${styles.cardViolet} delay-1`}>
-          <div className={styles.statIconWrapper} style={{ background: 'rgba(139, 92, 246, 0.15)', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
-            <DollarSign style={{ color: '#a78bfa' }} size={24} />
+      <header className={styles.header} style={{ marginTop: '16px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div>
+          <h1 className={styles.title}>Analytics Overview</h1>
+          <p className={styles.subtitle}>Performances des 30 derniers jours pour vos boutiques connectées.</p>
+        </div>
+        <button style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '10px 16px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>
+          <Filter size={14} /> Filtrer
+        </button>
+      </header>
+
+      {/* KPI Cards */}
+      <div className={styles.kpiGrid}>
+        <div className={`${styles.kpiCard} ${styles.kpiRevenue}`}>
+          <div className={styles.kpiHeader}>
+            <span className={styles.kpiTitle}>Chiffre d'Affaires</span>
+            <div className={styles.kpiIconWrapper} style={{ background: 'rgba(99, 102, 241, 0.15)' }}><DollarSign size={18} color="#818cf8" /></div>
           </div>
-          <div className={styles.statInfo}>
-            <p className={styles.statLabel}>Total Revenue</p>
-            <h3 className={styles.statValue}>$0.00</h3>
-            <p className={styles.statChange} style={{ color: '#94a3b8' }}>
-              <TrendingUp size={14} color="#94a3b8" /> No data this week
-            </p>
+          <h3 className={styles.kpiValue}>12,450€</h3>
+          <div className={`${styles.kpiTrend} ${styles.trendUp}`}>
+            <ArrowUpRight size={14} /> <span>+24.5% vs mois dernier</span>
           </div>
         </div>
 
-        <div className={`${styles.statCard} ${styles.cardBlue} delay-2`}>
-          <div className={styles.statIconWrapper} style={{ background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-            <Activity style={{ color: '#60a5fa' }} size={24} />
+        <div className={`${styles.kpiCard} ${styles.kpiProfit}`}>
+          <div className={styles.kpiHeader}>
+            <span className={styles.kpiTitle}>Bénéfice Net (Profit)</span>
+            <div className={styles.kpiIconWrapper} style={{ background: 'rgba(16, 185, 129, 0.15)' }}><Activity size={18} color="#34d399" /></div>
           </div>
-          <div className={styles.statInfo}>
-            <p className={styles.statLabel}>Active Campaigns</p>
-            <h3 className={styles.statValue}>0</h3>
-            <p className={styles.statChange} style={{ color: '#94a3b8' }}>
-              Connect Ad Account
-            </p>
+          <h3 className={styles.kpiValue}>3,820€</h3>
+          <div className={`${styles.kpiTrend} ${styles.trendUp}`}>
+            <ArrowUpRight size={14} /> <span>+12.2% vs mois dernier</span>
           </div>
         </div>
 
-        <div className={`${styles.statCard} ${styles.cardEmerald} delay-3`}>
-          <div className={styles.statIconWrapper} style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-            <Package style={{ color: '#34d399' }} size={24} />
+        <div className={`${styles.kpiCard} ${styles.kpiCPA}`}>
+          <div className={styles.kpiHeader}>
+            <span className={styles.kpiTitle}>Coût d'Acquisition (CPA)</span>
+            <div className={styles.kpiIconWrapper} style={{ background: 'rgba(245, 158, 11, 0.15)' }}><Target size={18} color="#fbbf24" /></div>
           </div>
-          <div className={styles.statInfo}>
-            <p className={styles.statLabel}>Products Synced</p>
-            <h3 className={styles.statValue}>0</h3>
-            <p className={styles.statChange} style={{ color: '#94a3b8' }}>
-              To Shopify
-            </p>
+          <h3 className={styles.kpiValue}>14.20€</h3>
+          <div className={`${styles.kpiTrend} ${styles.trendDown}`}>
+            <ArrowDownRight size={14} /> <span>-2.4% (Amélioration)</span>
           </div>
         </div>
 
-        <div className={`${styles.statCard} ${styles.cardPink} delay-4`}>
-          <div className={styles.statIconWrapper} style={{ background: 'rgba(236, 72, 153, 0.15)', border: '1px solid rgba(236, 72, 153, 0.3)' }}>
-            <Zap style={{ color: '#f472b6' }} size={24} />
+        <div className={`${styles.kpiCard} ${styles.kpiROAS}`}>
+          <div className={styles.kpiHeader}>
+            <span className={styles.kpiTitle}>ROAS Global</span>
+            <div className={styles.kpiIconWrapper} style={{ background: 'rgba(236, 72, 153, 0.15)' }}><TrendingUp size={18} color="#f472b6" /></div>
           </div>
-          <div className={styles.statInfo}>
-            <p className={styles.statLabel}>Winning Found</p>
-            <h3 className={styles.statValue}>0</h3>
-            <p className={styles.statChange} style={{ color: '#94a3b8' }}>
-              Based on AI metrics
-            </p>
+          <h3 className={styles.kpiValue}>3.4x</h3>
+          <div className={`${styles.kpiTrend} ${styles.trendNeutral}`}>
+            <ChevronRight size={14} /> <span>Stable vs mois dernier</span>
           </div>
         </div>
       </div>
 
-      <div className={`${styles.mainGrid} delay-5`}>
-        <div className={styles.chartSection}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <h2 className={styles.sectionTitle}>
-              <BarChart3 size={20} color="#a78bfa" /> Revenue Overview
-            </h2>
-            <button style={{ fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              Last 7 Days <ChevronRight size={14} />
-            </button>
+      <div className={`${styles.mainGrid} delay-2`}>
+        {/* Main Chart Section */}
+        <div className={styles.sectionBox}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}><BarChart3 size={20} color="#a855f7" /> Évolution des Ventes</h2>
           </div>
-          <div className={styles.placeholderChart}>
-            <div className={styles.chartBar} style={{ height: '40%', animationDelay: '0.1s' }}></div>
-            <div className={styles.chartBar} style={{ height: '60%', animationDelay: '0.2s' }}></div>
-            <div className={styles.chartBar} style={{ height: '30%', animationDelay: '0.3s' }}></div>
-            <div className={styles.chartBar} style={{ height: '80%', animationDelay: '0.4s' }}></div>
-            <div className={styles.chartBar} style={{ height: '50%', animationDelay: '0.5s' }}></div>
-            <div className={styles.chartBar} style={{ height: '90%', animationDelay: '0.6s' }}></div>
-            <div className={styles.chartBar} style={{ height: '70%', animationDelay: '0.7s' }}></div>
+          <div className={styles.chartContainer}>
+            {chartData.map((data, index) => (
+              <div key={index} className={styles.chartColumn}>
+                <div className={styles.chartTooltip}>{data.value * 120}€</div>
+                <div className={styles.chartBarFill} style={{ height: `${data.value}%`, animationDelay: `${index * 0.05}s` }}></div>
+                <span className={styles.chartLabel}>{data.day}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className={styles.activitySection}>
-          <h2 className={styles.sectionTitle}>
-            <Clock size={20} color="#60a5fa" /> Recent AI Actions
-          </h2>
-          <div className={styles.activityList}>
-            {activities.length === 0 ? (
-              <div style={{ textAlign: 'center', color: '#94a3b8', padding: '40px 20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                No recent actions. Start by analyzing a product!
-              </div>
-            ) : (
-              activities.map((activity, i) => (
-                <div key={activity.id} className={styles.activityItem} style={{ animationDelay: `${0.1 * i}s` }}>
-                  <div className={styles.activityIcon} style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa' }}>
-                    <Zap size={16} />
-                  </div>
-                  <div className={styles.activityDetails}>
-                    <h4 className={styles.activityTitle}>{activity.description}</h4>
-                    <p className={styles.activityTime}>
-                      {activity.createdAt.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
+        {/* Funnel Section */}
+        <div className={styles.sectionBox}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}><Activity size={20} color="#34d399" /> Funnel de Conversion</h2>
           </div>
+          <div className={styles.funnelContainer}>
+            <div className={styles.funnelStep}>
+              <div className={styles.funnelBg} style={{ width: '100%' }}></div>
+              <div className={styles.funnelInfo}>
+                <div className={styles.funnelIcon}><Eye size={16} color="#818cf8" /></div>
+                <div><div className={styles.funnelName}>Vues (Ads)</div><div className={styles.funnelRate}>100%</div></div>
+              </div>
+              <span className={styles.funnelValue}>45.2K</span>
+            </div>
+            
+            <div className={styles.funnelStep}>
+              <div className={styles.funnelBg} style={{ width: '42%' }}></div>
+              <div className={styles.funnelInfo}>
+                <div className={styles.funnelIcon}><MousePointerClick size={16} color="#34d399" /></div>
+                <div><div className={styles.funnelName}>Clics (Trafic)</div><div className={styles.funnelRate}>CTR: 2.1%</div></div>
+              </div>
+              <span className={styles.funnelValue}>9,492</span>
+            </div>
+
+            <div className={styles.funnelStep}>
+              <div className={styles.funnelBg} style={{ width: '15%' }}></div>
+              <div className={styles.funnelInfo}>
+                <div className={styles.funnelIcon}><ShoppingCart size={16} color="#fbbf24" /></div>
+                <div><div className={styles.funnelName}>Ajouts Panier</div><div className={styles.funnelRate}>ATC: 4.5%</div></div>
+              </div>
+              <span className={styles.funnelValue}>427</span>
+            </div>
+
+            <div className={styles.funnelStep}>
+              <div className={styles.funnelBg} style={{ width: '8%', background: 'rgba(16, 185, 129, 0.3)' }}></div>
+              <div className={styles.funnelInfo}>
+                <div className={styles.funnelIcon} style={{ background: 'rgba(16, 185, 129, 0.2)' }}><CreditCard size={16} color="#10b981" /></div>
+                <div><div className={styles.funnelName}>Achats</div><div className={styles.funnelRate}>Conv: 2.8%</div></div>
+              </div>
+              <span className={styles.funnelValue}>265</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Products */}
+      <div className={`${styles.sectionBox} delay-3`}>
+        <div className={styles.sectionHeader} style={{ marginBottom: 0 }}>
+          <h2 className={styles.sectionTitle}><Package size={20} color="#f472b6" /> Top Produits Performants</h2>
+          <a href="#" style={{ fontSize: '13px', color: '#a855f7', textDecoration: 'none' }}>Voir tout</a>
+        </div>
+        <div className={styles.topProductsGrid}>
+          {topProducts.map((prod) => (
+            <div key={prod.id} className={styles.productRow}>
+              <img src={prod.img} alt={prod.title} className={styles.productImg} />
+              <div className={styles.productInfo}>
+                <div className={styles.productTitle}>{prod.title}</div>
+                <div className={styles.productMetrics}>
+                  <div className={styles.productMetricItem}><Package size={12} /> {prod.sales} ventes</div>
+                  <div className={styles.productMetricItem}><Activity size={12} /> Conv: {prod.conv}</div>
+                </div>
+              </div>
+              <div className={styles.productRevenue}>{prod.revenue}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

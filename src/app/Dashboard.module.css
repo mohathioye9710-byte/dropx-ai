@@ -1,5 +1,5 @@
 /* ============================================
-   DASHBOARD — PREMIUM GLASSMORPHISM
+   DASHBOARD — ANALYTICS PRO
    ============================================ */
 
 .container {
@@ -8,6 +8,7 @@
   gap: 32px;
   position: relative;
   z-index: 2;
+  padding-bottom: 40px;
 }
 
 .header {
@@ -32,97 +33,89 @@
 }
 
 /* ============================================
-   STAT CARDS
+   KPI CARDS (Top Metrics)
    ============================================ */
 
-.statsGrid {
+.kpiGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
 }
 
-.statCard {
+.kpiCard {
   padding: 24px;
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-direction: column;
+  gap: 12px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-.statCard::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.statCard:hover {
-  transform: translateY(-6px);
+.kpiCard:hover {
   background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 
-.statCard:hover::before {
-  opacity: 1;
+/* Gradients on top edge */
+.kpiCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  opacity: 0.7;
 }
 
-.statIconWrapper {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+.kpiRevenue::before { background: linear-gradient(90deg, #6366f1, #a855f7); }
+.kpiProfit::before { background: linear-gradient(90deg, #10b981, #34d399); }
+.kpiCPA::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.kpiROAS::before { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+
+.kpiHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kpiTitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.kpiIconWrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  z-index: 1;
 }
 
-/* Specific card accents */
-.cardViolet:hover { border-color: rgba(139, 92, 246, 0.3); box-shadow: 0 12px 40px rgba(139, 92, 246, 0.15); }
-.cardBlue:hover { border-color: rgba(59, 130, 246, 0.3); box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15); }
-.cardEmerald:hover { border-color: rgba(16, 185, 129, 0.3); box-shadow: 0 12px 40px rgba(16, 185, 129, 0.15); }
-.cardPink:hover { border-color: rgba(236, 72, 153, 0.3); box-shadow: 0 12px 40px rgba(236, 72, 153, 0.15); }
-
-.statInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-}
-
-.statLabel {
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.statValue {
-  font-size: 28px;
+.kpiValue {
+  font-size: 32px;
   font-weight: 800;
   color: #fff;
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
 }
 
-.statChange {
-  font-size: 12px;
-  font-weight: 500;
+.kpiTrend {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
 }
+.trendUp { color: #10b981; }
+.trendDown { color: #ef4444; }
+.trendNeutral { color: #94a3b8; }
 
 /* ============================================
-   MAIN SECTIONS (CHART & ACTIVITY)
+   MAIN CHARTS & SPLIT LAYOUT
    ============================================ */
 
 .mainGrid {
@@ -131,75 +124,110 @@
   gap: 24px;
 }
 
-.sectionTitle {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 24px;
-  letter-spacing: -0.5px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.chartSection, .activitySection {
-  padding: 28px;
+.sectionBox {
+  padding: 24px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 24px;
   backdrop-filter: blur(20px);
 }
 
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* ============================================
-   ANIMATED CHART
+   ADVANCED FAKE CHART
    ============================================ */
 
-.placeholderChart {
-  height: 280px;
+.chartContainer {
+  height: 300px;
+  width: 100%;
+  position: relative;
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
-  padding-top: 40px;
-  gap: 12px;
-  position: relative;
+  padding-bottom: 20px;
+  gap: 8px;
 }
 
-.placeholderChart::before {
+/* Graph Lines (Y-Axis guides) */
+.chartContainer::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  inset: 0;
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 100% 50px;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.chartBar {
+.chartColumn {
   flex: 1;
-  background: linear-gradient(to top, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.8));
-  border-radius: 8px 8px 0 0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 16px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   position: relative;
-  overflow: hidden;
+  z-index: 1;
+  group-hover: opacity-100;
+}
+
+.chartBarFill {
+  width: 60%;
+  max-width: 30px;
+  background: linear-gradient(to top, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.8));
+  border-radius: 6px 6px 0 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
   animation: growUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transform-origin: bottom;
   opacity: 0;
 }
 
-.chartBar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 20%);
+.chartBarFill:hover {
+  background: linear-gradient(to top, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 1));
+  transform: scaleY(1.05);
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
 }
 
-.chartBar:hover {
-  background: linear-gradient(to top, rgba(168, 85, 247, 0.4), rgba(139, 92, 246, 1));
-  transform: scaleY(1.05);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+.chartTooltip {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.chartColumn:hover .chartTooltip {
+  opacity: 1;
+}
+
+.chartLabel {
+  position: absolute;
+  bottom: -25px;
+  font-size: 11px;
+  color: var(--text-secondary);
 }
 
 @keyframes growUp {
@@ -208,58 +236,141 @@
 }
 
 /* ============================================
-   ACTIVITY LIST
+   FUNNEL (ENTONNOIR DE CONVERSION)
    ============================================ */
 
-.activityList {
+.funnelContainer {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
-.activityItem {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
+.funnelStep {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.activityItem:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateX(4px);
+.funnelBg {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: rgba(99, 102, 241, 0.1);
+  z-index: 0;
+  border-radius: 12px 0 0 12px;
 }
 
-.activityIcon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+.funnelInfo {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.funnelIcon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
-.activityDetails {
+.funnelName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.funnelRate {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.funnelValue {
+  position: relative;
+  z-index: 1;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ============================================
+   TOP PRODUCTS LIST
+   ============================================ */
+
+.topProductsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.productRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.productRow:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.productImg {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.productInfo {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.activityTitle {
+.productTitle {
   font-size: 14px;
   font-weight: 600;
   color: #fff;
-  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.activityTime {
+.productMetrics {
+  display: flex;
+  gap: 16px;
   font-size: 12px;
   color: var(--text-secondary);
+}
+
+.productMetricItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.productRevenue {
+  font-size: 15px;
+  font-weight: 700;
+  color: #10b981;
 }
 
 @media (max-width: 1024px) {
