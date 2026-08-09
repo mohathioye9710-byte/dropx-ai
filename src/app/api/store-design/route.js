@@ -123,11 +123,13 @@ Return ONLY valid JSON:
 CRITICAL RULES:
 - The design must scream "2026 Premium Web3/Tech startup" or "High-End Luxury".
 - The background MUST be a single solid very dark color.
-- All text must be highly readable on the dark background.`;
+- All text must be highly readable on the dark background.
+- IMPORTANT: Be extremely creative. Do NOT return the same design twice. Here is a unique seed to force variation: ${Math.random()}`;
 
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
         model: "gpt-4o",
+        temperature: 0.9,
         response_format: { type: "json_object" }
       });
 
