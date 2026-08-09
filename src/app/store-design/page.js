@@ -16,12 +16,12 @@ export default function StoreDesignPage() {
   const [activePreviewTab, setActivePreviewTab] = useState('desktop');
 
   useEffect(() => {
-    fetch('/api/integrations/shopify')
+    fetch('/api/integrations')
       .then(res => res.json())
       .then(data => {
-        if (data.status === 'connected') {
+        if (data.connected) {
           setShopStatus('connected');
-          setShopInfo({ url: data.shopUrl });
+          setShopInfo({ url: data.domain });
         } else {
           setShopStatus('disconnected');
         }

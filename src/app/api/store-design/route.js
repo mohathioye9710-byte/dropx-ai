@@ -10,8 +10,12 @@ async function getShopifyCredentials(userId) {
   });
   if (!integration || integration.status !== 'connected') return null;
   const creds = JSON.parse(integration.keyData);
-  const shopUrl = (creds.shopUrl || "").trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
-  const adminToken = creds.accessToken || creds.clientSecret;
+  
+  // Use either the new OAuth format (domain/token) or legacy format (shopUrl/accessToken)
+  const rawShopUrl = creds.domain || creds.shopUrl || "";
+  const shopUrl = rawShopUrl.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+  const adminToken = creds.token || creds.accessToken || creds.clientSecret;
+  
   if (!shopUrl || !adminToken) return null;
   return { shopUrl, adminToken };
 }
