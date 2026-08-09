@@ -285,6 +285,66 @@ export default function SettingsPage() {
                   </>
                 )}
               </div>
+
+              {/* Pixel de Tracking Section */}
+              {existingIntegration && (
+                <div className={styles.profileCard} style={{ marginTop: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(168, 85, 247, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: '20px' }}>📡</span>
+                    </div>
+                    <div>
+                      <h3 style={{ color: '#fff', fontSize: '16px', marginBottom: '2px' }}>Pixel de Tracking DropX</h3>
+                      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>Installez ce pixel pour suivre les visites et ajouts au panier</p>
+                    </div>
+                  </div>
+
+                  <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
+                    Pour que DropX puisse suivre les <strong style={{ color: '#a855f7' }}>visites</strong> et les <strong style={{ color: '#a855f7' }}>ajouts au panier</strong> de votre boutique en temps réel, 
+                    copiez le code ci-dessous et collez-le dans votre Shopify Admin &gt; <strong style={{ color: '#fff' }}>Boutique en ligne</strong> &gt; <strong style={{ color: '#fff' }}>Thèmes</strong> &gt; <strong style={{ color: '#fff' }}>Modifier le code</strong> &gt; <strong style={{ color: '#fff' }}>theme.liquid</strong>, juste avant la balise <code style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '2px 6px', borderRadius: '4px' }}>&lt;/head&gt;</code>.
+                  </p>
+
+                  <div style={{ position: 'relative' }}>
+                    <pre style={{
+                      background: 'rgba(0,0,0,0.4)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '10px',
+                      padding: '16px',
+                      color: '#10b981',
+                      fontSize: '12px',
+                      fontFamily: 'monospace',
+                      overflow: 'auto',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all'
+                    }}>
+{`<!-- DropX AI Tracking Pixel -->
+<script src="https://dropx-ai.vercel.app/pixel.js?shop=${existingIntegration}" defer></script>`}
+                    </pre>
+                    <button
+                      onClick={() => {
+                        const code = `<!-- DropX AI Tracking Pixel -->\n<script src="https://dropx-ai.vercel.app/pixel.js?shop=${existingIntegration}" defer></script>`;
+                        navigator.clipboard.writeText(code);
+                        alert('Code copié dans le presse-papier !');
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        padding: '6px 12px',
+                        background: 'rgba(168, 85, 247, 0.3)',
+                        border: '1px solid rgba(168, 85, 247, 0.5)',
+                        color: '#fff',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '11px',
+                        fontWeight: 600
+                      }}
+                    >
+                      📋 Copier
+                    </button>
+                  </div>
+                </div>
+              )}
             </section>
           )}
         </div>

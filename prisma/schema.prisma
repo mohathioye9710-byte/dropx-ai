@@ -87,3 +87,16 @@ model AdCampaign {
   updatedAt   DateTime @updatedAt
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model TrafficEvent {
+  id          String   @id @default(cuid())
+  shopDomain  String   // e.g. "my-store.myshopify.com"
+  eventType   String   // "page_view", "add_to_cart", "purchase"
+  visitorId   String   // A random ID to track unique sessions
+  path        String?  // The URL path they visited
+  url         String?  // The full URL
+  createdAt   DateTime @default(now())
+
+  @@index([shopDomain, eventType])
+  @@index([createdAt])
+}
