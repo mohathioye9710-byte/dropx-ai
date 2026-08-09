@@ -166,14 +166,11 @@ export default function Dashboard() {
   const adCampaigns = analytics?.adCampaigns || [];
   const totalTraffic = analytics?.totalTraffic || 0;
 
-  // Geo data stays static for now (would require IP lookup)
-  const geoData = [
-    { country: 'France', pct: 45, color: '#6366f1' },
-    { country: 'Belgique', pct: 18, color: '#a855f7' },
-    { country: 'Canada', pct: 15, color: '#ec4899' },
-    { country: 'Suisse', pct: 12, color: '#f59e0b' },
-    { country: 'Côte d\'Ivoire', pct: 10, color: '#10b981' },
-  ];
+  const geoColors = ['#6366f1', '#a855f7', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#f43f5e', '#8b5cf6'];
+  const geoData = (analytics?.geoData || []).map((g, i) => ({
+    ...g,
+    color: geoColors[i % geoColors.length]
+  }));
 
   if (loading) {
     return (
@@ -620,12 +617,12 @@ export default function Dashboard() {
         </div>
         <div className={styles.emailGrid}>
           {[
-            { val: fmt(totalTraffic), label: 'Abonnés Liste', color: '#06b6d4' },
-            { val: '42.3%', label: 'Taux d\'Ouverture', color: '#10b981' },
-            { val: '6.8%', label: 'Taux de Clic', color: '#a855f7' },
-            { val: `€${Math.round(analytics?.kpis.revenue * 0.13 || 0)}`, label: 'Revenus Email', color: '#f59e0b' },
-            { val: '1.2%', label: 'Taux Désabonnement', color: '#ef4444' },
-            { val: '12', label: 'Campagnes Envoyées', color: '#3b82f6' },
+            { val: fmt(analytics?.emailData?.subscribers || 0), label: 'Abonnés Liste', color: '#06b6d4' },
+            { val: `${analytics?.emailData?.openRate?.toFixed(1) || 0}%`, label: 'Taux d\'Ouverture', color: '#10b981' },
+            { val: `${analytics?.emailData?.clickRate?.toFixed(1) || 0}%`, label: 'Taux de Clic', color: '#a855f7' },
+            { val: `€${Math.round(analytics?.emailData?.revenue || 0)}`, label: 'Revenus Email', color: '#f59e0b' },
+            { val: `${analytics?.emailData?.unsubRate?.toFixed(1) || 0}%`, label: 'Taux Désabonnement', color: '#ef4444' },
+            { val: `${analytics?.emailData?.campaignsSent || 0}`, label: 'Campagnes Envoyées', color: '#3b82f6' },
           ].map((e, i) => (
             <div key={i} className={styles.emailMetric}>
               <div className={styles.emailMetricValue} style={{ color: e.color }}>{e.val}</div>
@@ -642,23 +639,18 @@ export default function Dashboard() {
         </div>
         <div className={styles.grid2even}>
           <DonutChart
-            data={[
-              { name: 'Instagram', pct: 38, color: '#e1306c' },
-              { name: 'TikTok', pct: 32, color: '#ff0050' },
-              { name: 'Facebook', pct: 18, color: '#1877f2' },
-              { name: 'Twitter/X', pct: 12, color: '#64748b' },
-            ]}
-            centerValue="52.4K"
+            data={analytics?.socialData?.donut || []}
+            centerValue={fmt(analytics?.socialData?.followers || 0)}
             centerLabel="Followers"
           />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', justifyContent: 'center' }}>
             {[
-              { icon: Heart, label: 'Likes ce mois', val: '12,340', color: '#ec4899' },
-              { icon: MessageCircle, label: 'Commentaires', val: '2,180', color: '#3b82f6' },
-              { icon: Share2, label: 'Partages', val: '890', color: '#10b981' },
-              { icon: Eye, label: 'Portée organique', val: '185K', color: '#a855f7' },
-              { icon: ThumbsUp, label: 'Taux Engagement', val: '5.2%', color: '#f59e0b' },
-              { icon: Hash, label: 'Mentions', val: '342', color: '#06b6d4' },
+              { icon: Heart, label: 'Likes ce mois', val: fmt(analytics?.socialData?.likes || 0), color: '#ec4899' },
+              { icon: MessageCircle, label: 'Commentaires', val: fmt(analytics?.socialData?.comments || 0), color: '#3b82f6' },
+              { icon: Share2, label: 'Partages', val: fmt(analytics?.socialData?.shares || 0), color: '#10b981' },
+              { icon: Eye, label: 'Portée organique', val: fmt(analytics?.socialData?.reach || 0), color: '#a855f7' },
+              { icon: ThumbsUp, label: 'Taux Engagement', val: `${analytics?.socialData?.engagementRate?.toFixed(1) || 0}%`, color: '#f59e0b' },
+              { icon: Hash, label: 'Mentions', val: fmt(analytics?.socialData?.mentions || 0), color: '#06b6d4' },
             ].map((s, i) => {
               const Icon = s.icon;
               return (

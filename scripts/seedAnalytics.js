@@ -58,7 +58,8 @@ async function main() {
   // Seed Traffic (Last 30 days)
   const traffic = [];
   const sources = ['Facebook Ads', 'TikTok Ads', 'Google Ads', 'Organique', 'Direct'];
-  const devices = ['Mobile', 'Desktop', 'Tablet'];
+  const devices = ['Mobile', 'Mobile', 'Mobile', 'Desktop', 'Desktop', 'Tablet']; // weighted: 50% mobile, 33% desktop, 17% tablet
+  const countries = ['France','France','France','France','Belgique','Belgique','Canada','Canada','Suisse','Côte d\'Ivoire','Maroc','Sénégal'];
   
   for (let i = 0; i < 30; i++) {
     const d = new Date(now);
@@ -72,7 +73,7 @@ async function main() {
         storeId: store.id,
         source: sources[Math.floor(Math.random() * sources.length)],
         device: devices[Math.floor(Math.random() * devices.length)],
-        country: 'France',
+        country: countries[Math.floor(Math.random() * countries.length)],
         duration: 10 + Math.floor(Math.random() * 300),
         createdAt: d,
       });

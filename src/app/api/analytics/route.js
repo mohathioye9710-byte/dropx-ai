@@ -125,6 +125,20 @@ export async function GET(req) {
        pct: Math.round((deviceCount[k] / totalTraffic) * 100) || 0
     }));
 
+    // Geo Data (from real country field)
+    const countryCount = {};
+    traffic.forEach(t => {
+       countryCount[t.country] = (countryCount[t.country] || 0) + 1;
+    });
+    const geoData = Object.keys(countryCount)
+      .map(k => ({
+        country: k,
+        val: countryCount[k],
+        pct: Math.round((countryCount[k] / totalTraffic) * 100) || 0
+      }))
+      .sort((a, b) => b.val - a.val)
+      .slice(0, 8); // Top 8 countries
+
     // Funnel Data
     const totalImpressions = adCampaigns.reduce((sum, a) => sum + a.impressions, 0);
     const totalClicks = adCampaigns.reduce((sum, a) => sum + a.clicks, 0);
@@ -137,6 +151,46 @@ export async function GET(req) {
        { name: 'Achats', value: ordersCount, pct: totalTraffic > 0 ? Math.round((ordersCount/totalTraffic)*100) : 0 },
     ];
 
+    // Email Marketing (Dynamic simulation based on traffic)
+    const emailSubscribers = Math.floor(totalTraffic * 0.12);
+    const campaignsSent = Math.floor(days / 3) || 1;
+    const openRate = 35 + (Math.random() * 10);
+    const clickRate = openRate * 0.16;
+    const emailRevenue = revenue * 0.13;
+    const emailData = {
+      subscribers: emailSubscribers,
+      openRate,
+      clickRate,
+      revenue: emailRevenue,
+      unsubRate: 0.8 + (Math.random() * 0.8),
+      campaignsSent
+    };
+
+    // Social Media (Dynamic simulation based on traffic)
+    const followers = Math.floor(totalTraffic * 2.8);
+    const likes = Math.floor(followers * 0.18 * (days / 30));
+    const comments = Math.floor(likes * 0.12);
+    const shares = Math.floor(likes * 0.06);
+    const reach = Math.floor(followers * 3.2 * (days / 30));
+    const mentions = Math.floor(followers * 0.008 * (days / 30));
+    const engagementRate = reach > 0 ? ((likes + comments + shares) / reach) * 100 : 0;
+    
+    const socialData = {
+      followers,
+      likes,
+      comments,
+      shares,
+      reach,
+      mentions,
+      engagementRate,
+      donut: [
+        { name: 'Instagram', pct: 42, color: '#e1306c' },
+        { name: 'TikTok', pct: 35, color: '#ff0050' },
+        { name: 'Facebook', pct: 15, color: '#1877f2' },
+        { name: 'Twitter/X', pct: 8, color: '#64748b' }
+      ]
+    };
+
     return NextResponse.json({
       kpis: {
         revenue,
@@ -148,9 +202,12 @@ export async function GET(req) {
       revenueData,
       trafficSources,
       deviceData,
+      geoData,
       funnelData,
       adCampaigns,
-      totalTraffic
+      totalTraffic,
+      emailData,
+      socialData
     });
 
   } catch (error) {
