@@ -1,7 +1,8 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import styles from './page.module.css';
 import { User, Mail, Bell, CreditCard, Shield, Globe } from 'lucide-react';
 
@@ -9,6 +10,21 @@ export default function SettingsPage() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const [shopifyStatus, setShopifyStatus] = useState(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Check URL params for Shopify connection result
+    const shopifyParam = searchParams.get('shopify');
+    const errorParam = searchParams.get('error');
+    if (shopifyParam === 'connected') {
+      setShopifyStatus('success');
+      setActiveTab('integrations');
+    } else if (errorParam) {
+      setShopifyStatus('error');
+      setActiveTab('integrations');
+    }
+  }, [searchParams]);
 
   const handleUpgrade = async () => {
     try {
@@ -27,6 +43,14 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleShopifyConnect = (e) => {
+    e.preventDefault();
+    const domain = e.target.domain.value.trim();
+    if (!domain) return;
+    // Redirect to our OAuth initiation route
+    window.location.href = `/api/shopify/auth?shop=${encodeURIComponent(domain)}`;
   };
 
   return (
@@ -175,35 +199,32 @@ export default function SettingsPage() {
           {activeTab === 'integrations' && (
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Intégrations (Shopify)</h2>
+
+              {/* Success / Error banners */}
+              {shopifyStatus === 'success' && (
+                <div style={{ padding: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '20px' }}>✅</span>
+                  <div>
+                    <h4 style={{ color: '#10b981', marginBottom: '4px' }}>Boutique Shopify connectée avec succès !</h4>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Vos données de ventes apparaîtront maintenant sur le Dashboard en temps réel.</p>
+                  </div>
+                </div>
+              )}
+              {shopifyStatus === 'error' && (
+                <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '20px' }}>❌</span>
+                  <div>
+                    <h4 style={{ color: '#ef4444', marginBottom: '4px' }}>Erreur de connexion Shopify</h4>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>La connexion a échoué. Vérifiez l'URL de votre boutique et réessayez.</p>
+                  </div>
+                </div>
+              )}
+
               <div className={styles.profileCard}>
                 <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '24px', fontSize: '14px' }}>
-                  Connectez votre boutique Shopify pour récupérer vos vraies commandes, revenus et statistiques en temps réel.
+                  Connectez votre boutique Shopify pour récupérer vos vraies commandes, revenus et statistiques en temps réel. La connexion se fait en un clic via le système sécurisé de Shopify.
                 </p>
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    setLoading(true);
-                    const domain = e.target.domain.value;
-                    const token = e.target.token.value;
-                    try {
-                      const res = await fetch('/api/integrations', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ platform: 'shopify', domain, token })
-                      });
-                      if (res.ok) {
-                        alert("Boutique Shopify connectée avec succès !");
-                      } else {
-                        const err = await res.json();
-                        alert("Erreur: " + (err.error || "Échec de la connexion"));
-                      }
-                    } catch (error) {
-                      alert("Erreur de connexion serveur.");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                >
+                <form onSubmit={handleShopifyConnect}>
                   <div className={styles.formGroup}>
                     <label>URL de la Boutique (.myshopify.com)</label>
                     <input 
@@ -213,22 +234,12 @@ export default function SettingsPage() {
                       required 
                       className={styles.input} 
                     />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Jeton d'accès (Admin API Token)</label>
-                    <input 
-                      type="password" 
-                      name="token"
-                      placeholder="shpat_xxxxxxxxxxxxxxxxxxxxx" 
-                      required 
-                      className={styles.input} 
-                    />
                     <span className={styles.hint}>
-                      Créez une application personnalisée dans Shopify avec les droits `read_orders`.
+                      Entrez l'URL de votre boutique Shopify. Vous serez redirigé vers Shopify pour autoriser la connexion.
                     </span>
                   </div>
-                  <button type="submit" disabled={loading} className={styles.saveButton}>
-                    {loading ? 'Connexion...' : 'Connecter Shopify'}
+                  <button type="submit" className={styles.saveButton} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Globe size={16} /> Connecter Shopify
                   </button>
                 </form>
               </div>

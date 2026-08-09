@@ -15,32 +15,18 @@ export async function GET(req) {
     const shop = searchParams.get('shop');
     
     if (!code || !shop) {
-      return NextResponse.redirect(new URL('/shopify?error=missing_params', req.url));
+      return NextResponse.redirect(new URL('/settings?error=missing_params', req.url));
     }
 
-    // Récupérer temporairement les identifiants stockés
-    const integration = await prisma.integration.findUnique({
-      where: {
-        userId_platform: {
-          userId: session.user.id,
-          platform: "shopify"
-        }
-      }
-    });
-
-    if (!integration) {
-      return NextResponse.redirect(new URL('/shopify?error=no_integration_found', req.url));
-    }
-
-    const creds = JSON.parse(integration.keyData || "{}");
-    const clientId = creds.clientId;
-    const clientSecret = creds.clientSecret;
+    const clientId = process.env.SHOPIFY_CLIENT_ID;
+    const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-      return NextResponse.redirect(new URL('/shopify?error=missing_credentials', req.url));
+      console.error("Missing SHOPIFY_CLIENT_ID or SHOPIFY_CLIENT_SECRET env vars");
+      return NextResponse.redirect(new URL('/settings?error=server_config', req.url));
     }
 
-    // Échanger le code contre le jeton d'accès
+    // Exchange the authorization code for an access token
     const tokenResponse = await fetch(`https://${shop}/admin/oauth/access_token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -55,27 +41,42 @@ export async function GET(req) {
 
     if (!tokenResponse.ok || !tokenData.access_token) {
       console.error("[Shopify Auth Error]:", tokenData);
-      return NextResponse.redirect(new URL('/shopify?error=token_exchange_failed', req.url));
+      return NextResponse.redirect(new URL('/settings?error=token_exchange_failed', req.url));
     }
 
-    // Sauvegarder le vrai token (shpat_...)
-    await prisma.integration.update({
-      where: { id: integration.id },
-      data: {
+    // Clean the shop domain for storage
+    const cleanDomain = shop.replace(/^https?:\/\//, '').replace(/\/$/, '').trim();
+
+    // Save the real access token (shpat_...) in the database
+    await prisma.integration.upsert({
+      where: {
+        userId_platform: {
+          userId: session.user.id,
+          platform: 'shopify'
+        }
+      },
+      update: {
         status: 'connected',
         keyData: JSON.stringify({
-          shopUrl: shop,
-          clientId: clientId,
-          clientSecret: clientSecret,
-          accessToken: tokenData.access_token // LE FAMEUX shpat_ !
+          domain: cleanDomain,
+          token: tokenData.access_token
+        })
+      },
+      create: {
+        userId: session.user.id,
+        platform: 'shopify',
+        status: 'connected',
+        keyData: JSON.stringify({
+          domain: cleanDomain,
+          token: tokenData.access_token
         })
       }
     });
 
-    return NextResponse.redirect(new URL('/shopify?success=true', req.url));
+    return NextResponse.redirect(new URL('/settings?shopify=connected', req.url));
 
   } catch (error) {
     console.error("Callback Error:", error);
-    return NextResponse.redirect(new URL('/shopify?error=server_error', req.url));
+    return NextResponse.redirect(new URL('/settings?error=server_error', req.url));
   }
 }
