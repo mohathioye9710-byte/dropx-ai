@@ -55,9 +55,11 @@ export default function ShopifySync() {
           setStatus('connected');
         } else {
           // Dev Dashboard flow (shpss_) -> redirect to OAuth
-          const redirectUri = encodeURIComponent(`http://localhost:3000/api/shopify/callback`);
+          const baseUrl = window.location.origin;
+          const redirectUri = encodeURIComponent(`${baseUrl}/api/shopify/callback`);
           const cleanShop = storeUrl.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
-          window.location.href = `https://${cleanShop}/admin/oauth/authorize?client_id=${clientId}&scope=read_products,write_products&redirect_uri=${redirectUri}`;
+          const scopes = 'read_orders,read_products,write_products,read_themes,write_themes,read_script_tags,write_script_tags';
+          window.location.href = `https://${cleanShop}/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`;
         }
       } else {
         setStatus('disconnected');
