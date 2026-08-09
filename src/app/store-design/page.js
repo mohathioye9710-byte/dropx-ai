@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import styles from './page.module.css';
-import { Palette, Loader2, Check, Sparkles, ExternalLink, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Palette, Loader2, Check, Sparkles, ExternalLink, RefreshCw, AlertTriangle, Eye, Wand2, Zap, Crown } from 'lucide-react';
 
 export default function StoreDesignPage() {
   const [niche, setNiche] = useState('');
-  const [shopStatus, setShopStatus] = useState('loading'); // loading, connected, disconnected
+  const [shopStatus, setShopStatus] = useState('loading');
   const [shopInfo, setShopInfo] = useState(null);
   const [branding, setBranding] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
   const [error, setError] = useState('');
+  const [activePreviewTab, setActivePreviewTab] = useState('desktop');
 
   useEffect(() => {
     fetch('/api/integrations/shopify')
@@ -75,18 +76,22 @@ export default function StoreDesignPage() {
 
   return (
     <div className={styles.container}>
-      {/* Background orbs */}
+      {/* Background effects */}
       <div className={styles.orbPurple}></div>
       <div className={styles.orbBlue}></div>
+      <div className={styles.orbPink}></div>
 
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.headerIcon}>
-          <Palette size={28} />
+          <Wand2 size={28} />
         </div>
         <div>
           <h1 className={styles.title}>Store Design IA</h1>
           <p className={styles.subtitle}>Transforme ta boutique Shopify en marque premium grâce à l'IA.</p>
+        </div>
+        <div className={styles.headerBadge}>
+          <Crown size={14} /> Powered by GPT-4 + DALL·E
         </div>
       </header>
 
@@ -105,7 +110,7 @@ export default function StoreDesignPage() {
         {shopStatus === 'disconnected' && (
           <div className={styles.statusDisconnected}>
             <AlertTriangle size={16} /> Aucune boutique connectée.{' '}
-            <a href="/shopify" className={styles.connectLink}>Connecter maintenant →</a>
+            <a href="/settings" className={styles.connectLink}>Connecter maintenant →</a>
           </div>
         )}
       </div>
@@ -114,7 +119,9 @@ export default function StoreDesignPage() {
         <>
           {/* Input Section */}
           <div className={styles.inputSection}>
-            <label className={styles.inputLabel}>Décris ta niche ou ton style en une phrase</label>
+            <label className={styles.inputLabel}>
+              <Sparkles size={14} style={{ color: '#c084fc' }} /> Décris ta niche ou ton style en une phrase
+            </label>
             <div className={styles.inputRow}>
               <input
                 type="text"
@@ -133,11 +140,45 @@ export default function StoreDesignPage() {
                 {generating ? (
                   <><Loader2 size={18} className={styles.spin} /> Génération...</>
                 ) : (
-                  <><Sparkles size={18} /> Générer le design</>
+                  <><Zap size={18} /> Générer le design</>
                 )}
               </button>
             </div>
+            <div className={styles.suggestions}>
+              {['Gadgets tech futuristes', 'Mode streetwear premium', 'Cosmétiques bio luxe', 'Accessoires gaming'].map(s => (
+                <button key={s} className={styles.suggestionChip} onClick={() => setNiche(s)}>
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* Generating Animation */}
+          {generating && (
+            <div className={styles.generatingOverlay}>
+              <div className={styles.generatingCard}>
+                <div className={styles.generatingPulse}>
+                  <Wand2 size={32} />
+                </div>
+                <h3>L'IA conçoit votre identité visuelle...</h3>
+                <p>Analyse des produits, création de la palette, génération du branding</p>
+                <div className={styles.generatingSteps}>
+                  <div className={styles.generatingStep}>
+                    <div className={`${styles.stepDot} ${styles.stepActive}`}></div>
+                    <span>Analyse des produits</span>
+                  </div>
+                  <div className={styles.generatingStep}>
+                    <div className={`${styles.stepDot} ${styles.stepActive}`}></div>
+                    <span>Création palette couleurs</span>
+                  </div>
+                  <div className={styles.generatingStep}>
+                    <div className={styles.stepDot}></div>
+                    <span>Rédaction du branding</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Error */}
           {error && (
@@ -146,80 +187,226 @@ export default function StoreDesignPage() {
             </div>
           )}
 
-          {/* Branding Preview */}
-          {branding && (
+          {/* Premium Branding Preview */}
+          {branding && !generating && (
             <div className={styles.previewSection}>
-              <h2 className={styles.previewTitle}>
-                <Sparkles size={20} /> Aperçu du design généré
-              </h2>
-
-              <div className={styles.previewGrid}>
-                {/* Store Name */}
-                <div className={styles.previewCard}>
-                  <span className={styles.previewLabel}>Nom de la boutique</span>
-                  <span className={styles.previewValue} style={{fontSize: '24px', fontWeight: 800}}>{branding.storeName}</span>
-                  <span className={styles.previewVibe}>{branding.vibe}</span>
-                </div>
-
-                {/* Colors */}
-                <div className={styles.previewCard}>
-                  <span className={styles.previewLabel}>Palette de couleurs</span>
-                  <div className={styles.colorGrid}>
-                    {Object.entries(branding.colors).map(([key, color]) => (
-                      <div key={key} className={styles.colorSwatch}>
-                        <div className={styles.colorCircle} style={{background: color}}></div>
-                        <div className={styles.colorInfo}>
-                          <span className={styles.colorName}>{key}</span>
-                          <span className={styles.colorHex}>{color}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Typography */}
-                <div className={styles.previewCard}>
-                  <span className={styles.previewLabel}>Typographie</span>
-                  <span className={styles.previewValue} style={{fontFamily: branding.font, fontSize: '28px'}}>{branding.font}</span>
-                  <span className={styles.previewSub}>Police principale du site</span>
-                </div>
-
-                {/* Announcement */}
-                <div className={styles.previewCard}>
-                  <span className={styles.previewLabel}>Barre d'annonce</span>
-                  <div className={styles.announcementPreview} style={{
-                    background: branding.colors.announcementBg,
-                    color: branding.colors.announcementText
-                  }}>
-                    {branding.announcementText}
-                  </div>
-                </div>
-
-                {/* Hero */}
-                <div className={`${styles.previewCard} ${styles.previewCardWide}`}>
-                  <span className={styles.previewLabel}>Section Hero</span>
-                  <div className={styles.heroPreview} style={{background: `linear-gradient(135deg, ${branding.colors.primary}22, ${branding.colors.secondary}22)`}}>
-                    <h3 className={styles.heroPreviewTitle} style={{color: branding.colors.text}}>{branding.heroTitle}</h3>
-                    <p className={styles.heroPreviewSub} style={{color: branding.colors.text + '99'}}>{branding.heroSubtitle}</p>
-                    <button className={styles.heroPreviewBtn} style={{
-                      background: branding.colors.buttonBg,
-                      color: branding.colors.buttonText
-                    }}>Shop Now</button>
-                  </div>
-                </div>
-
-                {/* About */}
-                <div className={`${styles.previewCard} ${styles.previewCardWide}`}>
-                  <span className={styles.previewLabel}>À propos</span>
-                  <p className={styles.aboutText}>{branding.aboutText}</p>
+              <div className={styles.previewHeader}>
+                <h2 className={styles.previewTitle}>
+                  <Sparkles size={20} /> Design généré par l'IA
+                </h2>
+                <div className={styles.previewTabs}>
+                  {['desktop', 'identity', 'colors'].map(tab => (
+                    <button 
+                      key={tab}
+                      className={`${styles.previewTab} ${activePreviewTab === tab ? styles.previewTabActive : ''}`}
+                      onClick={() => setActivePreviewTab(tab)}
+                    >
+                      {tab === 'desktop' ? '🖥️ Aperçu Live' : tab === 'identity' ? '🎨 Identité' : '🌈 Couleurs'}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Apply Button */}
+              {/* TAB 1: Live Preview — Full Store Mockup */}
+              {activePreviewTab === 'desktop' && (
+                <div className={styles.livePreview}>
+                  {/* Browser Chrome */}
+                  <div className={styles.browserChrome}>
+                    <div className={styles.browserDots}>
+                      <span className={styles.dotRed}></span>
+                      <span className={styles.dotYellow}></span>
+                      <span className={styles.dotGreen}></span>
+                    </div>
+                    <div className={styles.browserUrl}>
+                      <span>🔒</span> {shopInfo?.url || 'ma-boutique.myshopify.com'}
+                    </div>
+                  </div>
+                  
+                  {/* Simulated Store */}
+                  <div className={styles.storeMockup} style={{ background: branding.colors.background }}>
+                    {/* Announcement Bar */}
+                    <div className={styles.mockAnnouncement} style={{ 
+                      background: branding.colors.announcementBg, 
+                      color: branding.colors.announcementText 
+                    }}>
+                      {branding.announcementText}
+                    </div>
+
+                    {/* Nav Bar */}
+                    <div className={styles.mockNav} style={{ borderBottom: `1px solid ${branding.colors.text}15` }}>
+                      <span className={styles.mockLogo} style={{ color: branding.colors.text }}>
+                        {branding.storeName}
+                      </span>
+                      <div className={styles.mockNavLinks} style={{ color: branding.colors.text + '99' }}>
+                        <span>Collection</span>
+                        <span>À Propos</span>
+                        <span>Contact</span>
+                      </div>
+                    </div>
+
+                    {/* Hero Section */}
+                    <div className={styles.mockHero} style={{ 
+                      background: `linear-gradient(135deg, ${branding.colors.primary}22, ${branding.colors.secondary}22, ${branding.colors.background})` 
+                    }}>
+                      <div className={styles.mockHeroContent}>
+                        <h2 className={styles.mockHeroTitle} style={{ color: branding.colors.text }}>
+                          {branding.heroTitle}
+                        </h2>
+                        <p className={styles.mockHeroSub} style={{ color: branding.colors.text + '88' }}>
+                          {branding.heroSubtitle}
+                        </p>
+                        <button className={styles.mockHeroBtn} style={{ 
+                          background: branding.colors.buttonBg, 
+                          color: branding.colors.buttonText 
+                        }}>
+                          Découvrir la Collection ✨
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Marquee */}
+                    <div className={styles.mockMarquee} style={{ background: branding.colors.primary }}>
+                      <div className={styles.mockMarqueeTrack}>
+                        {'✦ ' + branding.storeName + ' ✦ Qualité Premium ✦ Satisfaction Garantie ✦ Livraison Express ✦ '.repeat(3)}
+                      </div>
+                    </div>
+
+                    {/* Product Grid Placeholder */}
+                    <div className={styles.mockProductGrid}>
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className={styles.mockProduct} style={{ 
+                          background: branding.colors.text + '08',
+                          border: `1px solid ${branding.colors.text}10`
+                        }}>
+                          <div className={styles.mockProductImage} style={{ 
+                            background: `linear-gradient(135deg, ${branding.colors.primary}15, ${branding.colors.secondary}15)` 
+                          }}></div>
+                          <div className={styles.mockProductInfo}>
+                            <div className={styles.mockProductTitle} style={{ background: branding.colors.text + '20' }}></div>
+                            <div className={styles.mockProductPrice} style={{ background: branding.colors.primary + '30' }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: Brand Identity */}
+              {activePreviewTab === 'identity' && (
+                <div className={styles.identityGrid}>
+                  {/* Store Name Card */}
+                  <div className={styles.identityCard}>
+                    <div className={styles.identityCardHeader}>
+                      <span className={styles.identityIcon}>✏️</span>
+                      <span className={styles.identityLabel}>Nom de la Marque</span>
+                    </div>
+                    <h3 className={styles.identityStoreName}>{branding.storeName}</h3>
+                    <span className={styles.identityVibe}>{branding.vibe}</span>
+                  </div>
+
+                  {/* Typography Card */}
+                  <div className={styles.identityCard}>
+                    <div className={styles.identityCardHeader}>
+                      <span className={styles.identityIcon}>🔤</span>
+                      <span className={styles.identityLabel}>Typographie</span>
+                    </div>
+                    <div className={styles.typographyShowcase}>
+                      <span className={styles.fontDisplay} style={{ fontFamily: branding.font }}>{branding.font}</span>
+                      <div className={styles.fontSamples}>
+                        <span style={{ fontFamily: branding.font, fontWeight: 800, fontSize: '20px' }}>Aa Bb Cc</span>
+                        <span style={{ fontFamily: branding.font, fontWeight: 400, fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>abcdefghijklmnopqrstuvwxyz</span>
+                        <span style={{ fontFamily: branding.font, fontWeight: 400, fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>0123456789</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Announcement Bar Card */}
+                  <div className={`${styles.identityCard} ${styles.identityCardWide}`}>
+                    <div className={styles.identityCardHeader}>
+                      <span className={styles.identityIcon}>📢</span>
+                      <span className={styles.identityLabel}>Barre d'annonce</span>
+                    </div>
+                    <div className={styles.announcementShowcase} style={{
+                      background: branding.colors.announcementBg,
+                      color: branding.colors.announcementText
+                    }}>
+                      {branding.announcementText}
+                    </div>
+                  </div>
+
+                  {/* Hero Text Card */}
+                  <div className={`${styles.identityCard} ${styles.identityCardWide}`}>
+                    <div className={styles.identityCardHeader}>
+                      <span className={styles.identityIcon}>🚀</span>
+                      <span className={styles.identityLabel}>Section Hero</span>
+                    </div>
+                    <div className={styles.heroShowcase} style={{ 
+                      background: `linear-gradient(135deg, ${branding.colors.primary}15, ${branding.colors.secondary}15)` 
+                    }}>
+                      <h3 style={{ fontSize: '28px', fontWeight: 800, color: '#fff', marginBottom: '8px' }}>{branding.heroTitle}</h3>
+                      <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.6)', marginBottom: '16px' }}>{branding.heroSubtitle}</p>
+                      <div style={{ display: 'inline-block', padding: '10px 24px', borderRadius: '50px', background: branding.colors.buttonBg, color: branding.colors.buttonText, fontSize: '13px', fontWeight: 700 }}>
+                        Découvrir ✨
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* About Text Card */}
+                  <div className={`${styles.identityCard} ${styles.identityCardWide}`}>
+                    <div className={styles.identityCardHeader}>
+                      <span className={styles.identityIcon}>💎</span>
+                      <span className={styles.identityLabel}>À Propos</span>
+                    </div>
+                    <p className={styles.aboutShowcase}>{branding.aboutText}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: Colors */}
+              {activePreviewTab === 'colors' && (
+                <div className={styles.colorsSection}>
+                  <div className={styles.colorPaletteVisual}>
+                    {Object.entries(branding.colors).map(([key, color]) => (
+                      <div key={key} className={styles.colorBlock}>
+                        <div className={styles.colorBlockSwatch} style={{ background: color }}>
+                          <span className={styles.colorBlockHex}>{color}</span>
+                        </div>
+                        <span className={styles.colorBlockName}>{key}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Color Contrast Preview */}
+                  <div className={styles.contrastPreview}>
+                    <h4 style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px' }}>Aperçu Contraste</h4>
+                    <div className={styles.contrastCards}>
+                      <div style={{ background: branding.colors.background, color: branding.colors.text, padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <h5 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>Texte sur fond</h5>
+                        <p style={{ fontSize: '13px', opacity: 0.7 }}>Lorem ipsum dolor sit amet</p>
+                      </div>
+                      <div style={{ background: branding.colors.buttonBg, color: branding.colors.buttonText, padding: '20px', borderRadius: '12px' }}>
+                        <h5 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>Bouton CTA</h5>
+                        <p style={{ fontSize: '13px', opacity: 0.8 }}>Ajouter au panier</p>
+                      </div>
+                      <div style={{ background: branding.colors.announcementBg, color: branding.colors.announcementText, padding: '20px', borderRadius: '12px' }}>
+                        <h5 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>Barre annonce</h5>
+                        <p style={{ fontSize: '13px', opacity: 0.8 }}>{branding.announcementText?.slice(0, 40)}...</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Apply Section */}
               <div className={styles.applySection}>
                 {applied ? (
                   <div className={styles.appliedMsg}>
-                    <Check size={20} /> Design appliqué avec succès ! 
+                    <div className={styles.appliedIcon}>🎉</div>
+                    <div>
+                      <h4>Design appliqué avec succès !</h4>
+                      <p>Votre boutique a été entièrement redesignée par l'IA.</p>
+                    </div>
                     <a href={`https://${shopInfo?.url}`} target="_blank" rel="noopener noreferrer" className={styles.viewStoreLink}>
                       Voir ma boutique <ExternalLink size={14} />
                     </a>
@@ -233,7 +420,7 @@ export default function StoreDesignPage() {
                       {applying ? (
                         <><Loader2 size={18} className={styles.spin} /> Application en cours...</>
                       ) : (
-                        <><Check size={18} /> Appliquer sur Shopify</>
+                        <><Zap size={18} /> Appliquer sur Shopify</>
                       )}
                     </button>
                   </div>
