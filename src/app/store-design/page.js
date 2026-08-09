@@ -65,7 +65,12 @@ export default function StoreDesignPage() {
         body: JSON.stringify({ action: 'apply', branding })
       });
       const data = await res.json();
+      
       if (!res.ok) throw new Error(data.error || "Erreur lors de l'application");
+      
+      if (data.results && data.results.errors && data.results.errors.length > 0) {
+        setError(data.message + " " + data.results.errors.join(' '));
+      }
       setApplied(true);
     } catch (err) {
       setError(err.message);
@@ -414,11 +419,11 @@ export default function StoreDesignPage() {
               {/* Apply Section */}
               <div className={styles.applySection}>
                 {applied ? (
-                  <div className={styles.appliedMsg}>
-                    <div className={styles.appliedIcon}>🎉</div>
+                  <div className={styles.appliedMsg} style={error ? { borderColor: '#f59e0b', background: 'rgba(245, 158, 11, 0.05)' } : {}}>
+                    <div className={styles.appliedIcon}>{error ? '⚠️' : '🎉'}</div>
                     <div>
-                      <h4>Design appliqué avec succès !</h4>
-                      <p>Votre boutique a été entièrement redesignée par l'IA.</p>
+                      <h4 style={error ? { color: '#f59e0b' } : {}}>{error ? 'Application partielle' : 'Design appliqué avec succès !'}</h4>
+                      <p>{error || "Votre boutique a été entièrement redesignée par l'IA."}</p>
                     </div>
                     <a href={`https://${shopInfo?.url}`} target="_blank" rel="noopener noreferrer" className={styles.viewStoreLink}>
                       Voir ma boutique <ExternalLink size={14} />
