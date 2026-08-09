@@ -6,7 +6,9 @@ import {
   DollarSign, TrendingUp, Package, Activity, BarChart3, Zap,
   Target, ArrowUpRight, ArrowDownRight, Eye, MousePointerClick,
   ShoppingCart, CreditCard, PieChart, Users, Globe, Smartphone,
-  Monitor, Tablet, Clock, RefreshCw
+  Monitor, Tablet, Clock, RefreshCw, AlertTriangle, Mail,
+  Star, Heart, MessageCircle, Share2, ThumbsUp, Truck,
+  BarChart2, Hash, Flame
 } from 'lucide-react';
 import styles from './Dashboard.module.css';
 
@@ -429,6 +431,293 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+
+      {/* ======== ROW 6: HEATMAP — Ventes par Heure / Jour ======== */}
+      <div className={styles.sectionBox}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}><Flame size={18} color="#f97316" /> Carte de Chaleur — Ventes par Heure</h2>
+        </div>
+        <div className={styles.heatmapGrid}>
+          {/* Header row */}
+          <div></div>
+          {Array.from({ length: 24 }, (_, h) => (
+            <div key={h} className={styles.heatmapHeaderCell}>{h}h</div>
+          ))}
+          {/* Days */}
+          {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, di) => (
+            <>
+              <div key={`l-${di}`} className={styles.heatmapLabel}>{day}</div>
+              {Array.from({ length: 24 }, (_, hi) => {
+                const intensity = Math.sin((hi - 6) * 0.3 + di * 0.5) * 0.5 + 0.5;
+                const weekend = di >= 5 ? 1.3 : 1;
+                const peak = (hi >= 10 && hi <= 14) || (hi >= 19 && hi <= 22) ? 1.5 : 1;
+                const val = Math.min(intensity * weekend * peak, 1);
+                const alpha = (val * 0.85 + 0.05).toFixed(2);
+                return (
+                  <div
+                    key={`c-${di}-${hi}`}
+                    className={styles.heatmapCell}
+                    style={{ background: `rgba(139, 92, 246, ${alpha})` }}
+                    title={`${day} ${hi}h — ${Math.round(val * 12)} ventes`}
+                  />
+                );
+              })}
+            </>
+          ))}
+        </div>
+      </div>
+
+      {/* ======== ROW 7: AD PERFORMANCE — Performances Publicitaires ======== */}
+      <div className={styles.sectionBox}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}><BarChart2 size={18} color="#3b82f6" /> Performances Publicitaires</h2>
+        </div>
+        <div className={styles.adGrid}>
+          {[
+            { platform: 'Facebook Ads', icon: '📘', status: 'Actif', statusColor: '#10b981', spend: '€2,340', impressions: '128K', clicks: '4,820', ctr: '3.76%', cpc: '€0.49', conv: '186', roas: '4.2x' },
+            { platform: 'TikTok Ads', icon: '🎵', status: 'Actif', statusColor: '#10b981', spend: '€1,870', impressions: '245K', clicks: '8,120', ctr: '3.31%', cpc: '€0.23', conv: '112', roas: '3.1x' },
+            { platform: 'Google Ads', icon: '🔍', status: 'En pause', statusColor: '#f59e0b', spend: '€980', impressions: '52K', clicks: '2,340', ctr: '4.50%', cpc: '€0.42', conv: '44', roas: '2.8x' },
+          ].map((ad, i) => (
+            <div key={i} className={styles.adCard}>
+              <div className={styles.adCardHeader}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className={styles.adPlatformIcon} style={{ background: 'rgba(255,255,255,0.05)' }}>{ad.icon}</div>
+                  <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>{ad.platform}</span>
+                </div>
+                <span className={styles.adStatusBadge} style={{ background: `${ad.statusColor}20`, color: ad.statusColor }}>{ad.status}</span>
+              </div>
+              <div className={styles.adMetricRow}><span>Dépensé</span><span className={styles.adMetricValue}>{ad.spend}</span></div>
+              <div className={styles.adMetricRow}><span>Impressions</span><span className={styles.adMetricValue}>{ad.impressions}</span></div>
+              <div className={styles.adMetricRow}><span>Clics</span><span className={styles.adMetricValue}>{ad.clicks}</span></div>
+              <div className={styles.adMetricRow}><span>CTR</span><span className={styles.adMetricValue}>{ad.ctr}</span></div>
+              <div className={styles.adMetricRow}><span>CPC Moyen</span><span className={styles.adMetricValue}>{ad.cpc}</span></div>
+              <div className={styles.adMetricRow}><span>Conversions</span><span className={styles.adMetricValue}>{ad.conv}</span></div>
+              <div className={styles.adMetricRow} style={{ borderBottom: 'none' }}><span>ROAS</span><span className={styles.adMetricValue} style={{ color: '#34d399' }}>{ad.roas}</span></div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ======== ROW 8: CUSTOMER INSIGHTS ======== */}
+      <div className={styles.sectionBox}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}><Users size={18} color="#ec4899" /> Insights Clients</h2>
+        </div>
+        <div className={styles.customerGrid}>
+          {[
+            { val: '1,842', label: 'Clients Totaux', color: '#a855f7' },
+            { val: '€67.40', label: 'Valeur Client Moy. (LTV)', color: '#10b981' },
+            { val: '23%', label: 'Taux de Retour Client', color: '#3b82f6' },
+            { val: '4.6 / 5', label: 'Note Moyenne Avis', color: '#fbbf24' },
+          ].map((m, i) => (
+            <div key={i} className={styles.customerMetric}>
+              <div className={styles.customerMetricValue} style={{ color: m.color }}>{m.val}</div>
+              <div className={styles.customerMetricLabel}>{m.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ======== ROW 9: HEALTH SCORES (Gauges) + STOCK ALERTS ======== */}
+      <div className={styles.grid2even}>
+        {/* Health Scores */}
+        <div className={styles.sectionBox}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}><Activity size={18} color="#10b981" /> Scores de Santé</h2>
+          </div>
+          <div className={styles.gaugeContainer}>
+            {[
+              { label: 'Score Boutique', val: 92, color: '#10b981' },
+              { label: 'Santé Pub', val: 78, color: '#3b82f6' },
+              { label: 'Satisfaction', val: 88, color: '#a855f7' },
+              { label: 'Livraison', val: 71, color: '#f59e0b' },
+            ].map((g, i) => (
+              <div key={i} className={styles.gaugeItem}>
+                <div className={styles.gauge} style={{
+                  background: `conic-gradient(${g.color} 0% ${g.val}%, rgba(255,255,255,0.06) ${g.val}% 100%)`
+                }}>
+                  <div className={styles.gaugeInner}>{g.val}</div>
+                </div>
+                <span className={styles.gaugeLabel}>{g.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Stock Alerts */}
+        <div className={styles.sectionBox}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}><AlertTriangle size={18} color="#ef4444" /> Alertes Stock</h2>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {[
+              { name: 'Humidificateur LED', stock: 3, status: 'critique', color: '#ef4444' },
+              { name: 'Correcteur Posture', stock: 12, status: 'faible', color: '#f59e0b' },
+              { name: 'Brosse Soufflante', stock: 48, status: 'ok', color: '#10b981' },
+              { name: 'Lampe Lune 3D', stock: 7, status: 'faible', color: '#f59e0b' },
+              { name: 'Organisateur Câbles', stock: 85, status: 'ok', color: '#10b981' },
+            ].map((s, i) => (
+              <div key={i} className={styles.stockItem}>
+                <div className={styles.stockInfo}>
+                  <div className={styles.stockIcon} style={{ background: `${s.color}15` }}>
+                    <Package size={14} color={s.color} />
+                  </div>
+                  <div>
+                    <div className={styles.stockName}>{s.name}</div>
+                    <div className={styles.stockSub}>{s.stock} unités restantes</div>
+                  </div>
+                </div>
+                <span className={styles.stockBadge} style={{ background: `${s.color}20`, color: s.color }}>
+                  {s.status === 'critique' ? '⚠️ Critique' : s.status === 'faible' ? '🟡 Faible' : '✅ OK'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ======== ROW 10: EMAIL MARKETING ======== */}
+      <div className={styles.sectionBox}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}><Mail size={18} color="#06b6d4" /> Email Marketing</h2>
+        </div>
+        <div className={styles.emailGrid}>
+          {[
+            { val: '8,420', label: 'Abonnés Liste', color: '#06b6d4' },
+            { val: '42.3%', label: 'Taux d\'Ouverture', color: '#10b981' },
+            { val: '6.8%', label: 'Taux de Clic', color: '#a855f7' },
+            { val: '€3,240', label: 'Revenus Email', color: '#f59e0b' },
+            { val: '1.2%', label: 'Taux Désabonnement', color: '#ef4444' },
+            { val: '12', label: 'Campagnes Envoyées', color: '#3b82f6' },
+          ].map((e, i) => (
+            <div key={i} className={styles.emailMetric}>
+              <div className={styles.emailMetricValue} style={{ color: e.color }}>{e.val}</div>
+              <div className={styles.emailMetricLabel}>{e.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ======== ROW 11: SOCIAL MEDIA ENGAGEMENT ======== */}
+      <div className={styles.sectionBox}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}><Heart size={18} color="#ec4899" /> Engagement Réseaux Sociaux</h2>
+        </div>
+        <div className={styles.grid2even}>
+          {/* Social Metrics Donut */}
+          <DonutChart
+            data={[
+              { name: 'Instagram', pct: 38, color: '#e1306c' },
+              { name: 'TikTok', pct: 32, color: '#ff0050' },
+              { name: 'Facebook', pct: 18, color: '#1877f2' },
+              { name: 'Twitter/X', pct: 12, color: '#64748b' },
+            ]}
+            centerValue="52.4K"
+            centerLabel="Followers"
+          />
+          {/* Social KPIs */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', justifyContent: 'center' }}>
+            {[
+              { icon: Heart, label: 'Likes ce mois', val: '12,340', color: '#ec4899' },
+              { icon: MessageCircle, label: 'Commentaires', val: '2,180', color: '#3b82f6' },
+              { icon: Share2, label: 'Partages', val: '890', color: '#10b981' },
+              { icon: Eye, label: 'Portée organique', val: '185K', color: '#a855f7' },
+              { icon: ThumbsUp, label: 'Taux Engagement', val: '5.2%', color: '#f59e0b' },
+              { icon: Hash, label: 'Mentions', val: '342', color: '#06b6d4' },
+            ].map((s, i) => {
+              const Icon = s.icon;
+              return (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 14px', background: 'rgba(0,0,0,0.15)', borderRadius: '10px',
+                  border: '1px solid rgba(255,255,255,0.04)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Icon size={16} color={s.color} />
+                    <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>{s.label}</span>
+                  </div>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{s.val}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ======== ROW 12: SHIPPING & FULFILLMENT ======== */}
+      <div className={styles.sectionBox}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}><Truck size={18} color="#f59e0b" /> Expéditions & Fulfillment</h2>
+        </div>
+        <div className={styles.customerGrid}>
+          {[
+            { val: '342', label: 'Commandes ce mois', color: '#a855f7' },
+            { val: '298', label: 'Expédiées', color: '#10b981' },
+            { val: '31', label: 'En cours', color: '#3b82f6' },
+            { val: '13', label: 'En attente', color: '#f59e0b' },
+          ].map((m, i) => (
+            <div key={i} className={styles.customerMetric}>
+              <div className={styles.customerMetricValue} style={{ color: m.color }}>{m.val}</div>
+              <div className={styles.customerMetricLabel}>{m.label}</div>
+            </div>
+          ))}
+        </div>
+        <div className={styles.progressList} style={{ marginTop: '20px' }}>
+          {[
+            { name: 'Taux d\'expédition à temps', pct: 94, color: '#10b981' },
+            { name: 'Livraisons réussies', pct: 97, color: '#3b82f6' },
+            { name: 'Colis retournés', pct: 3, color: '#ef4444' },
+          ].map((obj, i) => (
+            <div key={i} className={styles.progressItem}>
+              <div className={styles.progressTop}>
+                <span className={styles.progressName}>{obj.name}</span>
+                <span className={styles.progressPercent}>{obj.pct}%</span>
+              </div>
+              <div className={styles.progressTrack}>
+                <div
+                  className={styles.progressFill}
+                  style={{ width: `${obj.pct}%`, background: `linear-gradient(90deg, ${obj.color}66, ${obj.color})` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ======== ROW 13: COMPETITOR PRICE WATCH ======== */}
+      <div className={styles.sectionBox}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}><Eye size={18} color="#6366f1" /> Veille Concurrentielle Prix</h2>
+        </div>
+        <table className={styles.activityTable}>
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Votre Prix</th>
+              <th>Prix Concurrent Min</th>
+              <th>Prix Concurrent Max</th>
+              <th>Position</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              { name: 'Humidificateur LED', your: '€49.90', min: '€42.00', max: '€65.00', pos: '2ème' },
+              { name: 'Correcteur Posture', your: '€29.90', min: '€24.90', max: '€39.90', pos: '3ème' },
+              { name: 'Brosse Soufflante', your: '€69.90', min: '€59.00', max: '€89.00', pos: '1er 🏆' },
+              { name: 'Lampe Lune 3D', your: '€39.90', min: '€35.00', max: '€55.00', pos: '2ème' },
+            ].map((c, i) => (
+              <tr key={i}>
+                <td style={{ fontWeight: 600, color: '#fff' }}>{c.name}</td>
+                <td style={{ color: '#a855f7', fontWeight: 600 }}>{c.your}</td>
+                <td>{c.min}</td>
+                <td>{c.max}</td>
+                <td style={{ fontWeight: 600 }}>{c.pos}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
+
