@@ -127,7 +127,7 @@ CRITICAL RULES:
 
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         response_format: { type: "json_object" }
       });
 
@@ -342,10 +342,22 @@ CRITICAL RULES:
                   --color-base-solid-button-labels: ${branding.colors.text} !important;
                 }
 
+                /* FORCE HEADER SECTION TO DARK MODE */
+                #shopify-section-header, #shopify-section-announcement-bar,
+                .header-wrapper, .header, sticky-header,
+                .header__inline-menu, .header__heading, .header__icons,
+                .shopify-section-group-header-group, 
+                .shopify-section-group-footer-group {
+                  background-color: ${branding.colors.background} !important;
+                  background: ${branding.colors.background} !important;
+                  color: ${branding.colors.text} !important;
+                  border: none !important;
+                  box-shadow: none !important;
+                }
+
                 html, body, .gradient, .color-background-1, .color-background-2,
-                .header-wrapper, .header, sticky-header, .footer, .shopify-section,
-                #MainContent, .page-container, [id^="shopify-section-"] > *,
-                .header__inline-menu, .header__heading, .header__icons {
+                .footer, .shopify-section, #MainContent, .page-container, 
+                [id^="shopify-section-"] > * {
                   background-color: ${branding.colors.background} !important;
                   background: ${branding.colors.background} !important;
                   color: ${branding.colors.text} !important;
