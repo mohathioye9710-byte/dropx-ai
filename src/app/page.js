@@ -221,30 +221,31 @@ export default function Dashboard() {
           <div className={styles.barChart}>
             {revenueData.map((d, i) => (
               <div key={i} className={styles.barCol}>
-                <div
-                  className={styles.bar}
-                  style={{
-                    height: `${d.rev}%`,
-                    background: 'linear-gradient(to top, rgba(99,102,241,0.3), #a855f7)',
-                    animationDelay: `${i * 0.06}s`,
-                    marginBottom: '2px',
-                  }}
-                  title={`Revenus: €${d.rev * 25}`}
-                />
-                <div
-                  className={styles.bar}
-                  style={{
-                    height: `${d.ads}%`,
-                    background: 'linear-gradient(to top, rgba(239,68,68,0.3), #f97316)',
-                    animationDelay: `${i * 0.06 + 0.3}s`,
-                    width: '50%',
-                    maxWidth: '18px',
-                    position: 'absolute',
-                    bottom: '28px',
-                    right: '4px',
-                  }}
-                  title={`Pub: €${d.ads * 12}`}
-                />
+                <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', position: 'relative', width: '100%', justifyContent: 'center' }}>
+                  <div
+                    className={styles.bar}
+                    style={{
+                      height: `${d.rev}%`,
+                      background: 'linear-gradient(to top, rgba(99,102,241,0.3), #a855f7)',
+                      animationDelay: `${i * 0.06}s`,
+                    }}
+                    title={`Revenus: €${d.rev * 25}`}
+                  />
+                  <div
+                    className={styles.bar}
+                    style={{
+                      height: `${d.ads}%`,
+                      background: 'linear-gradient(to top, rgba(239,68,68,0.3), #f97316)',
+                      animationDelay: `${i * 0.06 + 0.3}s`,
+                      width: '60%',
+                      maxWidth: '18px',
+                      position: 'absolute',
+                      bottom: 0,
+                      right: '10%',
+                    }}
+                    title={`Pub: €${d.ads * 12}`}
+                  />
+                </div>
                 <span className={styles.barLabel}>{d.day}</span>
               </div>
             ))}
