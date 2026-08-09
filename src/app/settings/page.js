@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import styles from './page.module.css';
-import { User, Mail, Bell, CreditCard, Shield } from 'lucide-react';
+import { User, Mail, Bell, CreditCard, Shield, Globe } from 'lucide-react';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
