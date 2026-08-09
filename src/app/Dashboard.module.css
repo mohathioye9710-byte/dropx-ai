@@ -124,6 +124,13 @@
   gap: 24px;
 }
 
+.donutGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
 .sectionBox {
   padding: 24px;
   background: rgba(255, 255, 255, 0.02);
@@ -150,6 +157,84 @@
 }
 
 /* ============================================
+   DONUT CHARTS
+   ============================================ */
+
+.donutContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.donutWrapper {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Conic gradient is applied inline in JS based on data */
+}
+
+.donutHole {
+  width: 100px;
+  height: 100px;
+  background-color: #0b0c16; /* Matches standard dark bg */
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.donutTotal {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.donutLabelInner {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.donutLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.legendName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legendValue {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ============================================
    ADVANCED FAKE CHART
    ============================================ */
 
@@ -163,7 +248,6 @@
   gap: 8px;
 }
 
-/* Graph Lines (Y-Axis guides) */
 .chartContainer::after {
   content: '';
   position: absolute;
@@ -182,7 +266,6 @@
   justify-content: center;
   position: relative;
   z-index: 1;
-  group-hover: opacity-100;
 }
 
 .chartBarFill {
@@ -374,7 +457,7 @@
 }
 
 @media (max-width: 1024px) {
-  .mainGrid {
+  .mainGrid, .donutGrid {
     grid-template-columns: 1fr;
   }
 }

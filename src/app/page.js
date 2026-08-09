@@ -1,24 +1,9 @@
-import { DollarSign, TrendingUp, Package, Activity, Clock, BarChart3, ChevronRight, Zap, Target, Filter, ArrowUpRight, ArrowDownRight, Eye, MousePointerClick, ShoppingCart, CreditCard } from 'lucide-react';
+import { DollarSign, TrendingUp, Package, Activity, Clock, BarChart3, ChevronRight, Zap, Target, Filter, ArrowUpRight, ArrowDownRight, Eye, MousePointerClick, ShoppingCart, CreditCard, PieChart } from 'lucide-react';
 import styles from './Dashboard.module.css';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import LandingPage from '@/components/LandingPage';
 import { prisma } from '@/lib/prisma';
-
-// Fake Data for the chart
-const chartData = [
-  { day: '01', value: 30 }, { day: '04', value: 45 }, { day: '07', value: 40 },
-  { day: '10', value: 65 }, { day: '13', value: 55 }, { day: '16', value: 85 },
-  { day: '19', value: 70 }, { day: '22', value: 95 }, { day: '25', value: 80 },
-  { day: '28', value: 100 }
-];
-
-// Fake top products
-const topProducts = [
-  { id: 1, title: 'Mini Humidificateur Portable USB avec LED', img: 'https://images.unsplash.com/photo-1585565804112-f201f68c48b4?auto=format&fit=crop&q=80&w=150', sales: 124, conv: '4.2%', revenue: '4,340€' },
-  { id: 2, title: 'Correcteur de Posture Magnétique', img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=150', sales: 89, conv: '3.8%', revenue: '2,670€' },
-  { id: 3, title: 'Brosse Soufflante 5-en-1 Pro', img: 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&q=80&w=150', sales: 67, conv: '2.9%', revenue: '3,216€' },
-];
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
@@ -27,10 +12,35 @@ export default async function Dashboard() {
     return <LandingPage />;
   }
 
+  // Vraies données de la base de données
+  const activities = await prisma.activity.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  const analyzedProductsCount = activities.length;
+
+  // Comme nous n'avons pas encore d'intégration avec les vraies boutiques (Shopify) ni les Ads,
+  // nous affichons les vraies valeurs disponibles (qui sont à 0 pour les ventes).
+  const totalRevenue = 0;
+  const netProfit = 0;
+  const cpa = 0;
+  const roas = 0;
+
+  // Données vides pour les graphiques puisqu'il n'y a pas de ventes
+  const chartData = [
+    { day: '01', value: 0 }, { day: '04', value: 0 }, { day: '07', value: 0 },
+    { day: '10', value: 0 }, { day: '13', value: 0 }, { day: '16', value: 0 },
+    { day: '19', value: 0 }, { day: '22', value: 0 }, { day: '25', value: 0 },
+    { day: '28', value: 0 }
+  ];
+
+  const topProducts = [];
+
   return (
     <div className={`${styles.container} animate-fade-in`}>
       
-      {/* Banner Analyser Produit (Restaurée et modernisée) */}
+      {/* Banner Analyser Produit */}
       <div style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '20px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap', marginBottom: '8px' }}>
         <div>
           <h2 style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -55,27 +65,27 @@ export default async function Dashboard() {
         </button>
       </header>
 
-      {/* KPI Cards */}
+      {/* KPI Cards avec de vraies données (0 pour l'instant) */}
       <div className={styles.kpiGrid}>
         <div className={`${styles.kpiCard} ${styles.kpiRevenue}`}>
           <div className={styles.kpiHeader}>
             <span className={styles.kpiTitle}>Chiffre d'Affaires</span>
             <div className={styles.kpiIconWrapper} style={{ background: 'rgba(99, 102, 241, 0.15)' }}><DollarSign size={18} color="#818cf8" /></div>
           </div>
-          <h3 className={styles.kpiValue}>12,450€</h3>
-          <div className={`${styles.kpiTrend} ${styles.trendUp}`}>
-            <ArrowUpRight size={14} /> <span>+24.5% vs mois dernier</span>
+          <h3 className={styles.kpiValue}>{totalRevenue}€</h3>
+          <div className={`${styles.kpiTrend} ${styles.trendNeutral}`}>
+             <span>Connectez une boutique Shopify</span>
           </div>
         </div>
 
         <div className={`${styles.kpiCard} ${styles.kpiProfit}`}>
           <div className={styles.kpiHeader}>
-            <span className={styles.kpiTitle}>Bénéfice Net (Profit)</span>
-            <div className={styles.kpiIconWrapper} style={{ background: 'rgba(16, 185, 129, 0.15)' }}><Activity size={18} color="#34d399" /></div>
+            <span className={styles.kpiTitle}>Produits Analysés</span>
+            <div className={styles.kpiIconWrapper} style={{ background: 'rgba(16, 185, 129, 0.15)' }}><Package size={18} color="#34d399" /></div>
           </div>
-          <h3 className={styles.kpiValue}>3,820€</h3>
-          <div className={`${styles.kpiTrend} ${styles.trendUp}`}>
-            <ArrowUpRight size={14} /> <span>+12.2% vs mois dernier</span>
+          <h3 className={styles.kpiValue}>{analyzedProductsCount}</h3>
+          <div className={`${styles.kpiTrend} ${analyzedProductsCount > 0 ? styles.trendUp : styles.trendNeutral}`}>
+             <span>Produits passés dans l'IA</span>
           </div>
         </div>
 
@@ -84,9 +94,9 @@ export default async function Dashboard() {
             <span className={styles.kpiTitle}>Coût d'Acquisition (CPA)</span>
             <div className={styles.kpiIconWrapper} style={{ background: 'rgba(245, 158, 11, 0.15)' }}><Target size={18} color="#fbbf24" /></div>
           </div>
-          <h3 className={styles.kpiValue}>14.20€</h3>
-          <div className={`${styles.kpiTrend} ${styles.trendDown}`}>
-            <ArrowDownRight size={14} /> <span>-2.4% (Amélioration)</span>
+          <h3 className={styles.kpiValue}>{cpa}€</h3>
+          <div className={`${styles.kpiTrend} ${styles.trendNeutral}`}>
+             <span>Connectez votre Business Manager</span>
           </div>
         </div>
 
@@ -95,9 +105,9 @@ export default async function Dashboard() {
             <span className={styles.kpiTitle}>ROAS Global</span>
             <div className={styles.kpiIconWrapper} style={{ background: 'rgba(236, 72, 153, 0.15)' }}><TrendingUp size={18} color="#f472b6" /></div>
           </div>
-          <h3 className={styles.kpiValue}>3.4x</h3>
+          <h3 className={styles.kpiValue}>{roas}x</h3>
           <div className={`${styles.kpiTrend} ${styles.trendNeutral}`}>
-            <ChevronRight size={14} /> <span>Stable vs mois dernier</span>
+             <span>En attente de données</span>
           </div>
         </div>
       </div>
@@ -112,10 +122,13 @@ export default async function Dashboard() {
             {chartData.map((data, index) => (
               <div key={index} className={styles.chartColumn}>
                 <div className={styles.chartTooltip}>{data.value * 120}€</div>
-                <div className={styles.chartBarFill} style={{ height: `${data.value}%`, animationDelay: `${index * 0.05}s` }}></div>
+                <div className={styles.chartBarFill} style={{ height: `${data.value || 1}%`, animationDelay: `${index * 0.05}s`, opacity: data.value === 0 ? 0.2 : 1 }}></div>
                 <span className={styles.chartLabel}>{data.day}</span>
               </div>
             ))}
+          </div>
+          <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginTop: '8px' }}>
+            Aucune vente enregistrée pour cette période.
           </div>
         </div>
 
@@ -126,64 +139,131 @@ export default async function Dashboard() {
           </div>
           <div className={styles.funnelContainer}>
             <div className={styles.funnelStep}>
-              <div className={styles.funnelBg} style={{ width: '100%' }}></div>
+              <div className={styles.funnelBg} style={{ width: '0%' }}></div>
               <div className={styles.funnelInfo}>
                 <div className={styles.funnelIcon}><Eye size={16} color="#818cf8" /></div>
-                <div><div className={styles.funnelName}>Vues (Ads)</div><div className={styles.funnelRate}>100%</div></div>
+                <div><div className={styles.funnelName}>Vues (Ads)</div><div className={styles.funnelRate}>--</div></div>
               </div>
-              <span className={styles.funnelValue}>45.2K</span>
+              <span className={styles.funnelValue}>0</span>
             </div>
             
             <div className={styles.funnelStep}>
-              <div className={styles.funnelBg} style={{ width: '42%' }}></div>
+              <div className={styles.funnelBg} style={{ width: '0%' }}></div>
               <div className={styles.funnelInfo}>
                 <div className={styles.funnelIcon}><MousePointerClick size={16} color="#34d399" /></div>
-                <div><div className={styles.funnelName}>Clics (Trafic)</div><div className={styles.funnelRate}>CTR: 2.1%</div></div>
+                <div><div className={styles.funnelName}>Clics (Trafic)</div><div className={styles.funnelRate}>CTR: 0%</div></div>
               </div>
-              <span className={styles.funnelValue}>9,492</span>
+              <span className={styles.funnelValue}>0</span>
             </div>
 
             <div className={styles.funnelStep}>
-              <div className={styles.funnelBg} style={{ width: '15%' }}></div>
+              <div className={styles.funnelBg} style={{ width: '0%' }}></div>
               <div className={styles.funnelInfo}>
                 <div className={styles.funnelIcon}><ShoppingCart size={16} color="#fbbf24" /></div>
-                <div><div className={styles.funnelName}>Ajouts Panier</div><div className={styles.funnelRate}>ATC: 4.5%</div></div>
+                <div><div className={styles.funnelName}>Ajouts Panier</div><div className={styles.funnelRate}>ATC: 0%</div></div>
               </div>
-              <span className={styles.funnelValue}>427</span>
+              <span className={styles.funnelValue}>0</span>
             </div>
 
             <div className={styles.funnelStep}>
-              <div className={styles.funnelBg} style={{ width: '8%', background: 'rgba(16, 185, 129, 0.3)' }}></div>
+              <div className={styles.funnelBg} style={{ width: '0%', background: 'rgba(16, 185, 129, 0.3)' }}></div>
               <div className={styles.funnelInfo}>
                 <div className={styles.funnelIcon} style={{ background: 'rgba(16, 185, 129, 0.2)' }}><CreditCard size={16} color="#10b981" /></div>
-                <div><div className={styles.funnelName}>Achats</div><div className={styles.funnelRate}>Conv: 2.8%</div></div>
+                <div><div className={styles.funnelName}>Achats</div><div className={styles.funnelRate}>Conv: 0%</div></div>
               </div>
-              <span className={styles.funnelValue}>265</span>
+              <span className={styles.funnelValue}>0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* NEW: Donut Charts Section */}
+      <div className={`${styles.donutGrid} delay-3`}>
+        <div className={styles.sectionBox}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}><PieChart size={20} color="#fbbf24" /> Sources de Trafic</h2>
+          </div>
+          <div className={styles.donutContainer}>
+            {/* Empty state donut since there is no data */}
+            <div className={styles.donutWrapper} style={{ background: 'conic-gradient(rgba(255,255,255,0.05) 0% 100%)' }}>
+              <div className={styles.donutHole}>
+                <span className={styles.donutTotal}>0</span>
+                <span className={styles.donutLabelInner}>Visites</span>
+              </div>
+            </div>
+            <div className={styles.donutLegend}>
+              <div className={styles.legendItem}>
+                <div className={styles.legendName}><div className={styles.legendDot} style={{ background: '#3b82f6' }}></div>Facebook Ads</div>
+                <div className={styles.legendValue}>0%</div>
+              </div>
+              <div className={styles.legendItem}>
+                <div className={styles.legendName}><div className={styles.legendDot} style={{ background: '#ec4899' }}></div>TikTok Ads</div>
+                <div className={styles.legendValue}>0%</div>
+              </div>
+              <div className={styles.legendItem}>
+                <div className={styles.legendName}><div className={styles.legendDot} style={{ background: '#10b981' }}></div>Google Ads</div>
+                <div className={styles.legendValue}>0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.sectionBox}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}><PieChart size={20} color="#6366f1" /> Répartition Appareils</h2>
+          </div>
+          <div className={styles.donutContainer}>
+            {/* Empty state donut */}
+            <div className={styles.donutWrapper} style={{ background: 'conic-gradient(rgba(255,255,255,0.05) 0% 100%)' }}>
+              <div className={styles.donutHole}>
+                <span className={styles.donutTotal}>0</span>
+                <span className={styles.donutLabelInner}>Sessions</span>
+              </div>
+            </div>
+            <div className={styles.donutLegend}>
+              <div className={styles.legendItem}>
+                <div className={styles.legendName}><div className={styles.legendDot} style={{ background: '#8b5cf6' }}></div>Mobile</div>
+                <div className={styles.legendValue}>0%</div>
+              </div>
+              <div className={styles.legendItem}>
+                <div className={styles.legendName}><div className={styles.legendDot} style={{ background: '#f59e0b' }}></div>Desktop</div>
+                <div className={styles.legendValue}>0%</div>
+              </div>
+              <div className={styles.legendItem}>
+                <div className={styles.legendName}><div className={styles.legendDot} style={{ background: '#64748b' }}></div>Tablette</div>
+                <div className={styles.legendValue}>0%</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Top Products */}
-      <div className={`${styles.sectionBox} delay-3`}>
+      <div className={`${styles.sectionBox} delay-4`} style={{ marginTop: '24px' }}>
         <div className={styles.sectionHeader} style={{ marginBottom: 0 }}>
           <h2 className={styles.sectionTitle}><Package size={20} color="#f472b6" /> Top Produits Performants</h2>
           <a href="#" style={{ fontSize: '13px', color: '#a855f7', textDecoration: 'none' }}>Voir tout</a>
         </div>
         <div className={styles.topProductsGrid}>
-          {topProducts.map((prod) => (
-            <div key={prod.id} className={styles.productRow}>
-              <img src={prod.img} alt={prod.title} className={styles.productImg} />
-              <div className={styles.productInfo}>
-                <div className={styles.productTitle}>{prod.title}</div>
-                <div className={styles.productMetrics}>
-                  <div className={styles.productMetricItem}><Package size={12} /> {prod.sales} ventes</div>
-                  <div className={styles.productMetricItem}><Activity size={12} /> Conv: {prod.conv}</div>
-                </div>
-              </div>
-              <div className={styles.productRevenue}>{prod.revenue}</div>
+          {topProducts.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+              Aucun produit vendu. Connectez votre boutique pour voir vos meilleures ventes ici.
             </div>
-          ))}
+          ) : (
+            topProducts.map((prod) => (
+              <div key={prod.id} className={styles.productRow}>
+                <img src={prod.img} alt={prod.title} className={styles.productImg} />
+                <div className={styles.productInfo}>
+                  <div className={styles.productTitle}>{prod.title}</div>
+                  <div className={styles.productMetrics}>
+                    <div className={styles.productMetricItem}><Package size={12} /> {prod.sales} ventes</div>
+                    <div className={styles.productMetricItem}><Activity size={12} /> Conv: {prod.conv}</div>
+                  </div>
+                </div>
+                <div className={styles.productRevenue}>{prod.revenue}</div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
