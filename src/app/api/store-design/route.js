@@ -166,9 +166,8 @@ CRITICAL RULES:
         results.shopName = res.ok;
         if (!res.ok) {
           console.error('[Store Design] Shop name update failed:', res.status);
-          if (res.status === 403 || res.status === 406 || resBody.includes('access')) {
-            results.errors.push('Shopify a bloqué la modification du nom via API (Erreur ' + res.status + '). Tu pourras le changer manuellement dans tes paramètres Shopify.');
-          }
+          // We intentionally do not push this to results.errors because it's a very common 
+          // limitation on basic Shopify plans and confuses the user into thinking the design failed.
         }
       } catch (e) { 
         console.error('[Store Design] Shop name error:', e.message); 
@@ -340,12 +339,15 @@ CRITICAL RULES:
                   --color-base-background-2: ${branding.colors.background} !important;
                   --color-foreground: ${branding.colors.text} !important;
                   --color-base-text: ${branding.colors.text} !important;
+                  --color-base-solid-button-labels: ${branding.colors.text} !important;
                 }
 
                 html, body, .gradient, .color-background-1, .color-background-2,
-                .header-wrapper, .header, .footer, .shopify-section,
-                #MainContent, .page-container, [id^="shopify-section-"] > * {
+                .header-wrapper, .header, sticky-header, .footer, .shopify-section,
+                #MainContent, .page-container, [id^="shopify-section-"] > *,
+                .header__inline-menu, .header__heading, .header__icons {
                   background-color: ${branding.colors.background} !important;
+                  background: ${branding.colors.background} !important;
                   color: ${branding.colors.text} !important;
                 }
 
@@ -353,12 +355,20 @@ CRITICAL RULES:
                 h1, h2, h3, h4, h5, h6, p, span, li, label, td, th, dt, dd,
                 .price, [class*="price"], [class*="title"], [class*="product-title"],
                 .card__heading, .card__information, .card-information,
-                .product-card, [class*="product"] *, [class*="card"] * {
+                .product-card, [class*="product"] *, [class*="card"] *,
+                .header__menu-item, .header__heading-link, .header__icon {
+                  color: ${branding.colors.text} !important;
+                }
+
+                /* Fix Header Icons (Cart, Search, Menu) */
+                .header__icon svg, .header__heading-link svg, .icon, 
+                .icon-cart, .icon-search, .icon-account {
+                  fill: ${branding.colors.text} !important;
                   color: ${branding.colors.text} !important;
                 }
 
                 /* Links slightly brighter */
-                a:not([class*="button"]):not(.btn):not(.ai-btn) {
+                a:not([class*="button"]):not(.btn):not(.ai-btn):not(.header__menu-item):not(.header__icon) {
                   color: ${branding.colors.primary} !important;
                 }
 
