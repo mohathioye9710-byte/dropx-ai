@@ -11,6 +11,17 @@
   align-items: center;
   padding: 24px 0;
   z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Hide scrollbar for sidebar but keep functionality */
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
+.sidebar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .logoContainer {
