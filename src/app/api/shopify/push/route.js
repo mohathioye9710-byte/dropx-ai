@@ -105,106 +105,260 @@ export async function POST(req) {
       }
     });
 
-    // HTML Injection - Full Landing Page (Dropmagic Style)
+    // HTML Injection - Full Landing Page (DropX Premium Style)
     const formattedDesc = (product.description || '').replace(/\n/g, '<br/>');
     const lp = product.landingPage || {};
+    // Legacy support
     const features = lp.features || [];
     const howToUse = lp.howToUse || [];
+    // New 5-Section Architecture
+    const s1 = lp.section1_benefits;
+    const s2 = lp.section2_features;
+    const s3 = lp.section3_steps;
+    const s4 = lp.section4_cta;
+    const s5 = lp.section5_power;
     const faq = lp.faq || [];
     const reviews = lp.reviews || [];
     const images = product.images || [];
 
-    // Build features HTML
-    const featuresHtml = features.length > 0 ? `
-      <div style="background:#fdf2f8;padding:40px 20px;margin:30px -20px;">
-        <div style="max-width:600px;margin:0 auto;">
-          <div style="display:flex;flex-wrap:wrap;gap:20px;">
-            ${features.map(f => `
-              <div style="flex:1 1 45%;min-width:200px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:28px;">${f.icon || '✨'}</span>
-                <div>
-                  <h4 style="margin:0 0 4px;font-size:15px;font-weight:700;color:#111;">${f.title}</h4>
-                  <p style="margin:0;font-size:13px;color:#555;line-height:1.5;">${f.text}</p>
+    const imgTag = (idx) => images[idx] ? `<img src="${images[idx]}" alt="Product" style="width:100%; border-radius:8px; object-fit:cover; display:block;"/>` : '';
+
+    let contentHtml = '';
+
+    if (s1 && s2) {
+      // --- SECTION 1: 3 Columns Benefits ---
+      if (s1) {
+        contentHtml += `
+        <div style="padding: 40px 20px; max-width: 1200px; margin: 0 auto;">
+          <h2 style="text-align:center; font-size: 28px; font-weight: 800; margin-bottom: 30px; color: #111;">${s1.sectionTitle}</h2>
+          <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+            ${s1.items.map((item, i) => `
+              <div style="flex: 1 1 30%; min-width: 250px; background: #fff; border: 1px solid #eaeaea; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                ${imgTag(i + 1)}
+                <div style="padding: 20px;">
+                  <h3 style="font-size: 16px; font-weight: 700; margin: 0 0 10px; color: #111;">${item.title}</h3>
+                  <p style="font-size: 14px; color: #555; line-height: 1.5; margin: 0;">${item.text}</p>
                 </div>
               </div>
             `).join('')}
           </div>
-          ${images[1] ? `<div style="text-align:center;margin-top:30px;"><img src="${images[1]}" alt="Product" style="max-width:100%;border-radius:12px;"/></div>` : ''}
-        </div>
-      </div>
-    ` : '';
-
-    // Build How To Use HTML
-    const howToUseHtml = howToUse.length > 0 ? `
-      <div style="padding:40px 0;text-align:center;">
-        <h2 style="font-size:22px;font-weight:800;color:#111;margin-bottom:30px;">Comment l'utiliser ?</h2>
-        <div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;">
-          ${howToUse.map((h, i) => `
-            <div style="flex:1 1 30%;min-width:160px;max-width:200px;text-align:center;">
-              ${images[i+2] ? `<img src="${images[i+2]}" alt="Step ${h.step}" style="width:100%;border-radius:12px;margin-bottom:12px;"/>` : `<div style="width:60px;height:60px;background:#fce7f3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;font-weight:900;color:#c85a7c;">${h.step}</div>`}
-              <h4 style="margin:0 0 6px;font-size:14px;font-weight:700;color:#111;">${h.title}</h4>
-              <p style="margin:0;font-size:12px;color:#666;line-height:1.5;">${h.text}</p>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    ` : '';
-
-    // Build Reviews HTML
-    const reviewsHtml = reviews.length > 0 ? `
-      <div style="padding:40px 0;">
-        <p style="text-align:center;font-size:12px;color:#c85a7c;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;">⭐⭐⭐⭐⭐ Avis de nos clients vérifiés</p>
-        <h2 style="text-align:center;font-size:22px;font-weight:800;color:#111;margin-bottom:30px;">Nos clients l'adorent!</h2>
-        <div style="display:flex;flex-wrap:wrap;gap:16px;">
-          ${reviews.map(r => `
-            <div style="flex:1 1 45%;min-width:240px;background:#fff;border:1px solid #eee;border-radius:12px;padding:20px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                <strong style="font-size:14px;color:#111;">${r.name}</strong>
-                <span style="font-size:12px;color:#16a34a;">✅ Achat vérifié</span>
+        </div>`;
+      }
+      // --- SECTION 2: Left Grid Features, Right Image ---
+      if (s2) {
+        contentHtml += `
+        <div style="background: #eaf8f9; padding: 50px 20px;">
+          <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 40px;">
+            <div style="flex: 1 1 45%; min-width: 300px;">
+              <div style="display: flex; flex-wrap: wrap; gap: 30px;">
+                ${s2.items.map(item => `
+                  <div style="flex: 1 1 45%; min-width: 200px;">
+                    <div style="font-size: 28px; color: #1e3a8a; margin-bottom: 12px;">${item.icon}</div>
+                    <h3 style="font-size: 16px; font-weight: 700; margin: 0 0 8px; color: #111;">${item.title}</h3>
+                    <p style="font-size: 14px; color: #555; line-height: 1.5; margin: 0;">${item.text}</p>
+                  </div>
+                `).join('')}
               </div>
-              <div style="color:#f59e0b;font-size:14px;margin-bottom:8px;">${'⭐'.repeat(r.rating || 5)}</div>
-              <p style="margin:0;font-size:13px;color:#444;line-height:1.5;">${r.text}</p>
             </div>
-          `).join('')}
+            <div style="flex: 1 1 45%; min-width: 300px;">
+               ${imgTag(4)}
+            </div>
+          </div>
+        </div>`;
+      }
+      // --- SECTION 3: 3 Columns Steps with Numbers ---
+      if (s3) {
+        contentHtml += `
+        <div style="padding: 40px 20px; max-width: 1200px; margin: 0 auto;">
+          <h2 style="text-align:center; font-size: 28px; font-weight: 800; margin-bottom: 30px; color: #111;">${s3.sectionTitle}</h2>
+          <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+            ${s3.items.map((item, i) => `
+              <div style="flex: 1 1 30%; min-width: 250px; background: #fff; border: 1px solid #eaeaea; border-radius: 8px; overflow: hidden;">
+                <div style="position: relative;">
+                  ${imgTag(i + 5)}
+                  <div style="position: absolute; top: 15px; right: 15px; background: #0ea5e9; color: #fff; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${i+1}</div>
+                </div>
+                <div style="padding: 20px;">
+                  <h3 style="font-size: 16px; font-weight: 700; margin: 0 0 10px; color: #111;">${item.title}</h3>
+                  <p style="font-size: 14px; color: #555; line-height: 1.5; margin: 0;">${item.text}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+      }
+      // --- SECTION 4: Left Image, Right Big CTA ---
+      if (s4) {
+        contentHtml += `
+        <div style="background: #eaf8f9; padding: 50px 20px;">
+          <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 40px;">
+            <div style="flex: 1 1 45%; min-width: 300px;">
+               ${imgTag(8)}
+            </div>
+            <div style="flex: 1 1 45%; min-width: 300px;">
+              <h2 style="font-size: 32px; font-weight: 800; color: #111; margin: 0 0 20px; line-height: 1.2;">${s4.title}</h2>
+              <p style="font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 30px;">${s4.text}</p>
+              <a href="#buy" style="display: inline-block; background: #1d4ed8; color: #fff; text-decoration: none; padding: 16px 32px; font-weight: 700; font-size: 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(29,78,216,0.3);">${s4.buttonText}</a>
+            </div>
+          </div>
+        </div>`;
+      }
+      // --- SECTION 5: Left Spec List, Right Image ---
+      if (s5) {
+        contentHtml += `
+        <div style="padding: 50px 20px; max-width: 1200px; margin: 0 auto;">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 40px;">
+            <div style="flex: 1 1 45%; min-width: 300px;">
+              <h2 style="font-size: 28px; font-weight: 800; color: #111; margin: 0 0 30px;">${s5.sectionTitle}</h2>
+              <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px;">
+                ${s5.items.map(item => `
+                  <div style="display: flex; gap: 16px; align-items: flex-start; padding: 16px; border: 1px solid #eaeaea; border-radius: 8px; background: #fafafa;">
+                    <div style="font-size: 24px; color: #1d4ed8; min-width: 30px;">${item.icon}</div>
+                    <div>
+                      <h3 style="font-size: 15px; font-weight: 700; margin: 0 0 6px; color: #111;">${item.title}</h3>
+                      <p style="font-size: 13px; color: #555; line-height: 1.5; margin: 0;">${item.text}</p>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+              <a href="#buy" style="display: block; text-align: center; background: #1d4ed8; color: #fff; text-decoration: none; padding: 16px 32px; font-weight: 700; font-size: 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(29,78,216,0.3);">${s5.buttonText}</a>
+              <p style="text-align: center; font-size: 12px; color: #666; margin-top: 10px; font-weight: 600;">⭐ ${s5.ratingText}</p>
+            </div>
+            <div style="flex: 1 1 45%; min-width: 300px;">
+               ${imgTag(9)}
+            </div>
+          </div>
+        </div>`;
+      }
+    } else {
+      // --- LEGACY FALLBACK ---
+      contentHtml += features.length > 0 ? `
+        <div style="background:#fdf2f8;padding:40px 20px;margin:30px -20px;">
+          <div style="max-width:600px;margin:0 auto;">
+            <div style="display:flex;flex-wrap:wrap;gap:20px;">
+              ${features.map(f => `
+                <div style="flex:1 1 45%;min-width:200px;display:flex;gap:12px;align-items:flex-start;">
+                  <span style="font-size:28px;">${f.icon || '✨'}</span>
+                  <div>
+                    <h4 style="margin:0 0 4px;font-size:15px;font-weight:700;color:#111;">${f.title}</h4>
+                    <p style="margin:0;font-size:13px;color:#555;line-height:1.5;">${f.text}</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            ${images[1] ? `<div style="text-align:center;margin-top:30px;"><img src="${images[1]}" alt="Product" style="max-width:100%;border-radius:12px;"/></div>` : ''}
+          </div>
+        </div>
+      ` : '';
+      contentHtml += howToUse.length > 0 ? `
+        <div style="padding:40px 0;text-align:center;">
+          <h2 style="font-size:22px;font-weight:800;color:#111;margin-bottom:30px;">Comment l'utiliser ?</h2>
+          <div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;">
+            ${howToUse.map((h, i) => `
+              <div style="flex:1 1 30%;min-width:160px;max-width:200px;text-align:center;">
+                ${images[i+2] ? `<img src="${images[i+2]}" alt="Step ${h.step}" style="width:100%;border-radius:12px;margin-bottom:12px;"/>` : `<div style="width:60px;height:60px;background:#fce7f3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;font-weight:900;color:#c85a7c;">${h.step}</div>`}
+                <h4 style="margin:0 0 6px;font-size:14px;font-weight:700;color:#111;">${h.title}</h4>
+                <p style="margin:0;font-size:12px;color:#666;line-height:1.5;">${h.text}</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : '';
+    }
+
+    // Build Reviews HTML (Trustpilot style - green bg, 3-col grid)
+    const reviewsHtml = reviews.length > 0 ? `
+      <div style="background: #eaf8f9; padding: 60px 20px;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+          <p style="text-align: center; color: #16a34a; font-weight: 700; font-size: 14px; margin-bottom: 8px;">⭐⭐⭐⭐⭐ 4.9/5 sur +2500 clients</p>
+          <h2 style="text-align: center; font-size: 32px; font-weight: 800; color: #111; margin-bottom: 40px;">Ils l'adorent</h2>
+          <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+            ${reviews.map(r => `
+              <div style="flex: 1 1 30%; min-width: 280px; background: #fff; border: 1px solid #eaeaea; border-radius: 8px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <strong style="font-size: 16px; color: #111;">${r.name}</strong>
+                  <span style="font-size: 12px; color: #1d4ed8; font-weight: 600;">&#10003; Acheteur vérifié</span>
+                </div>
+                <div style="color: #fbbf24; font-size: 16px; margin-bottom: 12px;">${'⭐'.repeat(r.rating || 5)}</div>
+                <p style="margin: 0 0 16px; font-size: 14px; color: #444; line-height: 1.6;">${r.text}</p>
+                <span style="font-size: 12px; color: #999;">Il y a ${Math.floor(Math.random() * 10) + 1}j</span>
+              </div>
+            `).join('')}
+          </div>
         </div>
       </div>
     ` : '';
 
-    // Build FAQ HTML
+    // Build FAQ HTML (2-column: left title + support card, right accordion)
     const faqHtml = faq.length > 0 ? `
-      <div style="padding:40px 0;">
-        <h2 style="font-size:22px;font-weight:800;color:#111;margin-bottom:24px;">Vos Questions, Nos Réponses.</h2>
-        ${faq.map(f => `
-          <details style="border:1px solid #eee;border-radius:8px;padding:16px;margin-bottom:10px;cursor:pointer;">
-            <summary style="font-weight:600;font-size:14px;color:#111;">${f.question}</summary>
-            <p style="margin:12px 0 0;font-size:13px;color:#555;line-height:1.6;">${f.answer}</p>
-          </details>
-        `).join('')}
+      <div style="padding: 60px 20px; background: #fff;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 60px;">
+          <div style="flex: 1 1 40%; min-width: 280px;">
+            <h2 style="font-size: 32px; font-weight: 800; color: #111; margin-bottom: 16px;">Questions Fréquentes</h2>
+            <p style="font-size: 16px; color: #666; line-height: 1.6; margin-bottom: 40px;">Découvrez comment ce produit révolutionne votre quotidien en rendant vos tâches aussi simples, rapides et efficaces que jamais auparavant.</p>
+            <div style="background: #fff; border: 1px solid #eaeaea; border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+              <h4 style="font-size: 18px; font-weight: 700; color: #1d4ed8; margin: 0 0 12px;">Besoin d'un coup de main supplémentaire ?</h4>
+              <p style="margin: 0; font-size: 14px; color: #555; line-height: 1.5;">Notre équipe est disponible 7j/7 pour vous accompagner et répondre à toutes vos interrogations.</p>
+            </div>
+          </div>
+          <div style="flex: 1 1 50%; min-width: 300px;">
+            ${faq.map(f => `
+              <details style="border-bottom: 1px solid #eaeaea; padding: 20px 0; cursor: pointer;">
+                <summary style="font-weight: 600; font-size: 16px; color: #111; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                  ${f.question}
+                  <span style="font-size: 24px; color: #666; font-weight: 300;">+</span>
+                </summary>
+                <p style="margin: 16px 0 0; font-size: 15px; color: #555; line-height: 1.6;">${f.answer}</p>
+              </details>
+            `).join('')}
+          </div>
+        </div>
       </div>
     ` : '';
 
-    // Trust Footer
+    // Trust Footer (4 feature icons + payment footer)
     const trustFooterHtml = `
-      <div style="display:flex;flex-wrap:wrap;gap:20px;padding:30px 0;border-top:1px solid #eee;margin-top:30px;">
-        <div style="flex:1 1 22%;min-width:120px;text-align:center;">
-          <div style="font-size:24px;margin-bottom:6px;">🛡️</div>
-          <h4 style="margin:0;font-size:12px;font-weight:700;">Satisfait ou Remboursé</h4>
-          <p style="margin:4px 0 0;font-size:11px;color:#888;">Garantie 30 jours</p>
+      <div style="background: linear-gradient(180deg, #eaf8f9 0%, #fff 100%); padding: 50px 20px;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 30px; justify-content: center;">
+          <div style="flex: 1 1 20%; min-width: 200px; text-align: left;">
+            <div style="font-size: 32px; margin-bottom: 16px;">⚡</div>
+            <h4 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #111;">Efficacité garantie</h4>
+            <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.5;">Fini les efforts inutiles, notre produit puissant vous simplifie la vie en un instant.</p>
+          </div>
+          <div style="flex: 1 1 20%; min-width: 200px; text-align: left;">
+            <div style="font-size: 32px; margin-bottom: 16px;">📦</div>
+            <h4 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #111;">Polyvalent</h4>
+            <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.5;">Changez et adaptez son utilisation pour chaque besoin de votre quotidien.</p>
+          </div>
+          <div style="flex: 1 1 20%; min-width: 200px; text-align: left;">
+            <div style="font-size: 32px; margin-bottom: 16px;">🔋</div>
+            <h4 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #111;">Design moderne</h4>
+            <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.5;">Une finition épurée et pratique qui s'intègre parfaitement partout.</p>
+          </div>
+          <div style="flex: 1 1 20%; min-width: 200px; text-align: left;">
+            <div style="font-size: 32px; margin-bottom: 16px;">⭐</div>
+            <h4 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #111;">Qualité premium</h4>
+            <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.5;">Une conception ergonomique et durable pour vous accompagner dans la durée.</p>
+          </div>
         </div>
-        <div style="flex:1 1 22%;min-width:120px;text-align:center;">
-          <div style="font-size:24px;margin-bottom:6px;">🚚</div>
-          <h4 style="margin:0;font-size:12px;font-weight:700;">Livraison Rapide</h4>
-          <p style="margin:4px 0 0;font-size:11px;color:#888;">Expédié en 24/48h</p>
-        </div>
-        <div style="flex:1 1 22%;min-width:120px;text-align:center;">
-          <div style="font-size:24px;margin-bottom:6px;">🔒</div>
-          <h4 style="margin:0;font-size:12px;font-weight:700;">Paiement Sécurisé</h4>
-          <p style="margin:4px 0 0;font-size:11px;color:#888;">Cryptage SSL 256-bit</p>
-        </div>
-        <div style="flex:1 1 22%;min-width:120px;text-align:center;">
-          <div style="font-size:24px;margin-bottom:6px;">💬</div>
-          <h4 style="margin:0;font-size:12px;font-weight:700;">Support Client</h4>
-          <p style="margin:4px 0 0;font-size:11px;color:#888;">Réponse sous 24h</p>
+      </div>
+      <div style="background: #fff; padding: 40px 20px; border-top: 1px solid #eaeaea;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px;">
+          <div>
+            <h3 style="font-size: 22px; font-weight: 800; font-style: italic; color: #111; margin: 0 0 8px;">${product.title}</h3>
+            <p style="margin: 0; font-size: 14px; color: #666;">La qualité sans effort pour un quotidien<br/>étincelant.</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 12px; opacity: 0.5;">
+              <span style="background: #eee; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color:#333;">VISA</span>
+              <span style="background: #eee; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color:#333;">MC</span>
+              <span style="background: #eee; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color:#333;">PayPal</span>
+              <span style="background: #16a34a; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color:#fff;">Shop</span>
+              <span style="background: #eee; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color:#333;">GPay</span>
+              <span style="background: #111; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color:#fff;">APay</span>
+            </div>
+            <p style="margin: 0; font-size: 12px; color: #999;">© 2024 Tous droits réservés.</p>
+          </div>
         </div>
       </div>
     `;
@@ -285,15 +439,14 @@ export async function POST(req) {
               </div>
             </div>
           </div>
+          </div>
         </div>
 
-        <!-- Extra Sections (Full Width) -->
-        <div style="max-width: 1000px; margin: 0 auto; padding: 20px 5%;">
-          ${featuresHtml}
-          ${howToUseHtml}
-          ${reviewsHtml}
-          ${faqHtml}
-        </div>
+        <!-- Full Width Landing Page Sections -->
+        ${contentHtml}
+        ${reviewsHtml}
+        ${faqHtml}
+        ${trustFooterHtml}
       </div>
     `;
     // -------------------------------------------------------------
