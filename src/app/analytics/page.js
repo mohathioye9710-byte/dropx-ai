@@ -492,7 +492,7 @@ export default function Analytics() {
                   <div
                     key={`c-${di}-${hi}`}
                     className={styles.heatmapCell}
-                    style={{ background: `rgba(139, 92, 246, ${alpha})` }}
+                    style={{ background: `rgba(255, 255, 255, ${alpha})` }}
                     title={`${day} ${hi}h — ${Math.round(val * 12)} ventes`}
                   />
                 );
