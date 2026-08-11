@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, GraduationCap, LogIn, LogOut } from 'lucide-react';
+import { Home, Search, Store, Palette, Megaphone, Share2, Settings, GraduationCap, LogIn, LogOut } from 'lucide-react';
 import { useSession, signIn, signOut } from "next-auth/react";
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -8,7 +8,13 @@ import styles from './Sidebar.module.css';
 
 const NAV_ITEMS = [
   { href: '/', icon: Home, label: 'Dashboard' },
+  { href: '/analyzer', icon: Search, label: 'Recherche de Produits' },
+  { href: '/stores', icon: Store, label: 'Mes Boutiques' },
+  { href: '/store-design', icon: Palette, label: 'Design' },
+  { href: '/ads', icon: Megaphone, label: 'Publicités' },
+  { href: '/social', icon: Share2, label: 'Réseaux Sociaux' },
   { href: '/tutoriels', icon: GraduationCap, label: 'Tutoriels' },
+  { href: '/settings', icon: Settings, label: 'Paramètres' },
 ];
 
 export default function Sidebar() {
