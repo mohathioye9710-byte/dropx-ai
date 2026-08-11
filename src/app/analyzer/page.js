@@ -291,7 +291,7 @@ export default function Analyzer() {
 
       {(state === 'loading' || state === 'results') && (
         <div style={{display: 'flex', height: '100%', width: '100%', background: '#090a0f', overflow: 'hidden'}}>
-          <div style={{flex: 1, padding: '40px', display: 'flex', flexDirection: 'column', maxWidth: '600px', margin: '0 auto'}}>
+          <div style={{flex: 1, padding: '40px', display: 'flex', flexDirection: 'column', overflowY: 'auto', maxWidth: '600px', margin: '0 auto'}}>
             <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px'}}>
               <button onClick={() => setState('idle')} style={{background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex'}}><ArrowLeft size={24} /></button>
               <h2 style={{fontSize: '24px', fontWeight: '600', color: '#fff', flex: 1, textAlign: 'center'}}>Ton score produit</h2>
