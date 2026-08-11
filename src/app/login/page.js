@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { signIn } from "next-auth/react";
-import { ArrowRight, Mail, Lock, Sparkles } from "lucide-react";
+import { Mail, Lock } from "lucide-react";
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -17,7 +17,6 @@ export default function LoginPage() {
       return;
     }
     setIsLoading(true);
-    // Simulate login for demo purposes
     await signIn('credentials', {
       email,
       password,
@@ -26,53 +25,68 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-      <div style={{ width: '100%', maxWidth: '400px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', padding: '40px', textAlign: 'center' }}>
-        <Sparkles size={32} color="#fff" style={{ marginBottom: '24px' }} />
-        <h1 style={{ fontSize: '28px', color: '#fff', fontWeight: 'bold', marginBottom: '8px' }}>Content de vous revoir</h1>
-        <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '32px' }}>Connectez-vous à votre empire.</p>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', position: 'relative', zIndex: 10 }}>
+      
+      {/* Brand */}
+      <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', background: '#111', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '24px', fontWeight: '800', textDecoration: 'none', marginBottom: '16px' }}>
+          D
+        </Link>
+        <h1 style={{ fontSize: '28px', color: '#fff', fontWeight: '800', letterSpacing: '-0.5px' }}>Te revoilà.</h1>
+        <p style={{ color: '#a1a1aa', fontSize: '15px', marginTop: '8px' }}>Connecte-toi pour gérer ton empire.</p>
+      </div>
 
+      <div style={{ width: '100%', maxWidth: '420px', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', padding: '40px' }}>
+        
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
           <div style={{ position: 'relative' }}>
-            <Mail size={18} color="rgba(255,255,255,0.4)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+            <Mail size={18} color="#a1a1aa" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
             <input 
               type="email" 
               placeholder="Adresse email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '14px 16px 14px 44px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontSize: '15px', outline: 'none' }}
+              style={{ width: '100%', padding: '14px 16px 14px 44px', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontSize: '15px', outline: 'none', transition: 'border-color 0.2s' }}
+              onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
             />
           </div>
           
           <div style={{ position: 'relative' }}>
-            <Lock size={18} color="rgba(255,255,255,0.4)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+            <Lock size={18} color="#a1a1aa" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
             <input 
               type="password" 
               placeholder="Mot de passe" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={{ width: '100%', padding: '14px 16px 14px 44px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontSize: '15px', outline: 'none' }}
+              style={{ width: '100%', padding: '14px 16px 14px 44px', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontSize: '15px', outline: 'none', transition: 'border-color 0.2s' }}
+              onFocus={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.3)'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
             />
           </div>
 
           <button 
             type="submit"
             disabled={isLoading}
-            style={{ background: '#fff', color: '#000', padding: '14px', borderRadius: '12px', fontSize: '16px', fontWeight: 'bold', border: 'none', cursor: 'pointer', marginTop: '8px', opacity: isLoading ? 0.7 : 1 }}
+            style={{ background: '#ffffff', color: '#000000', padding: '14px', borderRadius: '12px', fontSize: '15px', fontWeight: '700', border: 'none', cursor: 'pointer', marginTop: '8px', opacity: isLoading ? 0.7 : 1, transition: 'background 0.2s' }}
+            onMouseOver={(e) => e.target.style.background = '#e5e5e5'}
+            onMouseOut={(e) => e.target.style.background = '#ffffff'}
           >
             {isLoading ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>OU</span>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }}></div>
+          <span style={{ color: '#a1a1aa', fontSize: '12px', fontWeight: '600' }}>OU</span>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }}></div>
         </div>
 
         <button 
           onClick={() => signIn('google', { callbackUrl: '/' })}
-          style={{ width: '100%', background: 'transparent', color: '#fff', padding: '14px', borderRadius: '12px', fontSize: '15px', fontWeight: '600', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '32px' }}
+          style={{ width: '100%', background: '#111', color: '#fff', padding: '14px', borderRadius: '12px', fontSize: '15px', fontWeight: '600', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', transition: 'background 0.2s' }}
+          onMouseOver={(e) => e.target.style.background = '#222'}
+          onMouseOut={(e) => e.target.style.background = '#111'}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -83,10 +97,11 @@ export default function LoginPage() {
           Continuer avec Google
         </button>
 
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>
-          Pas encore de compte ? <Link href="/register" style={{ color: '#fff', fontWeight: 'bold' }}>S'inscrire</Link>
-        </p>
       </div>
+      
+      <p style={{ color: '#a1a1aa', fontSize: '14px', marginTop: '32px' }}>
+        Pas encore de compte ? <Link href="/register" style={{ color: '#fff', fontWeight: '600', textDecoration: 'none' }}>S'inscrire</Link>
+      </p>
     </div>
   );
 }

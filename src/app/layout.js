@@ -5,6 +5,7 @@ import { Providers } from '@/components/Providers';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import LandingPage from '@/components/LandingPage';
+import { LanguageProvider } from '@/context/LanguageContext';
 
 export const metadata = {
   title: 'DropX AI | Ultimate Dropshipping Platform',
@@ -17,6 +18,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <div className="dropmagic-grid"></div>
         <Providers>
           {session ? (
             <div className="app-container">
@@ -29,9 +31,11 @@ export default async function RootLayout({ children }) {
               </main>
             </div>
           ) : (
-            <div className="public-content" style={{ minHeight: '100vh', backgroundColor: '#050505' }}>
-              {children}
-            </div>
+            <LanguageProvider>
+              <div className="public-content" style={{ minHeight: '100vh', position: 'relative', zIndex: 1 }}>
+                {children}
+              </div>
+            </LanguageProvider>
           )}
         </Providers>
       </body>

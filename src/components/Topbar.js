@@ -10,6 +10,7 @@ export default function Topbar() {
   const { data: session } = useSession();
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(2);
+  const [expandedNotifs, setExpandedNotifs] = useState([]);
   const router = useRouter();
 
   const handleBellClick = () => {
@@ -49,23 +50,29 @@ export default function Topbar() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <button 
                   className={styles.notificationItem}
-                  onClick={() => { setShowNotifications(false); router.push('/analyzer'); }}
+                  onClick={() => setExpandedNotifs(prev => prev.includes(1) ? prev.filter(id => id !== 1) : [...prev, 1])}
                 >
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', marginTop: '6px', flexShrink: 0 }}></div>
                   <div>
                     <p style={{ color: '#fff', fontSize: '13px', fontWeight: '500', marginBottom: '4px', margin: 0 }}>Bienvenue sur DropX AI 🚀</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.4, margin: 0 }}>Votre compte a été activé avec succès. Commencez par analyser un produit !</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.4, margin: 0, 
+                                display: '-webkit-box', WebkitLineClamp: expandedNotifs.includes(1) ? 'none' : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      Votre compte a été activé avec succès. Commencez par analyser un produit dans la section générateur pour créer votre première boutique !
+                    </p>
                     <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', marginTop: '6px', margin: 0 }}>Il y a 1 heure</p>
                   </div>
                 </button>
                 <button 
                   className={styles.notificationItem}
-                  onClick={() => { setShowNotifications(false); router.push('/analyzer'); }}
+                  onClick={() => setExpandedNotifs(prev => prev.includes(2) ? prev.filter(id => id !== 2) : [...prev, 2])}
                 >
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', marginTop: '6px', flexShrink: 0 }}></div>
                   <div>
                     <p style={{ color: '#fff', fontSize: '13px', fontWeight: '500', marginBottom: '4px', margin: 0 }}>Nouveau : Analyse de tendances IA</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.4, margin: 0 }}>Notre IA croise désormais les avis et les tendances pour trouver les audiences rentables.</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.4, margin: 0,
+                                display: '-webkit-box', WebkitLineClamp: expandedNotifs.includes(2) ? 'none' : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      Notre IA croise désormais les avis et les tendances pour trouver les audiences rentables. Vous remarquerez que les options "Laisser l'IA choisir" sont beaucoup plus intelligentes !
+                    </p>
                     <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', marginTop: '6px', margin: 0 }}>Il y a 2 heures</p>
                   </div>
                 </button>

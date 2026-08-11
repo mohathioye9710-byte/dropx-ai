@@ -243,47 +243,37 @@ export default function SettingsPage() {
               )}
 
               <div className={styles.profileCard}>
-                {existingIntegration ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                      <Globe size={24} color="#10b981" />
-                      <div>
-                        <h4 style={{ color: '#fff', fontSize: '16px', marginBottom: '4px' }}>Boutique déjà connectée</h4>
-                        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>{existingIntegration}</p>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={handleDisconnect}
-                      style={{ padding: '10px 16px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', width: 'fit-content' }}
-                    >
+                <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '24px', fontSize: '14px' }}>
+                  Connectez votre boutique Shopify pour récupérer vos vraies commandes, revenus et statistiques en temps réel. La connexion se fait en un clic via le système sécurisé de Shopify.
+                </p>
+                <form onSubmit={handleShopifyConnect}>
+                  <div className={styles.formGroup}>
+                    <label>URL de la Boutique (.myshopify.com)</label>
+                    <input 
+                      type="text" 
+                      name="domain"
+                      defaultValue={existingIntegration || ''}
+                      placeholder="ma-boutique.myshopify.com" 
+                      required 
+                      disabled={!!existingIntegration}
+                      className={styles.input} 
+                    />
+                    <span className={styles.hint}>
+                      {existingIntegration 
+                        ? "Votre boutique est connectée. Si vous souhaitez la changer, déconnectez-la d'abord."
+                        : "Entrez l'URL de votre boutique Shopify. Vous serez redirigé vers Shopify pour autoriser la connexion."}
+                    </span>
+                  </div>
+                  {existingIntegration ? (
+                    <button type="button" onClick={handleDisconnect} className={styles.saveButton} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)' }}>
                       Changer de boutique
                     </button>
-                  </div>
-                ) : (
-                  <>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '24px', fontSize: '14px' }}>
-                      Connectez votre boutique Shopify pour récupérer vos vraies commandes, revenus et statistiques en temps réel. La connexion se fait en un clic via le système sécurisé de Shopify.
-                    </p>
-                    <form onSubmit={handleShopifyConnect}>
-                      <div className={styles.formGroup}>
-                        <label>URL de la Boutique (.myshopify.com)</label>
-                        <input 
-                          type="text" 
-                          name="domain"
-                          placeholder="ma-boutique.myshopify.com" 
-                          required 
-                          className={styles.input} 
-                        />
-                        <span className={styles.hint}>
-                          Entrez l'URL de votre boutique Shopify. Vous serez redirigé vers Shopify pour autoriser la connexion.
-                        </span>
-                      </div>
-                      <button type="submit" className={styles.saveButton} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Globe size={16} /> Connecter Shopify
-                      </button>
-                    </form>
-                  </>
-                )}
+                  ) : (
+                    <button type="submit" className={styles.saveButton} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Globe size={16} /> Connecter Shopify
+                    </button>
+                  )}
+                </form>
               </div>
 
               {/* Pixel de Tracking Section */}
