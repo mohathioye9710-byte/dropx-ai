@@ -252,8 +252,8 @@ export async function POST(req) {
     // Generate the realistic images using Replicate (Flux Dev)
     let generatedImages = [];
     if (analysis.productDescription && imageList.length > 0) {
-      if (!process.env.REPLICATE_API_TOKEN) {
-        console.log(`[DEBUG] ⚠️ Clé REPLICATE_API_TOKEN manquante. Impossible de générer les images Flux.`);
+      if (!process.env.REPLICATE_API_TOKEN || imageList[0].includes('unsplash.com')) {
+        console.log(`[DEBUG] ⚠️ Clé manquante ou image de démo. Impossible de générer les images Flux.`);
         generatedImages = imageList;
       } else {
         const sourceImages = imageList.slice(0, 10);
