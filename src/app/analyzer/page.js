@@ -436,8 +436,8 @@ export default function Analyzer() {
           </div>,
           <div style={{background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '48px', borderRadius: '24px', textAlign: 'center', width: '300px'}}>
             <div style={{fontSize: '48px', marginBottom: '16px'}}>{currentPersona?.icon || '👤'}</div>
-            <h3 style={{fontSize: '20px', color: '#fff', fontWeight: '600', marginBottom: '8px'}}>{currentPersona?.title || 'Persona'}</h3>
-            <p style={{color: 'rgba(255,255,255,0.4)', fontSize: '14px'}}>Ton profil acheteur unique</p>
+            <h3 style={{fontSize: '20px', color: '#fff', fontWeight: '600', marginBottom: '8px', textAlign: 'center'}}>{currentPersona?.title || 'Persona'}</h3>
+            <p style={{color: 'rgba(255,255,255,0.4)', fontSize: '14px', lineHeight: 1.4, textAlign: 'center'}}>{currentPersona?.desc || 'Ton profil acheteur unique'}</p>
           </div>,
           () => setState('select_language'),
           () => setState('select_angle')
@@ -473,8 +473,8 @@ export default function Analyzer() {
             <div style={{fontSize: typeof currentAngle?.icon === 'string' ? '48px' : 'inherit', marginBottom: '16px'}}>
               {currentAngle?.icon || '🎯'}
             </div>
-            <h3 style={{fontSize: '20px', color: '#fff', fontWeight: '600', marginBottom: '8px'}}>{currentAngle?.title || 'Angle marketing'}</h3>
-            <p style={{color: 'rgba(255,255,255,0.4)', fontSize: '14px'}}>Ton angle marketing unique</p>
+            <h3 style={{fontSize: '20px', color: '#fff', fontWeight: '600', marginBottom: '8px', textAlign: 'center'}}>{currentAngle?.title || 'Angle marketing'}</h3>
+            <p style={{color: 'rgba(255,255,255,0.4)', fontSize: '14px', lineHeight: 1.4, textAlign: 'center'}}>{currentAngle?.desc || 'Ton angle marketing unique'}</p>
           </div>,
           () => setState('select_persona'),
           () => setState('select_photos')
