@@ -25,8 +25,8 @@ export default function Sidebar() {
 
   return (
     <aside className={styles.sidebar}>
-      <Link href="/" className={styles.logoContainer} style={{ textDecoration: 'none' }} title="ShopX">
-        <img src="/logo.png" alt="ShopX" style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'cover' }} />
+      <Link href="/" className={styles.logoContainer} style={{ textDecoration: 'none' }} title="DropX">
+        <img src="/logo.png" alt="DropX" style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'cover' }} />
       </Link>
       
       <nav className={styles.nav}>

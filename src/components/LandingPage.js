@@ -17,9 +17,9 @@ export default function LandingPage() {
       {/* ============ NAVBAR ============ */}
       <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 48px', position: 'relative', zIndex: 100 }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="/logo.png" alt="ShopX Logo" style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover' }} />
+          <img src="/logo.png" alt="DropX Logo" style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover' }} />
           <h1 style={{ fontSize: '22px', fontWeight: '800', letterSpacing: '-0.5px', margin: 0, cursor: 'pointer' }}>
-            ShopX
+            DropX
           </h1>
         </div>
         
