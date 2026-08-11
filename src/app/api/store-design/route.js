@@ -100,8 +100,8 @@ The user has a Shopify store:
 
 IMPORTANT: Base your branding on the ACTUAL PRODUCTS listed above. 
 
-Generate a complete, BREATHTAKING, ULTRA-PREMIUM brand redesign. 
-We want modern, futuristic, luxury, or neon aesthetics. NEVER output boring, flat, or generic colors like standard red (#FF0000) or plain gray. Use vibrant neon accents, deep rich dark backgrounds, or sleek monochromatic palettes.
+Generate a complete, HIGH-CONVERTING, PREMIUM brand redesign. 
+We want clean, professional, and elegant e-commerce aesthetics. NEVER output dark or neon futuristic "AI" styles. Use clean white or very light backgrounds, highly readable typography, and modern, trustworthy accent colors (e.g., emerald green, elegant navy, soft pink, minimalist black).
 
 Return ONLY valid JSON:
 {
@@ -111,24 +111,24 @@ Return ONLY valid JSON:
   "heroSubtitle": "Hero subtitle in French (1 short sentence, max 12 words, very impactful)",
   "aboutText": "Premium 'About' paragraph in French (2-3 sentences, emotional brand story)",
   "colors": {
-    "primary": "#hex (A VIBRANT, glowing neon accent color like Cyberpunk Pink, Electric Blue, Emerald Green, or Luxury Gold)",
-    "secondary": "#hex (A complementary rich color, slightly darker or lighter than primary)",
-    "background": "#hex (MUST be extremely dark. e.g., #05050A for deep space, #0A0A0A for sleek black, #09090E for dark tech. NO light backgrounds.)",
-    "text": "#hex (MUST be crisp white #FFFFFF or very light silver #F3F4F6 for max readability)",
-    "buttonBg": "#hex (Same as primary or a vivid gradient-ready color)",
-    "buttonText": "#hex (MUST contrast perfectly with buttonBg. e.g. #000000 if button is bright neon, #FFFFFF if button is dark)",
-    "announcementBg": "#hex (Slightly lighter than background, e.g., #11111A)",
-    "announcementText": "#hex (Same as text)"
+    "primary": "#hex (A professional, conversion-optimized accent color like Emerald Green, Classic Navy, or Elegant Burgundy)",
+    "secondary": "#hex (A complementary soft color for backgrounds or badges)",
+    "background": "#hex (MUST be clean and light. e.g., #FFFFFF for pure white, or #F9F9F9 for soft gray. NO dark backgrounds.)",
+    "text": "#hex (MUST be very dark #111111 or #333333 for max readability)",
+    "buttonBg": "#hex (Same as primary or a strong call-to-action color)",
+    "buttonText": "#hex (MUST contrast perfectly with buttonBg, e.g. #FFFFFF)",
+    "announcementBg": "#hex (A soft color or the primary color, e.g., #F3F4F6 or primary)",
+    "announcementText": "#hex (Contrasting text for announcement)"
   },
   "font": "One of: 'Outfit', 'Space Grotesk', 'Syne', 'Clash Display', 'Inter'. Pick the coolest modern font.",
   "vibe": "One word (e.g. Cyberpunk, Minimalist, Luxury, Futuristic, Ethereal)"
 }
 
 CRITICAL RULES:
-- The design must scream "2026 Premium Web3/Tech startup" or "High-End Luxury".
-- The background MUST be a single solid very dark color.
-- All text must be highly readable on the dark background.
-- IMPORTANT: Be extremely creative. Do NOT return the same design twice. Here is a unique seed to force variation: ${Math.random()}`;
+- The design must scream "Premium D2C E-commerce Brand" or "High-End Retail".
+- The background MUST be a light, clean color (white or soft gray).
+- All text must be dark and highly readable.
+- IMPORTANT: Be extremely creative in a professional way. Do NOT return the same design twice. Here is a unique seed to force variation: ${Math.random()}`;
 
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],

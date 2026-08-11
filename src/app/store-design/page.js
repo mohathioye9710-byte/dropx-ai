@@ -237,12 +237,10 @@ export default function StoreDesignPage() {
                       {branding.announcementText}
                     </div>
 
-                    {/* Nav Bar */}
-                    <div className={styles.mockNav} style={{ borderBottom: `1px solid ${branding.colors.text}15` }}>
-                      <span className={styles.mockLogo} style={{ color: branding.colors.text }}>
-                        {branding.storeName}
-                      </span>
-                      <div className={styles.mockNavLinks} style={{ color: branding.colors.text + '99' }}>
+                    {/* Desktop / Mobile Toggle */}
+                    <div className={styles.mockHeader}>
+                      <div className={styles.mockLogo} style={{ color: branding.colors.text }}>{branding.storeName}</div>
+                      <div className={styles.mockNav} style={{ color: branding.colors.text }}>
                         <span>Collection</span>
                         <span>À Propos</span>
                         <span>Contact</span>
@@ -251,61 +249,61 @@ export default function StoreDesignPage() {
 
                     {/* Hero Section */}
                     <div className={styles.mockHero} style={{ 
-                      background: `radial-gradient(circle at 50% 0%, ${branding.colors.primary}44 0%, ${branding.colors.background} 70%)`,
-                      borderBottom: `1px solid ${branding.colors.primary}33`,
-                      boxShadow: `inset 0 20px 60px ${branding.colors.primary}11`
+                      background: branding.colors.background,
+                      color: branding.colors.text
                     }}>
                       <div className={styles.mockHeroContent}>
-                        <div style={{ display: 'inline-block', padding: '6px 16px', borderRadius: '50px', background: `${branding.colors.secondary}22`, border: `1px solid ${branding.colors.secondary}55`, color: branding.colors.secondary, fontSize: '11px', fontWeight: 'bold', marginBottom: '16px', letterSpacing: '1px', textTransform: 'uppercase' }}>{branding.vibe}</div>
-                        <h2 className={styles.mockHeroTitle} style={{ color: branding.colors.text, textShadow: `0 0 30px ${branding.colors.primary}88` }}>
-                          {branding.heroTitle}
-                        </h2>
-                        <p className={styles.mockHeroSub} style={{ color: branding.colors.text + 'aa' }}>
-                          {branding.heroSubtitle}
-                        </p>
-                        <button className={styles.mockHeroBtn} style={{ 
-                          background: `linear-gradient(45deg, ${branding.colors.primary}, ${branding.colors.secondary || branding.colors.primary})`, 
-                          color: branding.colors.buttonText,
-                          boxShadow: `0 10px 30px ${branding.colors.primary}66`,
-                          border: `1px solid ${branding.colors.primary}88`
+                        <span className={styles.mockBadge} style={{ 
+                          color: branding.colors.primary, 
+                          border: `1px solid ${branding.colors.primary}40`,
+                          background: `${branding.colors.primary}10`
+                        }}>
+                          {branding.vibe.toUpperCase()}
+                        </span>
+                        <h1 className={styles.mockH1}>{branding.heroTitle}</h1>
+                        <p className={styles.mockP}>{branding.heroSubtitle}</p>
+                        <button className={styles.mockButton} style={{ 
+                          background: branding.colors.buttonBg, 
+                          color: branding.colors.buttonText
                         }}>
                           Découvrir la Collection ✨
                         </button>
                       </div>
                     </div>
 
-                    {/* Marquee */}
-                    <div className={styles.mockMarquee} style={{ 
-                      background: branding.colors.background,
-                      borderTop: `1px solid ${branding.colors.primary}22`,
-                      borderBottom: `1px solid ${branding.colors.primary}22`,
-                      color: branding.colors.primary
-                    }}>
-                      <div className={styles.mockMarqueeTrack} style={{ textShadow: `0 0 10px ${branding.colors.primary}88` }}>
-                        {'✦ ' + branding.storeName + ' ✦ Qualité Premium ✦ Satisfaction Garantie ✦ Livraison Express ✦ '.repeat(3)}
-                      </div>
+                  {/* Marquee */}
+                  <div className={styles.mockMarquee} style={{ 
+                    background: branding.colors.announcementBg,
+                    borderTop: `1px solid ${branding.colors.primary}22`,
+                    borderBottom: `1px solid ${branding.colors.primary}22`,
+                    color: branding.colors.announcementText
+                  }}>
+                    <div className={styles.mockMarqueeTrack}>
+                      {'✦ ' + branding.storeName + ' ✦ Qualité Premium ✦ Satisfaction Garantie ✦ Livraison Express ✦ '.repeat(3)}
                     </div>
+                  </div>
 
-                    {/* Product Grid Placeholder */}
-                    <div className={styles.mockProductGrid} style={{ background: branding.colors.background }}>
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className={styles.mockProduct} style={{ 
-                          background: `linear-gradient(180deg, ${branding.colors.text}08 0%, ${branding.colors.background} 100%)`,
-                          border: `1px solid ${branding.colors.text}15`,
-                          boxShadow: `0 8px 32px 0 ${branding.colors.primary}11`,
-                          backdropFilter: 'blur(10px)'
-                        }}>
-                          <div className={styles.mockProductImage} style={{ 
-                            background: `linear-gradient(135deg, ${branding.colors.primary}22, ${branding.colors.secondary || branding.colors.primary}22)`,
-                            borderBottom: `1px solid ${branding.colors.text}10`
-                          }}></div>
-                          <div className={styles.mockProductInfo}>
-                            <div className={styles.mockProductTitle} style={{ background: branding.colors.text + '40' }}></div>
-                            <div className={styles.mockProductPrice} style={{ background: branding.colors.primary + '80', boxShadow: `0 0 10px ${branding.colors.primary}44` }}></div>
-                          </div>
+                  {/* Product Grid Placeholder */}
+                  <div className={styles.mockProductGrid} style={{ background: branding.colors.background }}>
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className={styles.mockProduct} style={{ 
+                        background: '#ffffff',
+                        border: `1px solid #eaeaea`,
+                        boxShadow: `0 4px 12px rgba(0,0,0,0.05)`,
+                        borderRadius: '12px',
+                        overflow: 'hidden'
+                      }}>
+                        <div className={styles.mockProductImage} style={{ 
+                          background: '#f9f9f9',
+                          borderBottom: `1px solid #eaeaea`
+                        }}></div>
+                        <div className={styles.mockProductInfo} style={{ padding: '16px' }}>
+                          <div className={styles.mockProductTitle} style={{ background: branding.colors.text + '20', height: '16px', borderRadius: '4px', marginBottom: '8px' }}></div>
+                          <div className={styles.mockProductPrice} style={{ background: branding.colors.primary, height: '24px', width: '50%', borderRadius: '4px' }}></div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
+                  </div>
                   </div>
                 </div>
               )}
