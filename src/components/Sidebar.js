@@ -25,9 +25,8 @@ export default function Sidebar() {
 
   return (
     <aside className={styles.sidebar}>
-      <Link href="/" className={styles.logoContainer} style={{ textDecoration: 'none' }}>
-        <img src="/logo.png" alt="ShopX" style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover' }} />
-        <span style={{ fontSize: '20px', fontWeight: '800', color: '#fff', letterSpacing: '-0.5px', marginLeft: '12px' }}>ShopX</span>
+      <Link href="/" className={styles.logoContainer} style={{ textDecoration: 'none' }} title="ShopX">
+        <img src="/logo.png" alt="ShopX" style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'cover' }} />
       </Link>
       
       <nav className={styles.nav}>
