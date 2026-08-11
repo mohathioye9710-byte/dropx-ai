@@ -8,6 +8,15 @@ import styles from './Topbar.module.css';
 export default function Topbar() {
   const { data: session } = useSession();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(2);
+
+  const handleBellClick = () => {
+    setShowNotifications(!showNotifications);
+    if (!showNotifications && unreadCount > 0) {
+      setUnreadCount(0);
+    }
+  };
+
   return (
     <header className={styles.topbar}>
       <div className={styles.searchContainer}>
@@ -23,16 +32,36 @@ export default function Topbar() {
         <div style={{ position: 'relative' }}>
           <button 
             className={styles.iconButton}
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={handleBellClick}
           >
             <Bell size={20} />
-            <span className={styles.badge}>0</span>
+            {unreadCount > 0 && <span className={styles.badge}>{unreadCount}</span>}
           </button>
           
           {showNotifications && (
-            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', background: 'rgba(15, 15, 30, 0.95)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '16px', width: '280px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', zIndex: 50 }}>
-              <h4 style={{ color: '#fff', fontSize: '14px', marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>Notifications</h4>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', textAlign: 'center', padding: '12px 0' }}>Aucune nouvelle notification.</p>
+            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '12px', background: 'rgba(15, 15, 30, 0.98)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '20px', width: '320px', boxShadow: '0 10px 40px rgba(0,0,0,0.8)', zIndex: 50 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>
+                <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: '600', margin: 0 }}>Notifications</h4>
+                {unreadCount === 0 && <span style={{ fontSize: '12px', color: '#10b981', fontWeight: '500' }}>Toutes lues</span>}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', marginTop: '6px', flexShrink: 0 }}></div>
+                  <div>
+                    <p style={{ color: '#fff', fontSize: '13px', fontWeight: '500', marginBottom: '4px', margin: 0 }}>Bienvenue sur DropX AI 🚀</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.4, margin: 0 }}>Votre compte a été activé avec succès. Commencez par analyser un produit !</p>
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', marginTop: '6px', margin: 0 }}>Il y a 1 heure</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', marginTop: '6px', flexShrink: 0 }}></div>
+                  <div>
+                    <p style={{ color: '#fff', fontSize: '13px', fontWeight: '500', marginBottom: '4px', margin: 0 }}>Nouveau : Analyse de tendances IA</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.4, margin: 0 }}>Notre IA croise désormais les avis et les tendances pour trouver les audiences rentables.</p>
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', marginTop: '6px', margin: 0 }}>Il y a 2 heures</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
