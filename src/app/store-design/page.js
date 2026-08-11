@@ -66,7 +66,7 @@ export default function StoreDesignPage() {
       });
       const data = await res.json();
       
-      if (!res.ok) throw new Error(data.error || "Erreur lors de l'application");
+      if (!res.ok) throw new Error(data.error || "Erreur lors de l&apos;application");
       
       if (data.results && data.results.errors && data.results.errors.length > 0) {
         setError(data.message + " " + data.results.errors.join(' '));
@@ -93,7 +93,7 @@ export default function StoreDesignPage() {
         </div>
         <div>
           <h1 className={styles.title}>Store Design IA</h1>
-          <p className={styles.subtitle}>Transforme ta boutique Shopify en marque premium grâce à l'IA.</p>
+          <p className={styles.subtitle}>Transforme ta boutique Shopify en marque premium gr&acirc;ce &agrave; l&apos;IA.</p>
         </div>
         <div className={styles.headerBadge}>
           <Crown size={14} /> Powered by GPT-4 + DALL·E
@@ -165,7 +165,7 @@ export default function StoreDesignPage() {
                 <div className={styles.generatingPulse}>
                   <Wand2 size={32} />
                 </div>
-                <h3>L'IA conçoit votre identité visuelle...</h3>
+                <h3>L&apos;IA con&ccedil;oit votre identit&eacute; visuelle...</h3>
                 <p>Analyse des produits, création de la palette, génération du branding</p>
                 <div className={styles.generatingSteps}>
                   <div className={styles.generatingStep}>
@@ -197,7 +197,7 @@ export default function StoreDesignPage() {
             <div className={styles.previewSection}>
               <div className={styles.previewHeader}>
                 <h2 className={styles.previewTitle}>
-                  <Sparkles size={20} /> Design généré par l'IA
+                  <Sparkles size={20} /> Design g&eacute;n&eacute;r&eacute; par l&apos;IA
                 </h2>
                 <div className={styles.previewTabs}>
                   {['desktop', 'identity', 'colors'].map(tab => (
@@ -402,7 +402,7 @@ export default function StoreDesignPage() {
                   <div className={`${styles.identityCard} ${styles.identityCardWide}`}>
                     <div className={styles.identityCardHeader}>
                       <span className={styles.identityIcon}>📢</span>
-                      <span className={styles.identityLabel}>Barre d'annonce</span>
+                      <span className={styles.identityLabel}>Barre d&apos;annonce</span>
                     </div>
                     <div className={styles.announcementShowcase} style={{
                       background: branding.colors.announcementBg,
