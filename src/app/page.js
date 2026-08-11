@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Plus, ArrowRight, Store, Settings, ExternalLink } from 'lucide-react';
 import LandingPage from '@/components/LandingPage';
@@ -8,15 +9,25 @@ import { useRouter } from 'next/navigation';
 export default function Dashboard() {
   const { data: session } = useSession();
   const router = useRouter();
+  const [stores, setStores] = useState([]);
+
+  useEffect(() => {
+    if (session) {
+      fetch('/api/stores')
+        .then(res => res.json())
+        .then(data => {
+          if (data.generatedStores) {
+            // Get the 2 most recent stores
+            setStores(data.generatedStores.slice(0, 2));
+          }
+        })
+        .catch(err => console.error("Error fetching stores:", err));
+    }
+  }, [session]);
 
   if (!session) return <LandingPage />;
 
   const firstName = session.user?.name?.split(' ')[0] || 'User';
-
-  const MOCK_STORES = [
-    { name: "Brosse Électrique Pro", url: "brosse-pro.myshopify.com", status: "Publié", date: "Il y a 2 jours" },
-    { name: "Coussin Ergonomique", url: "coussin-ergo.myshopify.com", status: "Brouillon", date: "Il y a 5 jours" }
-  ];
 
   return (
     <div style={{ padding: '60px 40px', maxWidth: '1200px', margin: '0 auto', width: '100%', position: 'relative', zIndex: 10 }}>
@@ -55,7 +66,9 @@ export default function Dashboard() {
           <p style={{ color: '#a1a1aa', fontSize: '15px', lineHeight: '1.6', marginBottom: '32px' }}>
             Crée ta boutique avec DropX AI et bénéficie de l'offre exclusive partenaire Shopify. Valable sur tes prochaines créations.
           </p>
-          <button style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#fff', color: '#000', padding: '14px 24px', borderRadius: '12px', fontSize: '15px', fontWeight: '700', border: 'none', cursor: 'pointer', transition: 'background 0.2s' }}
+          <button 
+            onClick={() => window.open('https://shopify.pxf.io/dropxai', '_blank')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#fff', color: '#000', padding: '14px 24px', borderRadius: '12px', fontSize: '15px', fontWeight: '700', border: 'none', cursor: 'pointer', transition: 'background 0.2s' }}
             onMouseOver={(e) => e.currentTarget.style.background = '#e5e5e5'}
             onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
           >
@@ -70,27 +83,28 @@ export default function Dashboard() {
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
           
-          {MOCK_STORES.map((store, i) => (
+          {stores.map((store, i) => (
             <div key={i} style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '24px', transition: 'border-color 0.2s', cursor: 'pointer' }}
               onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'}
               onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'}
+              onClick={() => router.push(`/preview?id=${store.id}`)}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                 <div style={{ width: '40px', height: '40px', background: '#111', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
                   <Store size={20} color="#a1a1aa" />
                 </div>
-                <span style={{ fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '100px', background: store.status === 'Publié' ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)', color: store.status === 'Publié' ? '#10b981' : '#a1a1aa' }}>
+                <span style={{ fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '100px', background: store.status.includes('Publié') ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)', color: store.status.includes('Publié') ? '#10b981' : '#a1a1aa' }}>
                   {store.status}
                 </span>
               </div>
               <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '4px' }}>{store.name}</h4>
-              <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '24px' }}>{store.url}</p>
+              <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '24px' }}>{store.niche || "Boutique générée"}</p>
               
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
-                <span style={{ fontSize: '12px', color: '#71717a' }}>{store.date}</span>
+                <span style={{ fontSize: '12px', color: '#71717a' }}>{store.createdAt}</span>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><Settings size={16} /></button>
-                  <button style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><ExternalLink size={16} /></button>
+                  <button onClick={(e) => { e.stopPropagation(); router.push('/settings'); }} style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><Settings size={16} /></button>
+                  <button onClick={(e) => { e.stopPropagation(); router.push(`/preview?id=${store.id}`); }} style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><ExternalLink size={16} /></button>
                 </div>
               </div>
             </div>

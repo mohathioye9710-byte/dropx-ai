@@ -2,21 +2,29 @@
 
 import { Bell, Search, LogOut } from 'lucide-react';
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import styles from './Topbar.module.css';
 
 export default function Topbar() {
   const { data: session } = useSession();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(2);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [expandedNotifs, setExpandedNotifs] = useState([]);
   const router = useRouter();
+
+  useEffect(() => {
+    const read = localStorage.getItem('notifications_read');
+    if (!read) {
+      setUnreadCount(2);
+    }
+  }, []);
 
   const handleBellClick = () => {
     setShowNotifications(!showNotifications);
     if (!showNotifications && unreadCount > 0) {
       setUnreadCount(0);
+      localStorage.setItem('notifications_read', 'true');
     }
   };
 
