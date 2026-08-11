@@ -147,12 +147,10 @@ export default function StoreBuilder() {
   return (
     <>
       <style>{`
-        .preview-fullscreen .main-content { margin-left: 0 !important; }
-        .preview-fullscreen .page-content { padding-top: 0 !important; }
-        .preview-fullscreen aside { display: none !important; }
+        .preview-fullscreen .page-content { padding: 0 !important; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         .preview-fullscreen .topbar { display: none !important; }
       `}</style>
-      <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', background: '#000', overflow: 'hidden', color: '#fff', fontFamily: 'var(--font-family)', position: 'fixed', top: 0, left: 0, zIndex: 200 }}>
+      <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', background: '#000', overflow: 'hidden', color: '#fff', fontFamily: 'var(--font-family)' }}>
       
       {/* TOPBAR */}
       <div style={{ height: '64px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: '#050505' }}>
@@ -187,7 +185,7 @@ export default function StoreBuilder() {
               padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s'
             }}
           >
-            <Eye size={16} /> {isPreviewMode ? 'Quitter Aperçu' : 'Aperçu Plein Écran'}
+            <Eye size={16} /> {isPreviewMode ? "Afficher l'éditeur" : "Masquer l'éditeur"}
           </button>
 
           <button 
@@ -309,14 +307,14 @@ export default function StoreBuilder() {
         )}
 
         {/* RIGHT AREA (STORE PREVIEW WRAPPER) */}
-        <div style={{ flex: 1, background: '#000', padding: isPreviewMode ? '0' : '24px', overflowY: 'auto', display: 'flex', justifyContent: 'center' }}>
-          
-          <div style={{ 
-            width: '100%', maxWidth: isPreviewMode ? '100%' : '1200px', 
-            background: '#fff', borderRadius: isPreviewMode ? '0' : '16px', overflow: 'hidden', 
-            boxShadow: isPreviewMode ? 'none' : '0 20px 40px rgba(0,0,0,0.4)', border: isPreviewMode ? 'none' : '1px solid rgba(255,255,255,0.1)',
-            display: 'flex', flexDirection: 'column'
-          }}>
+        <div style={{ flex: 1, background: '#000', padding: isPreviewMode ? '0' : '24px', overflowY: 'auto', overflowX: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', minHeight: '100%' }}>
+            <div style={{ 
+              width: '100%', maxWidth: isPreviewMode ? '100%' : '1200px', 
+              background: '#fff', borderRadius: isPreviewMode ? '0' : '16px', overflow: 'hidden', 
+              boxShadow: isPreviewMode ? 'none' : '0 20px 40px rgba(0,0,0,0.4)', border: isPreviewMode ? 'none' : '1px solid rgba(255,255,255,0.1)',
+              display: 'flex', flexDirection: 'column', height: 'max-content'
+            }}>
             
             {/* INJECTED STORE PREVIEW CONTENT */}
             <div style={{ minHeight: '100%', color: themeColor, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
@@ -419,7 +417,6 @@ export default function StoreBuilder() {
 
             </div>
           </div>
-
         </div>
       </div>
     </div>
