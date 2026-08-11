@@ -99,7 +99,7 @@ export async function POST(req) {
 
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const themeRules = autoTheme 
-      ? `- You MUST generate a beautiful, premium color palette ("colors" object) that perfectly matches the products/niche. The background should remain clean (white or very light).`
+      ? `- You MUST generate a beautiful, premium color palette ("colors" object) that perfectly matches the products. The background should remain clean (white or very light).\n- YOU MUST deduce the overarching niche/theme of the store by analyzing the actual products listed (e.g. if you see toothbrushes, the niche is 'oral hygiene').\n- ALL copywriting (Hero text, About text, etc.) MUST be heavily tailored to this deduced niche.`
       : `- You MUST use the exact colors provided in the JSON template above (#27ae60 etc). Do not change them.`;
 
     const prompt = `You are an expert Shopify store designer, brand strategist, and elite UI/UX designer.

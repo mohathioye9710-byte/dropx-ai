@@ -32,7 +32,7 @@ export default function StoreDesignPage() {
   }, []);
 
   const handleGenerate = async () => {
-    if (!niche.trim()) return;
+    if (!niche.trim() && !autoTheme) return;
     setGenerating(true);
     setError('');
     setBranding(null);
@@ -137,12 +137,12 @@ export default function StoreDesignPage() {
                 value={niche}
                 onChange={e => setNiche(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleGenerate()}
-                disabled={generating}
+                disabled={generating || autoTheme}
               />
               <button 
                 className={styles.generateBtn} 
                 onClick={handleGenerate} 
-                disabled={generating || !niche.trim()}
+                disabled={generating || (!niche.trim() && !autoTheme)}
               >
                 {generating ? (
                   <><Loader2 size={18} className={styles.spin} /> Génération...</>
@@ -159,15 +159,17 @@ export default function StoreDesignPage() {
                 onChange={(e) => setAutoTheme(e.target.checked)} 
                 style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#27ae60' }} 
               />
-              <label htmlFor="autoTheme" style={{ cursor: 'pointer' }}>Laisser l'IA choisir le thème et les couleurs de la boutique (selon tes produits)</label>
+              <label htmlFor="autoTheme" style={{ cursor: 'pointer' }}>Analyser mes produits et trouver automatiquement la niche / le thème</label>
             </div>
-            <div className={styles.suggestions}>
-              {['Gadgets tech futuristes', 'Mode streetwear premium', 'Cosmétiques bio luxe', 'Accessoires gaming'].map(s => (
-                <button key={s} className={styles.suggestionChip} onClick={() => setNiche(s)}>
-                  {s}
-                </button>
-              ))}
-            </div>
+            {!autoTheme && (
+              <div className={styles.suggestions}>
+                {['Gadgets tech futuristes', 'Mode streetwear premium', 'Cosmétiques bio luxe', 'Accessoires gaming'].map(s => (
+                  <button key={s} className={styles.suggestionChip} onClick={() => setNiche(s)}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Generating Animation */}
