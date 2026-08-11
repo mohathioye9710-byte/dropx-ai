@@ -458,24 +458,24 @@ CRITICAL RULES:
             // === SECTION 1: HERO (TOUJOURS injecté — avec image ou gradient) ===
             const heroBackground = uploadedImageKey
               ? `background-image: url('{{ '${uploadedImageKey}' | asset_url }}'); background-size: cover; background-position: center;`
-              : `background: radial-gradient(ellipse at 50% 0%, ${branding.colors.primary}55 0%, ${branding.colors.background} 70%);`;
+              : `background: ${branding.colors.background};`;
             
             const heroOverlay = uploadedImageKey
-              ? `<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5);"></div>`
+              ? `<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.2);"></div>`
               : '';
 
             const heroHtml = `
-              <div style="position: relative; width: 100%; min-height: 65vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #ffffff; ${heroBackground} overflow: hidden;">
+              <div style="position: relative; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: ${branding.colors.text}; ${heroBackground} overflow: hidden;">
                 ${heroOverlay}
-                <div style="position: relative; z-index: 1; padding: 60px 20px; max-width: 800px; animation: fadeInUp 1s ease;">
-                  <div style="display: inline-block; padding: 6px 18px; border-radius: 50px; background: ${branding.colors.primary}22; border: 1px solid ${branding.colors.primary}66; color: ${branding.colors.primary}; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px;">${branding.vibe || 'PREMIUM'}</div>
-                  <h1 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; margin: 0 0 20px; color: #ffffff; text-shadow: 0 0 40px ${branding.colors.primary}66; letter-spacing: -1px; line-height: 1.15;">${branding.heroTitle}</h1>
-                  <p style="font-size: 1.2rem; margin: 0 0 35px; color: rgba(255,255,255,0.75); max-width: 550px; margin-left: auto; margin-right: auto; line-height: 1.6;">${branding.heroSubtitle}</p>
-                  <a href="/collections/all" class="ai-btn" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, ${branding.colors.primary}, ${branding.colors.secondary || branding.colors.primary}); color: ${branding.colors.buttonText} !important; text-decoration: none; font-weight: 700; border-radius: 50px; font-size: 1.05rem; box-shadow: 0 8px 30px ${branding.colors.primary}55; transition: transform 0.3s; letter-spacing: 0.5px; border: 1px solid ${branding.colors.primary}88;">Découvrir la Collection ✨</a>
+                <div style="position: relative; z-index: 1; padding: 60px 24px; max-width: 800px; animation: fadeInUp 1s ease;">
+                  <div style="display: inline-block; padding: 4px 12px; border-radius: 4px; border: 1px solid ${branding.colors.primary}50; color: ${branding.colors.primary}; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 24px;">${branding.vibe || 'PREMIUM'}</div>
+                  <h1 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; margin: 0 0 16px; color: ${branding.colors.text}; letter-spacing: -1px; line-height: 1.15;">${branding.heroTitle}</h1>
+                  <p style="font-size: 1.1rem; margin: 0 0 30px; color: ${branding.colors.text}; opacity: 0.8; max-width: 550px; margin-left: auto; margin-right: auto; line-height: 1.6;">${branding.heroSubtitle}</p>
+                  <a href="/collections/all" class="ai-btn" style="display: inline-block; padding: 14px 40px; background: ${branding.colors.buttonBg}; color: ${branding.colors.buttonText} !important; text-decoration: none; font-weight: 700; border-radius: 4px; font-size: 1rem; transition: opacity 0.3s;">Catalogue</a>
                 </div>
               </div>
               <style>
-                @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+                @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
               </style>
             `;
             indexJson.sections[customHeroId] = {
@@ -485,8 +485,8 @@ CRITICAL RULES:
             
             // === SECTION 2: MARQUEE SUBTIL (bordure, pas de fond criard) ===
             const marqueeHtml = `
-              <div style="background: ${branding.colors.background}; border-top: 1px solid ${branding.colors.primary}33; border-bottom: 1px solid ${branding.colors.primary}33; padding: 12px 0; overflow: hidden; white-space: nowrap;">
-                <div style="display: inline-block; animation: marquee 20s linear infinite; color: ${branding.colors.primary}; font-weight: 700; font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 15px ${branding.colors.primary}55;">
+              <div style="background: ${branding.colors.primary}; color: #ffffff; padding: 12px 0; overflow: hidden; white-space: nowrap;">
+                <div style="display: inline-block; animation: marquee 20s linear infinite; font-weight: bold; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase;">
                   ✦ ${branding.storeName} ✦ Qualité Premium ✦ Satisfaction Garantie ✦ Livraison Express ✦ Service 24/7 ✦ ${branding.storeName} ✦ Qualité Premium ✦ Satisfaction Garantie ✦ Livraison Express ✦ Service 24/7 ✦ ${branding.storeName} ✦ Qualité Premium ✦ Satisfaction Garantie ✦ Livraison Express ✦ Service 24/7 ✦
                 </div>
               </div>
@@ -494,12 +494,12 @@ CRITICAL RULES:
 
             // === SECTION 3: À PROPOS (MINIMALISTE) ===
             const aboutHtml = `
-              <div style="padding: 80px 20px; text-align: center;">
+              <div style="padding: 60px 20px; text-align: center; background: ${branding.colors.background};">
                 <div style="max-width: 700px; margin: 0 auto;">
-                  <h2 style="font-size: 2.2rem; margin-bottom: 24px; font-weight: 700; color: ${branding.colors.text}; letter-spacing: -0.5px;">À Propos de ${branding.storeName}</h2>
-                  <p style="font-size: 1.1rem; line-height: 1.9; color: ${branding.colors.text}; opacity: 0.8;">${branding.aboutText}</p>
-                  <div style="margin-top: 35px;">
-                    <a href="/collections/all" class="ai-btn" style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, ${branding.colors.primary}, ${branding.colors.secondary || branding.colors.primary}); color: ${branding.colors.buttonText} !important; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 1rem; box-shadow: 0 6px 20px ${branding.colors.primary}44;">Explorer nos produits →</a>
+                  <h2 style="font-size: 2rem; margin-bottom: 24px; font-weight: 800; color: ${branding.colors.text}; letter-spacing: -0.5px;">À Propos de ${branding.storeName}</h2>
+                  <p style="font-size: 1.1rem; line-height: 1.7; color: ${branding.colors.text}; opacity: 0.8;">${branding.aboutText}</p>
+                  <div style="margin-top: 30px;">
+                    <a href="/collections/all" class="ai-btn" style="display: inline-block; padding: 12px 30px; background: ${branding.colors.buttonBg}; color: ${branding.colors.buttonText} !important; text-decoration: none; font-weight: bold; border-radius: 4px; font-size: 1rem;">Explorer nos produits</a>
                   </div>
                 </div>
               </div>
