@@ -11,6 +11,7 @@ import {
   BarChart2, Hash, Flame, Loader2
 } from 'lucide-react';
 import styles from './Dashboard.module.css';
+import LandingPage from '@/components/LandingPage';
 
 /* ===========================================
    COULEURS FIXES pour les sources et appareils
@@ -126,7 +127,7 @@ export default function Dashboard() {
     }
   }, [session, period, fetchAnalytics]);
 
-  if (!session) return null;
+  if (!session) return <LandingPage />;
 
   const firstName = session.user?.name?.split(' ')[0] || 'User';
 

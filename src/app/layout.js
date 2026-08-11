@@ -30,7 +30,7 @@ export default async function RootLayout({ children }) {
             </div>
           ) : (
             <div className="public-content" style={{ minHeight: '100vh', backgroundColor: '#050505' }}>
-              <LandingPage />
+              {children}
             </div>
           )}
         </Providers>
