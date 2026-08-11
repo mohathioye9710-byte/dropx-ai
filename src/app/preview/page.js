@@ -68,7 +68,16 @@ export default function StoreBuilder() {
             'USD_XOF': 605.0, 'XOF_USD': 1 / 605.0
           };
           const rate = rates[`${originalCurrency}_${targetCurrency}`] || 1;
-          finalPrice = targetCurrency === 'XOF' ? Math.round(basePriceOrig * rate) : Math.round(basePriceOrig * rate * 100) / 100;
+          finalPrice = basePriceOrig * rate;
+        }
+
+        // Apply a x3 Profit Multiplier to guarantee profit
+        if (targetCurrency === 'XOF') {
+          // In XOF, round to the nearest 100
+          finalPrice = Math.ceil((finalPrice * 3) / 100) * 100;
+        } else {
+          // In EUR/USD, end in .99
+          finalPrice = Math.floor(finalPrice * 3) + 0.99;
         }
 
         setCurrency(targetCurrency);
@@ -95,8 +104,18 @@ export default function StoreBuilder() {
     if (currency === newCurrency) return;
     const rates = { 'EUR_XOF': 655.957, 'XOF_EUR': 1 / 655.957, 'EUR_USD': 1.08, 'USD_EUR': 1 / 1.08, 'USD_XOF': 605.0, 'XOF_USD': 1 / 605.0 };
     const rate = rates[`${currency}_${newCurrency}`] || 1;
-    const newPrice = newCurrency === 'XOF' ? Math.round(product.price * rate) : Math.round(product.price * rate * 100) / 100;
-    const newCompare = newCurrency === 'XOF' ? Math.round(product.compareAtPrice * rate) : Math.round(product.compareAtPrice * rate * 100) / 100;
+    
+    let newPrice = product.price * rate;
+    let newCompare = product.compareAtPrice * rate;
+
+    if (newCurrency === 'XOF') {
+      newPrice = Math.ceil(newPrice / 100) * 100;
+      newCompare = Math.ceil(newCompare / 100) * 100;
+    } else {
+      newPrice = Math.floor(newPrice) + 0.99;
+      newCompare = Math.floor(newCompare) + 0.99;
+    }
+
     setProduct({...product, price: newPrice, compareAtPrice: newCompare});
     setCurrency(newCurrency);
   };
