@@ -138,8 +138,21 @@ export default function StoreBuilder() {
     }
   };
 
+  // Hide global sidebar/topbar on preview page for full-screen editing
+  useEffect(() => {
+    document.body.classList.add('preview-fullscreen');
+    return () => document.body.classList.remove('preview-fullscreen');
+  }, []);
+
   return (
-    <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', background: '#000', overflow: 'hidden', color: '#fff', fontFamily: 'var(--font-family)' }}>
+    <>
+      <style>{`
+        .preview-fullscreen .main-content { margin-left: 0 !important; }
+        .preview-fullscreen .page-content { padding-top: 0 !important; }
+        .preview-fullscreen aside { display: none !important; }
+        .preview-fullscreen .topbar { display: none !important; }
+      `}</style>
+      <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', background: '#000', overflow: 'hidden', color: '#fff', fontFamily: 'var(--font-family)', position: 'fixed', top: 0, left: 0, zIndex: 200 }}>
       
       {/* TOPBAR */}
       <div style={{ height: '64px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: '#050505' }}>
@@ -410,5 +423,6 @@ export default function StoreBuilder() {
         </div>
       </div>
     </div>
+    </>
   );
 }
