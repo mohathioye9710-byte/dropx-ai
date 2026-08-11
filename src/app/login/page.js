@@ -1,11 +1,21 @@
 "use client";
 
-import { useState } from 'react';
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from 'react';
+import { signIn, useSession } from "next-auth/react";
 import { Mail, Lock } from "lucide-react";
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/');
+    }
+  }, [status, router]);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
