@@ -111,15 +111,15 @@ export async function POST(req) {
 
     // Build features HTML
     const featuresHtml = features.length > 0 ? `
-      <div style="background: rgba(16,185,129,0.05);padding:40px 20px;margin:30px -20px;">
+      <div style="background:#fdf2f8;padding:40px 20px;margin:30px -20px;">
         <div style="max-width:600px;margin:0 auto;">
           <div style="display:flex;flex-wrap:wrap;gap:20px;">
             ${features.map(f => `
               <div style="flex:1 1 45%;min-width:200px;display:flex;gap:12px;align-items:flex-start;">
                 <span style="font-size:28px;">${f.icon || '✨'}</span>
                 <div>
-                  <h4 style="margin:0 0 4px;font-size:15px;font-weight:700;color: #ffffff;">${f.title}</h4>
-                  <p style="margin:0;font-size:13px;color: #a1a1aa;line-height:1.5;">${f.text}</p>
+                  <h4 style="margin:0 0 4px;font-size:15px;font-weight:700;color:#111;">${f.title}</h4>
+                  <p style="margin:0;font-size:13px;color:#555;line-height:1.5;">${f.text}</p>
                 </div>
               </div>
             `).join('')}
@@ -132,13 +132,13 @@ export async function POST(req) {
     // Build How To Use HTML
     const howToUseHtml = howToUse.length > 0 ? `
       <div style="padding:40px 0;text-align:center;">
-        <h2 style="font-size:22px;font-weight:800;color: #ffffff;margin-bottom:30px;">Comment l'utiliser ?</h2>
+        <h2 style="font-size:22px;font-weight:800;color:#111;margin-bottom:30px;">Comment l'utiliser ?</h2>
         <div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;">
           ${howToUse.map((h, i) => `
             <div style="flex:1 1 30%;min-width:160px;max-width:200px;text-align:center;">
-              ${images[i+2] ? `<img src="${images[i+2]}" alt="Step ${h.step}" style="width:100%;border-radius:12px;margin-bottom:12px;"/>` : `<div style="width:60px;height:60px;background: rgba(16,185,129,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;font-weight:900;color: #10b981;">${h.step}</div>`}
-              <h4 style="margin:0 0 6px;font-size:14px;font-weight:700;color: #ffffff;">${h.title}</h4>
-              <p style="margin:0;font-size:12px;color: #999999;line-height:1.5;">${h.text}</p>
+              ${images[i+2] ? `<img src="${images[i+2]}" alt="Step ${h.step}" style="width:100%;border-radius:12px;margin-bottom:12px;"/>` : `<div style="width:60px;height:60px;background:#fce7f3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;font-weight:900;color:#c85a7c;">${h.step}</div>`}
+              <h4 style="margin:0 0 6px;font-size:14px;font-weight:700;color:#111;">${h.title}</h4>
+              <p style="margin:0;font-size:12px;color:#666;line-height:1.5;">${h.text}</p>
             </div>
           `).join('')}
         </div>
@@ -148,13 +148,13 @@ export async function POST(req) {
     // Build Reviews HTML
     const reviewsHtml = reviews.length > 0 ? `
       <div style="padding:40px 0;">
-        <p style="text-align:center;font-size:12px;color: #10b981;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;">⭐⭐⭐⭐⭐ Avis de nos clients vérifiés</p>
-        <h2 style="text-align:center;font-size:22px;font-weight:800;color: #ffffff;margin-bottom:30px;">Nos clients l'adorent!</h2>
+        <p style="text-align:center;font-size:12px;color:#c85a7c;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;">⭐⭐⭐⭐⭐ Avis de nos clients vérifiés</p>
+        <h2 style="text-align:center;font-size:22px;font-weight:800;color:#111;margin-bottom:30px;">Nos clients l'adorent!</h2>
         <div style="display:flex;flex-wrap:wrap;gap:16px;">
           ${reviews.map(r => `
-            <div style="flex:1 1 45%;min-width:240px;background: #050505;border: 1px solid rgba(255,255,255,0.05);border-radius:12px;padding:20px;">
+            <div style="flex:1 1 45%;min-width:240px;background:#fff;border:1px solid #eee;border-radius:12px;padding:20px;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                <strong style="font-size:14px;color: #ffffff;">${r.name}</strong>
+                <strong style="font-size:14px;color:#111;">${r.name}</strong>
                 <span style="font-size:12px;color:#16a34a;">✅ Achat vérifié</span>
               </div>
               <div style="color:#f59e0b;font-size:14px;margin-bottom:8px;">${'⭐'.repeat(r.rating || 5)}</div>
@@ -168,11 +168,11 @@ export async function POST(req) {
     // Build FAQ HTML
     const faqHtml = faq.length > 0 ? `
       <div style="padding:40px 0;">
-        <h2 style="font-size:22px;font-weight:800;color: #ffffff;margin-bottom:24px;">Vos Questions, Nos Réponses.</h2>
+        <h2 style="font-size:22px;font-weight:800;color:#111;margin-bottom:24px;">Vos Questions, Nos Réponses.</h2>
         ${faq.map(f => `
-          <details style="border: 1px solid rgba(255,255,255,0.05);border-radius:8px;padding:16px;margin-bottom:10px;cursor:pointer;">
-            <summary style="font-weight:600;font-size:14px;color: #ffffff;">${f.question}</summary>
-            <p style="margin:12px 0 0;font-size:13px;color: #a1a1aa;line-height:1.6;">${f.answer}</p>
+          <details style="border:1px solid #eee;border-radius:8px;padding:16px;margin-bottom:10px;cursor:pointer;">
+            <summary style="font-weight:600;font-size:14px;color:#111;">${f.question}</summary>
+            <p style="margin:12px 0 0;font-size:13px;color:#555;line-height:1.6;">${f.answer}</p>
           </details>
         `).join('')}
       </div>
@@ -180,26 +180,26 @@ export async function POST(req) {
 
     // Trust Footer
     const trustFooterHtml = `
-      <div style="display:flex;flex-wrap:wrap;gap:20px;padding:30px 0;border-top: 1px solid rgba(255,255,255,0.05);margin-top:30px;">
+      <div style="display:flex;flex-wrap:wrap;gap:20px;padding:30px 0;border-top:1px solid #eee;margin-top:30px;">
         <div style="flex:1 1 22%;min-width:120px;text-align:center;">
           <div style="font-size:24px;margin-bottom:6px;">🛡️</div>
           <h4 style="margin:0;font-size:12px;font-weight:700;">Satisfait ou Remboursé</h4>
-          <p style="margin:4px 0 0;font-size:11px;color: #888888;">Garantie 30 jours</p>
+          <p style="margin:4px 0 0;font-size:11px;color:#888;">Garantie 30 jours</p>
         </div>
         <div style="flex:1 1 22%;min-width:120px;text-align:center;">
           <div style="font-size:24px;margin-bottom:6px;">🚚</div>
           <h4 style="margin:0;font-size:12px;font-weight:700;">Livraison Rapide</h4>
-          <p style="margin:4px 0 0;font-size:11px;color: #888888;">Expédié en 24/48h</p>
+          <p style="margin:4px 0 0;font-size:11px;color:#888;">Expédié en 24/48h</p>
         </div>
         <div style="flex:1 1 22%;min-width:120px;text-align:center;">
           <div style="font-size:24px;margin-bottom:6px;">🔒</div>
           <h4 style="margin:0;font-size:12px;font-weight:700;">Paiement Sécurisé</h4>
-          <p style="margin:4px 0 0;font-size:11px;color: #888888;">Cryptage SSL 256-bit</p>
+          <p style="margin:4px 0 0;font-size:11px;color:#888;">Cryptage SSL 256-bit</p>
         </div>
         <div style="flex:1 1 22%;min-width:120px;text-align:center;">
           <div style="font-size:24px;margin-bottom:6px;">💬</div>
           <h4 style="margin:0;font-size:12px;font-weight:700;">Support Client</h4>
-          <p style="margin:4px 0 0;font-size:11px;color: #888888;">Réponse sous 24h</p>
+          <p style="margin:4px 0 0;font-size:11px;color:#888;">Réponse sous 24h</p>
         </div>
       </div>
     `;
@@ -207,12 +207,12 @@ export async function POST(req) {
     const imagesHtml = `
       <!-- Dropmagic Custom Gallery -->
       <div class="dropmagic-custom-gallery" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px;">
-        <div style="width: 100%; aspect-ratio: 1/1; border-radius: 16px; background: #0a0a0a; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+        <div style="width: 100%; aspect-ratio: 1/1; border-radius: 16px; background: #f9f9f9; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #eaeaea;">
           <img src="${product.images[0]}" style="width: 100%; height: 100%; object-fit: contain; padding: 24px;" />
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           ${product.images.slice(1).map(img => `
-            <div style="width: 100%; aspect-ratio: 1/1; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: #0a0a0a; padding: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <div style="width: 100%; aspect-ratio: 1/1; border-radius: 12px; border: 1px solid #eaeaea; background: #f9f9f9; padding: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
               <img src="${img}" style="width: 100%; height: 100%; object-fit: contain;" />
             </div>
           `).join('')}
@@ -222,20 +222,20 @@ export async function POST(req) {
 
     // Build full DropX Layout
     const body_html = `
-      <div id="dropx-full-page-container" data-base-price="${basePrice}" data-safe-compare="${safeCompare}" style="display: none; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #050505; color: #ffffff; min-height: 100vh; padding-bottom: 50px;">
+      <div id="dropx-full-page-container" data-base-price="${basePrice}" data-safe-compare="${safeCompare}" style="display: none; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #fff; color: #111; min-height: 100vh; padding-bottom: 50px;">
         
         <!-- Top Section: Image & Info -->
         <div style="max-width: 1200px; margin: 0 auto; padding: 40px 5%; display: flex; gap: 50px; flex-wrap: wrap;">
           
           <!-- Left: Gallery -->
           <div style="flex: 1 1 500px; display: flex; flex-direction: column; gap: 16px;">
-            <div style="width: 100%; aspect-ratio: 1/1; border-radius: 16px; background: #0a0a0a; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="width: 100%; aspect-ratio: 1/1; border-radius: 16px; background: #f9f9f9; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #eaeaea;">
               <img src="${product.images[0]}" style="width: 100%; height: 100%; object-fit: contain; padding: 24px;" />
             </div>
             ${product.images.length > 1 ? `
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               ${product.images.slice(1).map(img => `
-                <div style="width: 100%; aspect-ratio: 1/1; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: #0a0a0a; padding: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <div style="width: 100%; aspect-ratio: 1/1; border-radius: 12px; border: 1px solid #eaeaea; background: #f9f9f9; padding: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                   <img src="${img}" style="width: 100%; height: 100%; object-fit: contain;" />
                 </div>
               `).join('')}
@@ -244,25 +244,25 @@ export async function POST(req) {
 
           <!-- Right: Product Info -->
           <div style="flex: 1 1 400px; display: flex; flex-direction: column;">
-            <p style="color: #999999; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">FUTURISTIC & PREMIUM</p>
-            <h1 style="font-size: 32px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; color: #ffffff;">${product.title}</h1>
+            <p style="color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Haute Qualité</p>
+            <h1 style="font-size: 32px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; color: #111;">${product.title}</h1>
             
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-              <div style="display: flex; align-items: center; background: rgba(16,185,129,0.1); padding: 6px 16px; border-radius: 8px; font-size: 24px; font-weight: bold; color: #10b981;">
+              <div style="display: flex; align-items: center; background: #fce7f3; padding: 6px 16px; border-radius: 8px; font-size: 24px; font-weight: bold; color: #c85a7c;">
                 <span id="dropx-price-display"></span>
               </div>
-              <div style="display: flex; align-items: center; background: #0a0a0a; padding: 6px 16px; border-radius: 8px; font-size: 18px; color: #999; text-decoration: line-through;">
+              <div style="display: flex; align-items: center; background: #f9f9f9; padding: 6px 16px; border-radius: 8px; font-size: 18px; color: #999; text-decoration: line-through;">
                 <span id="dropx-oldprice-display"></span>
               </div>
-              <span id="dropx-savings-display" style="background: rgba(16,185,129,0.1); color: #10b981; padding: 6px 10px; border-radius: 6px; font-size: 13px; font-weight: bold;"></span>
+              <span id="dropx-savings-display" style="background: #fce7f3; color: #c85a7c; padding: 6px 10px; border-radius: 6px; font-size: 13px; font-weight: bold;"></span>
             </div>
 
-            <div style="color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-bottom: 32px;">
+            <div style="color: #555; font-size: 14px; line-height: 1.6; margin-bottom: 32px;">
               ${formattedDesc}
             </div>
 
             <div style="margin-bottom: 24px;">
-              <h3 style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; text-align: center; color: #ffffff;">BUNDLE & ÉCONOMIES</h3>
+              <h3 style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; text-align: center; color: #111;">BUNDLE & ÉCONOMIES</h3>
               <div id="dropx-bundles-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
             </div>
 
@@ -272,11 +272,11 @@ export async function POST(req) {
             <div style="display: flex; gap: 16px; justify-content: center; padding-top: 20px; border-top: 1px solid #eaeaea;">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 20px;">🛡️</span>
-                <div style="font-size: 11px; color: #999999; line-height: 1.2;"><b>Essai 30 Jours</b><br/>Satisfait ou remboursé</div>
+                <div style="font-size: 11px; color: #666; line-height: 1.2;"><b>Essai 30 Jours</b><br/>Satisfait ou remboursé</div>
               </div>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 20px;">🚚</span>
-                <div style="font-size: 11px; color: #999999; line-height: 1.2;"><b>Livraison Rapide</b><br/>Expédié en 24/48h</div>
+                <div style="font-size: 11px; color: #666; line-height: 1.2;"><b>Livraison Rapide</b><br/>Expédié en 24/48h</div>
               </div>
             </div>
           </div>
@@ -314,14 +314,14 @@ export async function POST(req) {
 <style>
   .dropx-shopify-payment-btn { margin-top: 10px; width: 100%; }
   .dropx-shopify-payment-btn .shopify-payment-button { width: 100%; }
-  .dropx-option-btn { display: inline-block; padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: #fff; background: #0a0a0a; transition: all 0.2s; margin: 4px; }
-  .dropx-option-btn:hover { border-color: #10b981; }
-  .dropx-option-btn.active { border-color: #10b981; background: rgba(16,185,129,0.1); color: #10b981; }
+  .dropx-option-btn { display: inline-block; padding: 8px 16px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: #333; background: #fff; transition: all 0.2s; margin: 4px; }
+  .dropx-option-btn:hover { border-color: #111; }
+  .dropx-option-btn.active { border-color: #111; background: #111; color: #fff; }
 </style>
 <div id="dropx-liquid-form-container" style="display:none; width: 100%;">
   {% form 'product', product %}
     <input type="hidden" name="id" id="dropx-hidden-variant-id" value="{{ product.variants.first.id }}">
-    <button type="submit" name="add" id="dropx-native-add" style="background: #10b981; color: #000; box-shadow: 0 0 20px rgba(16,185,129,0.4); width: 100%; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; transition: opacity 0.2s;">
+    <button type="submit" name="add" id="dropx-native-add" style="background: #111; color: #fff; width: 100%; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; transition: opacity 0.2s;">
       Ajouter au Panier
     </button>
     <div class="dropx-shopify-payment-btn">
@@ -420,7 +420,7 @@ export async function POST(req) {
           var label = document.createElement('div');
           label.style.fontWeight = '600';
           label.style.fontSize = '13px';
-          label.style.color = '#ffffff';
+          label.style.color = '#111';
           label.style.marginBottom = '8px';
           label.style.marginTop = '12px';
           label.innerText = opt.name + ' : ' + selectedOptions[opt.name];
@@ -468,8 +468,8 @@ export async function POST(req) {
         bundlesData.forEach(function(b, index) {
           var isSelected = (index === selectedBundleIndex);
           var box = document.createElement('div');
-          box.style.border = isSelected ? '2px solid #10b981' : '1px solid #eaeaea';
-          box.style.background = isSelected ? 'rgba(16,185,129,0.05)' : '#050505';
+          box.style.border = isSelected ? '2px solid #16a34a' : '1px solid #eaeaea';
+          box.style.background = isSelected ? '#fdf2f8' : '#fff';
           box.style.borderRadius = '8px';
           box.style.padding = '16px';
           box.style.cursor = 'pointer';
@@ -485,8 +485,8 @@ export async function POST(req) {
             tag.style.position = 'absolute';
             tag.style.top = '-10px';
             tag.style.right = '16px';
-            tag.style.background = '#10b981';
-            tag.style.color = '#050505';
+            tag.style.background = '#c85a7c';
+            tag.style.color = '#fff';
             tag.style.fontSize = '10px';
             tag.style.fontWeight = 'bold';
             tag.style.padding = '2px 8px';
@@ -498,7 +498,7 @@ export async function POST(req) {
           radioContainer.style.width = '18px';
           radioContainer.style.height = '18px';
           radioContainer.style.borderRadius = '50%';
-          radioContainer.style.border = isSelected ? '2px solid #111' : '1px solid rgba(255,255,255,0.1)';
+          radioContainer.style.border = isSelected ? '2px solid #111' : '1px solid #ccc';
           radioContainer.style.display = 'flex';
           radioContainer.style.alignItems = 'center';
           radioContainer.style.justifyContent = 'center';
@@ -506,7 +506,7 @@ export async function POST(req) {
              var dot = document.createElement('div');
              dot.style.width = '8px';
              dot.style.height = '8px';
-             dot.style.background = '#ffffff';
+             dot.style.background = '#111';
              dot.style.borderRadius = '50%';
              radioContainer.appendChild(dot);
           }
@@ -523,7 +523,7 @@ export async function POST(req) {
           titleTxt.innerText = b.title;
           titleTxt.style.fontWeight = '600';
           titleTxt.style.fontSize = '15px';
-          titleTxt.style.color = '#ffffff';
+          titleTxt.style.color = '#111';
           var subtitleTxt = document.createElement('div');
           subtitleTxt.style.fontSize = '12px';
           subtitleTxt.style.color = '#666';
@@ -540,7 +540,7 @@ export async function POST(req) {
           p1.innerText = formatPrice(b.price);
           p1.style.fontWeight = '800';
           p1.style.fontSize = '15px';
-          p1.style.color = '#ffffff';
+          p1.style.color = '#111';
           var p2 = document.createElement('div');
           p2.innerText = formatPrice(b.oldPrice);
           p2.style.textDecoration = 'line-through';
