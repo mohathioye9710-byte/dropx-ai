@@ -276,6 +276,16 @@ export default function Analyzer() {
               Générer ma boutique
             </button>
           </div>
+          
+          {error && (
+            <div style={{
+              marginTop: '16px', padding: '16px', borderRadius: '8px', 
+              background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)',
+              color: '#ef4444', textAlign: 'center', maxWidth: '600px', margin: '16px auto 0'
+            }}>
+              {error}
+            </div>
+          )}
         </>
       )}
 
