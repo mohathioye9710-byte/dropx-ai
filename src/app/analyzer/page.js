@@ -329,9 +329,41 @@ export default function Analyzer() {
             )}
           </div>
           {state === 'results' && result?.product?.title && (
-            <h3 style={{color: '#fff', fontSize: '18px', fontWeight: '700', textAlign: 'center', lineHeight: '1.4'}}>
-              {result.product.title}
-            </h3>
+            <>
+              <h3 style={{color: '#fff', fontSize: '18px', fontWeight: '700', textAlign: 'center', lineHeight: '1.4', marginBottom: '24px'}}>
+                {result.product.title}
+              </h3>
+              
+              {result.analysis && result.analysis.score !== undefined && (
+                <div style={{width: '100%'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
+                    <span style={{fontSize: '15px', fontWeight: '600', color: '#fff'}}>Ton score produit</span>
+                    <span style={{fontSize: '20px', fontWeight: '800', color: '#fff'}}>{result.analysis.score}</span>
+                  </div>
+                  <div style={{display: 'flex', gap: '2px', background: '#111', padding: '8px', borderRadius: '12px'}}>
+                    {Array.from({ length: 40 }).map((_, i) => {
+                      const isActive = (i / 40) * 100 <= result.analysis.score;
+                      // Color gradient from blue (start) to green (end)
+                      const r = Math.round(59 + (i / 40) * (16 - 59));
+                      const g = Math.round(130 + (i / 40) * (185 - 130));
+                      const b = Math.round(246 + (i / 40) * (129 - 246));
+                      const color = `rgb(${r}, ${g}, ${b})`;
+                      return (
+                        <div 
+                          key={i} 
+                          style={{
+                            flex: 1, 
+                            height: '24px', 
+                            borderRadius: '2px', 
+                            background: isActive ? color : 'rgba(255,255,255,0.05)'
+                          }} 
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>,
         () => setState('idle'),
