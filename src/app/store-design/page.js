@@ -291,7 +291,7 @@ export default function StoreDesignPage() {
                         background: '#ffffff',
                         border: `1px solid #eaeaea`,
                         boxShadow: `0 4px 12px rgba(0,0,0,0.05)`,
-                        borderRadius: '0px',
+                        borderRadius: '12px',
                         overflow: 'hidden'
                       }}>
                         <div className={styles.mockProductImage} style={{ 
