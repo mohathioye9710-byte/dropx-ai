@@ -92,36 +92,43 @@ export default function Dashboard() {
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
           
-          {stores.map((store, i) => (
-            <div key={i} style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '24px', transition: 'border-color 0.2s', cursor: 'pointer' }}
+          {stores.map((store, i) => {
+            const storeImage = store.metadata?.image || store.metadata?.product?.image || store.metadata?.images?.[0] || null;
+            return (
+            <div key={i} style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden', transition: 'border-color 0.2s', cursor: 'pointer' }}
               onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'}
               onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'}
               onClick={() => router.push(`/preview?id=${store.id}`)}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                <div style={{ width: '40px', height: '40px', background: '#111', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                  {store.metadata?.product?.image ? (
-                    <img src={store.metadata.product.image} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <Store size={20} color="#a1a1aa" />
-                  )}
-                </div>
-                <span style={{ fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '100px', background: store.status.includes('Publié') ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)', color: store.status.includes('Publié') ? '#10b981' : '#a1a1aa' }}>
-                  {store.status}
-                </span>
+              {/* Product Image Banner */}
+              <div style={{ width: '100%', height: '160px', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                {storeImage ? (
+                  <img src={storeImage} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <Store size={40} color="#333" />
+                )}
               </div>
-              <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '4px' }}>{store.name}</h4>
-              <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '24px' }}>{store.niche || "Boutique générée"}</p>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
-                <span style={{ fontSize: '12px', color: '#71717a' }}>{store.createdAt}</span>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={(e) => { e.stopPropagation(); router.push('/settings'); }} style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><Settings size={16} /></button>
-                  <button onClick={(e) => { e.stopPropagation(); router.push(`/preview?id=${store.id}`); }} style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><ExternalLink size={16} /></button>
+              <div style={{ padding: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', flex: 1, marginRight: '12px' }}>{store.name}</h4>
+                  <span style={{ fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '100px', background: store.status.includes('Publié') ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)', color: store.status.includes('Publié') ? '#10b981' : '#a1a1aa', whiteSpace: 'nowrap' }}>
+                    {store.status}
+                  </span>
+                </div>
+                <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '16px' }}>{store.niche || "Boutique générée"}</p>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
+                  <span style={{ fontSize: '12px', color: '#71717a' }}>{store.createdAt}</span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={(e) => { e.stopPropagation(); router.push('/settings'); }} style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><Settings size={16} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); router.push(`/preview?id=${store.id}`); }} style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}><ExternalLink size={16} /></button>
                 </div>
               </div>
             </div>
-          ))}
+            </div>
+          )})}
+
 
           {/* Empty State / Create New */}
           <div 
