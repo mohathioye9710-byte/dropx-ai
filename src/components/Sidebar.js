@@ -2,7 +2,7 @@
 
 import { Home, Search, Store, Palette, Megaphone, Share2, Settings, GraduationCap, LogIn, LogOut, Activity } from 'lucide-react';
 import { useSession, signIn, signOut } from "next-auth/react";
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './Sidebar.module.css';
 
@@ -21,6 +21,7 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <aside className={styles.sidebar}>
@@ -48,7 +49,7 @@ export default function Sidebar() {
       
       <div className={styles.userCard}>
         {session ? (
-          <div className={styles.avatarContainer} onClick={() => signOut()} title="Déconnexion">
+          <div className={styles.avatarContainer} onClick={() => router.push('/settings')} title="Paramètres du Profil">
             <img 
               src={`https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${session.user?.email || session.user?.name || 'DropX'}`} 
               alt="Profile" 
