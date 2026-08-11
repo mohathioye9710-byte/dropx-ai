@@ -204,7 +204,7 @@ export default function Analyzer() {
     const progress = barProgress;
     
     return (
-      <div style={{display: 'flex', gap: '3px', marginTop: '16px', marginBottom: '32px', height: '40px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px'}}>
+      <div style={{display: 'flex', gap: '3px', marginTop: '16px', marginBottom: '32px', height: '40px', minHeight: '40px', flexShrink: 0, background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px'}}>
         {Array.from({length: bars}).map((_, i) => {
           let color = '#3b82f6';
           if (i > 10) color = '#10b981';
