@@ -31,35 +31,249 @@ export async function POST(req) {
     console.log(`[DEBUG] URL: ${url}`);
     console.log(`=================================================\n`);
 
-    // Demo Bypass for the specific test URL since AliExpress aggressively blocks residential IPs
-    if (url.includes('3256807751349745')) {
-       console.log(`[DEBUG] ⚠️ Mode Demo détecté pour ce lien spécifique.`);
-       title = "Electric Portable Dehumidifier Air Purifier USB Mute Moisture Absorbers Air Dryer For Home Room Office Kitchen Deodorizer Dryer";
-       extractedPrice = "$56.78";
-       image = "https://ae-pic-a1.aliexpress-media.com/kf/S7f0dbb7d4554473ba85a4c2190c67d5f9.png"; 
-       imageList = [image];
-       console.log(`[DEBUG] ✅ Données de démo chargées avec succès.`);
-    } else {
-        // Fallback to fast Cheerio scraping for MVP (No Puppeteer due to Vercel 50MB limit)
-        console.log(`[DEBUG] 🌐 Lancement du scraping rapide avec Cheerio...`);
+    // ============================================================
+    // SCRAPING MULTI-STRATÉGIE (3 couches de bypass)
+    // ============================================================
+    const isAliExpress = url.includes('aliexpress.com') || url.includes('aliexpress.us');
+    let isDemoMode = false;
+
+    if (isAliExpress) {
+      // Extract product ID from URL
+      const productIdMatch = url.match(/\/item\/(\d+)/);
+      const productId = productIdMatch ? productIdMatch[1] : null;
+      console.log(`[DEBUG] 🔑 AliExpress détecté. Product ID: ${productId}`);
+
+      if (productId) {
+        // ===== STRATÉGIE 1: API Mobile AliExpress =====
+        console.log(`[DEBUG] 🚀 Stratégie 1: API Mobile AliExpress...`);
         try {
-          const response = await fetch(url, {
+          const apiUrl = `https://m.aliexpress.com/item/${productId}.html`;
+          const apiRes = await fetch(apiUrl, {
             headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+              'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
               'Accept-Language': 'en-US,en;q=0.9',
+              'Accept-Encoding': 'gzip, deflate, br',
+              'Referer': 'https://m.aliexpress.com/',
+              'Cache-Control': 'no-cache',
             },
             redirect: 'follow',
             signal: AbortSignal.timeout(15000)
           });
-          if (response.ok) {
-            html = await response.text();
-            console.log(`[DEBUG] ✅ Scraping Fetch réussi. Taille HTML: ${html.length} octets.`);
+          if (apiRes.ok) {
+            html = await apiRes.text();
+            console.log(`[DEBUG] ✅ Stratégie 1 réussie. Taille HTML: ${html.length} octets.`);
           } else {
-            console.log(`[DEBUG] ❌ Échec Fetch: Statut HTTP ${response.status}`);
+            console.log(`[DEBUG] ❌ Stratégie 1 échouée: HTTP ${apiRes.status}`);
           }
-        } catch (fetchErr) {
-          console.log(`[DEBUG] ❌ Échec Fetch complet: ${fetchErr.message}`);
+        } catch (e) {
+          console.log(`[DEBUG] ❌ Stratégie 1 erreur: ${e.message}`);
         }
+
+        // ===== STRATÉGIE 2: Page Desktop avec headers avancés =====
+        if (!html || html.length < 5000) {
+          console.log(`[DEBUG] 🔄 Stratégie 2: Desktop avec headers avancés...`);
+          try {
+            const desktopRes = await fetch(`https://www.aliexpress.com/item/${productId}.html`, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Sec-Ch-Ua': '"Chromium";v="126", "Google Chrome";v="126", "Not-A.Brand";v="8"',
+                'Sec-Ch-Ua-Mobile': '?0',
+                'Sec-Ch-Ua-Platform': '"Windows"',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Upgrade-Insecure-Requests': '1',
+                'Referer': 'https://www.google.com/',
+                'Cache-Control': 'no-cache',
+              },
+              redirect: 'follow',
+              signal: AbortSignal.timeout(15000)
+            });
+            if (desktopRes.ok) {
+              const desktopHtml = await desktopRes.text();
+              if (desktopHtml.length > (html?.length || 0)) {
+                html = desktopHtml;
+                console.log(`[DEBUG] ✅ Stratégie 2 réussie. Taille HTML: ${html.length} octets.`);
+              }
+            } else {
+              console.log(`[DEBUG] ❌ Stratégie 2 échouée: HTTP ${desktopRes.status}`);
+            }
+          } catch (e) {
+            console.log(`[DEBUG] ❌ Stratégie 2 erreur: ${e.message}`);
+          }
+        }
+
+        // ===== STRATÉGIE 3: URL originale de l'utilisateur =====
+        if (!html || html.length < 5000) {
+          console.log(`[DEBUG] 🔄 Stratégie 3: URL originale...`);
+          try {
+            const origRes = await fetch(url, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
+              },
+              redirect: 'follow',
+              signal: AbortSignal.timeout(15000)
+            });
+            if (origRes.ok) {
+              const origHtml = await origRes.text();
+              if (origHtml.length > (html?.length || 0)) {
+                html = origHtml;
+                console.log(`[DEBUG] ✅ Stratégie 3 réussie. Taille HTML: ${html.length} octets.`);
+              }
+            }
+          } catch (e) {
+            console.log(`[DEBUG] ❌ Stratégie 3 erreur: ${e.message}`);
+          }
+        }
+      }
+
+      // ===== EXTRACTION DES DONNÉES ALIEXPRESS =====
+      if (html && html.length > 1000) {
+        console.log(`[DEBUG] 🔍 Extraction des données AliExpress...`);
+
+        // Try to extract JSON data embedded in the page (window.runParams / data)
+        const jsonPatterns = [
+          /window\.runParams\s*=\s*\{.*?"data"\s*:\s*(\{.+?\})\s*;\s*$/ms,
+          /"storeModule"\s*:\s*(\{[^}]+\})/,
+        ];
+
+        // --- TITLE ---
+        const titlePatterns = [
+          /"subject":"([^"]+)"/,
+          /"title":"([^"]+)"/,
+          /"productTitle":"([^"]+)"/,
+          /"name":"([^"]{10,200})"/,
+        ];
+        for (const pat of titlePatterns) {
+          const m = html.match(pat);
+          if (m && m[1] && m[1].length > 5 && !m[1].includes('{') && !m[1].includes('<')) {
+            title = m[1];
+            console.log(`[DEBUG] ✅ Titre trouvé via regex: ${title.substring(0, 60)}...`);
+            break;
+          }
+        }
+        // Fallback via Cheerio
+        if (title === 'Unknown Product') {
+          const $ = cheerio.load(html);
+          title = $('meta[property="og:title"]').attr('content') || $('title').text().trim() || $('h1').text().trim() || 'Unknown Product';
+          if (title && title !== 'Unknown Product') {
+            console.log(`[DEBUG] ✅ Titre trouvé via Cheerio: ${title.substring(0, 60)}...`);
+          }
+        }
+
+        // --- IMAGES ---
+        const imgPatterns = [
+          /"imagePathList"\s*:\s*\[(.*?)\]/,
+          /"imageUrl"\s*:\s*"(https?:\/\/[^"]+)"/g,
+        ];
+        const imgListMatch = html.match(/"imagePathList"\s*:\s*\[(.*?)\]/);
+        if (imgListMatch) {
+          try {
+            const urls = imgListMatch[1].split(',').map(u => u.replace(/"/g, '').trim()).filter(u => u.startsWith('http'));
+            if (urls.length > 0) {
+              imageList = urls;
+              image = urls[0];
+              console.log(`[DEBUG] ✅ ${urls.length} images trouvées via imagePathList.`);
+            }
+          } catch(e) {}
+        }
+        if (!image) {
+          const ogMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i) || html.match(/<meta\s+content="([^"]+)"\s+property="og:image"/i);
+          if (ogMatch) {
+            image = ogMatch[1];
+            imageList = [image];
+            console.log(`[DEBUG] ✅ Image trouvée via og:image.`);
+          }
+        }
+        if (!image) {
+          const anyImgMatch = [...html.matchAll(/"imageUrl"\s*:\s*"(https?:\/\/[^"]+\.(?:jpg|png|webp)[^"]*)"/g)];
+          if (anyImgMatch.length > 0) {
+            imageList = anyImgMatch.map(m => m[1]);
+            image = imageList[0];
+            console.log(`[DEBUG] ✅ ${imageList.length} images trouvées via imageUrl regex.`);
+          }
+        }
+
+        // --- PRICE ---
+        const pricePatterns = [
+          /"formatedActivityPrice"\s*:\s*"([^"]+)"/,
+          /"formatedPrice"\s*:\s*"([^"]+)"/,
+          /"minPrice"\s*:\s*"?([0-9.]+)"?/,
+          /"minAmount"\s*:\s*\{\s*"value"\s*:\s*([0-9.]+)/,
+          /"price"\s*:\s*\{\s*"formatedAmount"\s*:\s*"([^"]+)"/,
+          /product:price:amount"\s*content="([^"]+)"/,
+        ];
+        for (const pat of pricePatterns) {
+          const m = html.match(pat);
+          if (m && m[1]) {
+            extractedPrice = m[1].startsWith('$') || m[1].startsWith('€') || m[1].startsWith('US') ? m[1] : '$' + m[1];
+            console.log(`[DEBUG] ✅ Prix trouvé: ${extractedPrice}`);
+            break;
+          }
+        }
+
+        // --- DESCRIPTION ---
+        const descMatch = html.match(/"description"\s*:\s*"([^"]{10,500})"/);
+        if (descMatch) description = descMatch[1];
+
+        // --- OPTIONS / SKU ---
+        const skuMatch = html.match(/"productSKUPropertyList"\s*:\s*(\[.*?\])\s*,\s*"hasSkuProperty"/);
+        if (skuMatch) {
+          try {
+            const parsedSku = JSON.parse(skuMatch[1]);
+            productOptions = parsedSku.map(p => ({
+              name: p.skuPropertyName,
+              values: p.skuPropertyValues.map(v => v.propertyValueDefinitionName).filter(Boolean)
+            })).filter(o => o.values.length > 0);
+            if (productOptions.length > 0) {
+              console.log(`[DEBUG] ✅ Options trouvées: ${productOptions.map(o => o.name).join(', ')}`);
+            }
+          } catch(e) {}
+        }
+
+        // --- PRICE from URL (pdp_npi) ---
+        if (!extractedPrice && url.includes('pdp_npi')) {
+          const decodedUrl = decodeURIComponent(url);
+          const npiMatch = decodedUrl.match(/dis!([A-Z]{3})![0-9.]+!([0-9.]+)!/);
+          if (npiMatch) extractedPrice = '$' + npiMatch[2];
+        }
+
+        console.log(`[DEBUG] 📝 Résumé extraction AliExpress:`);
+        console.log(`[DEBUG] - Titre: ${title.substring(0, 60)}...`);
+        console.log(`[DEBUG] - Prix: ${extractedPrice || 'Non trouvé'}`);
+        console.log(`[DEBUG] - Images: ${imageList.length}`);
+        console.log(`[DEBUG] - Options: ${productOptions.length > 0 ? productOptions.map(o => o.name).join(', ') : 'Aucune'}`);
+      } else {
+        console.log(`[DEBUG] ❌ Aucun HTML récupéré pour AliExpress.`);
+      }
+
+    } else {
+      // ===== NON-ALIEXPRESS (Amazon, Temu, etc.) =====
+      console.log(`[DEBUG] 🌐 Site non-AliExpress détecté. Scraping standard...`);
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9',
+          },
+          redirect: 'follow',
+          signal: AbortSignal.timeout(15000)
+        });
+        if (response.ok) {
+          html = await response.text();
+          console.log(`[DEBUG] ✅ Scraping standard réussi. Taille HTML: ${html.length} octets.`);
+        } else {
+          console.log(`[DEBUG] ❌ Échec standard: HTTP ${response.status}`);
+        }
+      } catch (fetchErr) {
+        console.log(`[DEBUG] ❌ Échec standard: ${fetchErr.message}`);
+      }
 
       if (html) {
         console.log(`[DEBUG] 🔍 Extraction des données avec Cheerio...`);
@@ -81,77 +295,22 @@ export async function POST(req) {
         }
         image = imageList[0] || '';
         
-        extractedPrice = $('meta[property="product:price:amount"]').attr('content') || $('.a-price .a-offscreen').first().text().trim() || $('#priceblock_ourprice').text().trim() || $('.ma-ref-price span').text().trim() || $('.price').text().trim() || $('._3-p1zM').text().trim();
-        if (!extractedPrice) {
-           const titlePriceMatch = title.match(/(?:US\s*\$|€|£)\s*([0-9,.]+)/i);
-           if (titlePriceMatch) extractedPrice = titlePriceMatch[0];
-        }
-
-        if (productOptions.length === 0) {
-            const skuMatch = html.match(/"productSKUPropertyList":(\[.*?\]),"hasSkuProperty"/);
-            if(skuMatch) {
-                try {
-                    const parsedSku = JSON.parse(skuMatch[1]);
-                    productOptions = parsedSku.map(p => ({
-                        name: p.skuPropertyName,
-                        values: p.skuPropertyValues.map(v => v.propertyValueDefinitionName).filter(Boolean)
-                    })).filter(o => o.values.length > 0);
-                } catch(e) {}
-            }
-        }
-
-        if (!extractedPrice) {
-           const activityPriceMatch = html.match(/"formatedActivityPrice":"([^"]+)"/);
-           const formatedPriceMatch = html.match(/"formatedPrice":"([^"]+)"/);
-           const minPriceMatch = html.match(/"minPrice":([0-9.]+)/);
-           
-           if (activityPriceMatch) {
-             extractedPrice = activityPriceMatch[1];
-           } else if (formatedPriceMatch) {
-             extractedPrice = formatedPriceMatch[1];
-           } else if (minPriceMatch) {
-             extractedPrice = "$" + minPriceMatch[1];
-           } else {
-             const anyPriceMatch = html.match(/"price":"([^"]+)"/);
-             if (anyPriceMatch) extractedPrice = anyPriceMatch[1];
-           }
-        }
-        
-        if (!extractedPrice && url.includes('pdp_npi')) {
-           const decodedUrl = decodeURIComponent(url);
-           const npiMatch = decodedUrl.match(/dis!([A-Z]{3})![0-9.]+!([0-9.]+)!/);
-           if (npiMatch) extractedPrice = npiMatch[2] + " " + npiMatch[1];
-        }
-
-        if (!extractedPrice) {
-           const bodyText = $('body').text();
-           const bodyPriceMatch = bodyText.match(/(?:US\s*\$|€|FCFA|CFA|XOF|£)\s*([0-9]{1,6}(?:[\s,.][0-9]{2,3})?)/i) || bodyText.match(/([0-9]{1,6}(?:[\s,.][0-9]{2,3})?)\s*(?:FCFA|CFA|XOF|€|£)/i);
-           if (bodyPriceMatch) extractedPrice = bodyPriceMatch[0];
-        }
-
-        const oldPriceMatch = html.match(/"formatedCrossPrice":"([^"]+)"/);
-        let oldPrice = oldPriceMatch ? oldPriceMatch[1] : '';
+        extractedPrice = $('meta[property="product:price:amount"]').attr('content') || $('.a-price .a-offscreen').first().text().trim() || $('#priceblock_ourprice').text().trim() || $('.price').text().trim() || '';
 
         console.log(`[DEBUG] 📝 Résultat Cheerio:`);
         console.log(`[DEBUG] - Titre: ${title.substring(0, 50)}...`);
         console.log(`[DEBUG] - Prix: ${extractedPrice || 'Non trouvé'}`);
-        console.log(`[DEBUG] - Options: ${productOptions.length > 0 ? productOptions.map(o => o.name).join(', ') : 'Aucune'}`);
         console.log(`[DEBUG] - Image: ${image ? 'Trouvée' : 'Non trouvée'}`);
-        
-      } else {
-        console.log(`[DEBUG] ❌ Aucun HTML récupéré. Impossible d'extraire les données.`);
       }
-      
-      // If we failed to get the minimum required data (image and a real title), fallback to mock data!
-      let isDemoMode = false;
-      if (!image || !title || title === 'Unknown Product') {
-        console.log(`[DEBUG] ❌ Échec critique : Image ou titre manquant dû à la protection anti-bot. Utilisation de données de démonstration.`);
-        title = "Smart Desktop Air Purifier Humidifier Essential Oil Diffuser with LED Light for Home Room Office";
-        extractedPrice = "$34.50";
-        image = "https://images.unsplash.com/photo-1528313437190-302a90da30d5?w=800&q=80"; 
-        imageList = [image];
-        isDemoMode = true;
-      }
+    }
+
+    // ===== VALIDATION FINALE =====
+    if (!image || !title || title === 'Unknown Product') {
+      console.log(`[DEBUG] ❌ Échec critique: données insuffisantes après toutes les stratégies.`);
+      return NextResponse.json(
+        { error: 'Impossible d\'extraire les données du produit. Vérifiez que le lien est correct et réessayez.' },
+        { status: 422 }
+      );
     }
 
     console.log(`[DEBUG] 🤖 Envoi des données à OpenAI pour analyse...`);
@@ -237,7 +396,7 @@ export async function POST(req) {
     const messagesContent = [
       { type: "text", text: prompt }
     ];
-    if (!isDemoMode && image) {
+    if (image && !image.includes('unsplash.com')) {
       messagesContent.push({ type: "image_url", image_url: { url: image } });
     }
 
@@ -258,7 +417,7 @@ export async function POST(req) {
     // Generate the realistic images using Replicate (Flux Dev)
     let generatedImages = [];
     if (analysis.productDescription && imageList.length > 0) {
-      if (!process.env.REPLICATE_API_TOKEN || isDemoMode) {
+      if (!process.env.REPLICATE_API_TOKEN) {
         console.log(`[DEBUG] ⚠️ Clé manquante ou image de démo. Impossible de générer les images Flux.`);
         generatedImages = imageList;
       } else {
