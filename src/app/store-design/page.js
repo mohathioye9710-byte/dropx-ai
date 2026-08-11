@@ -297,7 +297,7 @@ export default function StoreDesignPage() {
                           background: '#f9f9f9',
                           borderBottom: `1px solid #eaeaea`,
                           backgroundImage: p.image ? `url(${p.image})` : 'none',
-                          backgroundSize: 'contain',
+                          backgroundSize: 'cover',
                           backgroundPosition: 'center',
                           backgroundRepeat: 'no-repeat'
                         }}></div>

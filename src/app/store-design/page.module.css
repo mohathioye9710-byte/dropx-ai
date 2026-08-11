@@ -583,13 +583,15 @@
 }
 
 .mockProductGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
   padding: 40px 24px;
 }
 
 .mockProduct {
+  width: 250px;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -597,7 +599,8 @@
 }
 
 .mockProductImage {
-  height: 200px;
+  height: 250px;
+  width: 100%;
 }
 
 .mockProductInfo {
