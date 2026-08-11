@@ -382,8 +382,8 @@ export async function POST(req) {
       - "howToUse": An array of exactly 3 objects, each with "step" (number 1-3), "title" (short French title), and "text" (1-2 sentence French explanation).
       - "faq": An array of exactly 5 objects, each with "question" (French) and "answer" (French). These should be realistic customer questions about the product.
       - "reviews": An array of exactly 6 objects, each with "name" (French first name), "rating" (4 or 5), "text" (1-3 sentence realistic French review), and "verified" (always true).
-      - "personas": An array of exactly 4 objects representing target customer profiles, each with "icon" (emoji), "title" (short French title), "desc" (1-2 sentence French explanation of why they need it).
-      - "angles": An array of 4 objects representing different marketing angles, each with "icon" (emoji), "title" (short French title), "desc" (1-2 sentence French explanation of the marketing hook).
+      - "personas": An array of exactly 4 objects representing target customer profiles. The VERY FIRST object (index 0) MUST be the absolute most profitable and data-backed target audience based on market trends and likely customer reviews. Each with "icon" (emoji), "title" (short French title), "desc" (1-2 sentence French explanation).
+      - "angles": An array of 4 objects representing different marketing angles. The VERY FIRST object (index 0) MUST be the most high-converting, profit-maximizing marketing hook based on current e-commerce trends and reviews. Each with "icon" (emoji), "title" (short French title), "desc" (1-2 sentence French explanation).
 
       Return ONLY valid JSON matching this structure:
       {

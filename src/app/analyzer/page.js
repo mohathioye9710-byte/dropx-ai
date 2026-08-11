@@ -170,7 +170,9 @@ export default function Analyzer() {
               compareAtPrice: result.product.compareAtPrice,
               options: result.product.options || [],
               description: result.analysis?.commercialDescription || '',
-              landingPage: result.landingPage || {}
+              landingPage: result.landingPage || {},
+              persona: selectedPersona?.id === 'auto' ? (result?.landingPage?.personas?.[0] || selectedPersona) : selectedPersona,
+              angle: selectedAngle?.id === 'auto' ? (result?.landingPage?.angles?.[0] || selectedAngle) : selectedAngle,
             };
             localStorage.setItem('dropx_preview_product', JSON.stringify(storeData));
           }
@@ -409,7 +411,7 @@ export default function Analyzer() {
         const dynamicPersonas = result?.landingPage?.personas?.map((p, i) => ({ id: `dyn_p_${i}`, ...p })) || PERSONAS.slice(0, 4);
         const allPersonas = [
           ...dynamicPersonas,
-          { id: 'auto', icon: '🤖', title: 'Laisser l\'IA décider', desc: 'On choisira la meilleure audience pour ton produit.' },
+          { id: 'auto', icon: '🤖', title: 'Laisser l\'IA décider (Recommandé)', desc: 'L\'IA croise les avis et les tendances pour trouver l\'audience la plus rentable.' },
           { id: 'custom', icon: '✏️', title: 'Écris ta propre persona', desc: '' }
         ];
         
@@ -446,7 +448,7 @@ export default function Analyzer() {
         const dynamicAngles = result?.landingPage?.angles?.map((a, i) => ({ id: `dyn_a_${i}`, ...a })) || ANGLES.slice(0, 4);
         const allAngles = [
           ...dynamicAngles,
-          { id: 'auto', icon: <BrainCircuit size={20} color="#d946ef" />, title: 'Laisser l\'IA décider', desc: 'On choisira le meilleur angle marketing pour ton produit.' }
+          { id: 'auto', icon: <BrainCircuit size={20} color="#d946ef" />, title: 'Laisser l\'IA décider (Recommandé)', desc: 'L\'IA analyse le marché pour créer l\'angle marketing qui maximise les ventes.' }
         ];
 
         // Auto-select first if null
