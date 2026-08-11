@@ -450,5 +450,6 @@ export default function StoreBuilder() {
       </div>
     </div>
     </div>
+    </div>
   );
 }
