@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { ShoppingBag, ShieldCheck, Truck, ArrowLeft, Check, Zap, Loader2, LayoutTemplate, Palette, Image as ImageIcon, Settings, Eye } from 'lucide-react';
+import { ShoppingBag, ShieldCheck, Truck, ArrowLeft, Check, Zap, Loader2, LayoutTemplate, Palette, Image as ImageIcon, Settings, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -207,7 +207,21 @@ export default function StoreBuilder() {
         
         {/* LEFT SIDEBAR (EDITOR CONTROLS) */}
         {!isPreviewMode && (
-          <div style={{ width: '320px', background: '#0a0a0a', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+          <div style={{ width: '320px', background: '#0a0a0a', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'relative' }}>
+            
+            {/* Collapse button */}
+            <button 
+              onClick={() => setIsPreviewMode(true)}
+              style={{
+                position: 'absolute', top: '20px', right: '-12px', width: '24px', height: '24px', 
+                background: '#fff', color: '#000', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                cursor: 'pointer', border: '1px solid #e5e7eb', zIndex: 10, boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+              }}
+              title="Replier l'éditeur"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
             {/* Tabs */}
             <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 16px 0 16px', gap: '16px' }}>
               <button 
@@ -307,7 +321,22 @@ export default function StoreBuilder() {
         )}
 
         {/* RIGHT AREA (STORE PREVIEW WRAPPER) */}
-        <div style={{ flex: 1, background: '#000', padding: isPreviewMode ? '0' : '24px', overflowY: 'auto', overflowX: 'hidden' }}>
+        <div style={{ flex: 1, background: '#000', padding: isPreviewMode ? '0' : '24px', overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
+          
+          {isPreviewMode && (
+            <button 
+              onClick={() => setIsPreviewMode(false)}
+              style={{
+                position: 'absolute', top: '20px', left: '20px', width: '36px', height: '36px', 
+                background: '#fff', color: '#000', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                cursor: 'pointer', border: '1px solid #e5e7eb', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+              }}
+              title="Ouvrir l'éditeur"
+            >
+              <ChevronRight size={20} />
+            </button>
+          )}
+
           <div style={{ display: 'flex', justifyContent: 'center', minHeight: '100%' }}>
             <div style={{ 
               width: '100%', maxWidth: isPreviewMode ? '100%' : '1200px', 
