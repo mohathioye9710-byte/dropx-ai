@@ -7,6 +7,7 @@ import { Palette, Loader2, Check, Sparkles, ExternalLink, RefreshCw, AlertTriang
 
 export default function StoreDesignPage() {
   const [niche, setNiche] = useState('');
+  const [autoTheme, setAutoTheme] = useState(false);
   const [shopStatus, setShopStatus] = useState('loading');
   const [shopInfo, setShopInfo] = useState(null);
   const [branding, setBranding] = useState(null);
@@ -41,7 +42,7 @@ export default function StoreDesignPage() {
       const res = await fetch('/api/store-design', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'generate', niche: niche.trim() })
+        body: JSON.stringify({ action: 'generate', niche: niche.trim(), autoTheme })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la génération');
@@ -149,6 +150,16 @@ export default function StoreDesignPage() {
                   <><Zap size={18} /> Générer le design</>
                 )}
               </button>
+            </div>
+            <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#666', marginBottom: '12px' }}>
+              <input 
+                type="checkbox" 
+                id="autoTheme" 
+                checked={autoTheme} 
+                onChange={(e) => setAutoTheme(e.target.checked)} 
+                style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#27ae60' }} 
+              />
+              <label htmlFor="autoTheme" style={{ cursor: 'pointer' }}>Laisser l'IA choisir le thème et les couleurs de la boutique (selon tes produits)</label>
             </div>
             <div className={styles.suggestions}>
               {['Gadgets tech futuristes', 'Mode streetwear premium', 'Cosmétiques bio luxe', 'Accessoires gaming'].map(s => (

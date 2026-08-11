@@ -61,7 +61,7 @@ export async function POST(req) {
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const { action } = body;
+    const { action, niche, autoTheme } = body;
 
     const shopCreds = await getShopifyCredentials(session.user.id);
     if (!shopCreds) return NextResponse.json({ error: "Boutique Shopify non connectée ou identifiants incomplets." }, { status: 400 });
@@ -98,21 +98,24 @@ export async function POST(req) {
       } catch (e) { console.error('[Store Design] Products error:', e.message); }
 
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const prompt = `You are an expert Shopify store designer, brand strategist, and elite UI/UX designer.
+    const themeRules = autoTheme 
+      ? `- You MUST generate a beautiful, premium color palette ("colors" object) that perfectly matches the products/niche. The background should remain clean (white or very light).`
+      : `- You MUST use the exact colors provided in the JSON template above (#27ae60 etc). Do not change them.`;
+
+    const prompt = `You are an expert Shopify store designer, brand strategist, and elite UI/UX designer.
 
 The user has a Shopify store:
 - Current name: "${shopName}"
 - ACTUAL PRODUCTS in the store: ${productsList.length > 0 ? productsList.join(', ') : 'No products yet'}
 - Niche/style hint: "${niche}"
 
-IMPORTANT: Base your branding on the ACTUAL PRODUCTS listed above. 
+IMPORTANT: Base your branding on the ACTUAL PRODUCTS listed above.
 
 Generate a complete, HIGH-CONVERTING, PREMIUM brand redesign. 
-We want clean, professional, and elegant e-commerce aesthetics. NEVER output dark or neon futuristic "AI" styles. Use clean white or very light backgrounds, highly readable typography, and modern, trustworthy accent colors (e.g., emerald green, elegant navy, soft pink, minimalist black).
+We want clean, professional, and elegant e-commerce aesthetics. NEVER output dark or neon futuristic "AI" styles. Use clean white or very light backgrounds, highly readable typography.
 
 Return ONLY valid JSON:
 {
-  "storeName": "Catchy premium store name (max 25 chars, fits the niche)",
   "announcementText": "Short announcement bar in French with an emoji (e.g. '✨ Nouvelle Collection | ⚡ Expédition 24h')",
   "heroTitle": "Extremely punchy, modern hero headline in French (max 6 words, Apple-style copywriting)",
   "heroSubtitle": "Hero subtitle in French (1 short sentence, max 12 words, very impactful)",
@@ -133,10 +136,11 @@ Return ONLY valid JSON:
 
 CRITICAL RULES:
 - The design must scream "Premium D2C E-commerce Brand".
-- You MUST use the exact colors provided in the JSON template above. Do not change them. The user explicitly requested this exact green/pink color scheme.
-- The background MUST be white.
+- DO NOT generate or change the store name. The store name is already "${shopName}".
+${themeRules}
+- The background MUST be white or extremely light.
 - All text must be dark and highly readable.
-- IMPORTANT: Be extremely creative with the copy (heroTitle, subtitle, etc), but keep the colors exactly as specified. Here is a unique seed to force variation in copy: ${Math.random()}`;
+- IMPORTANT: Be extremely creative with the copy (heroTitle, subtitle, etc). Here is a unique seed to force variation in copy: ${Math.random()}`;
 
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
@@ -146,6 +150,7 @@ CRITICAL RULES:
       });
 
       const branding = JSON.parse(completion.choices[0].message.content);
+      branding.storeName = shopName; // Override with actual store name
       console.log('[Store Design] ✅ AI branding generated:', branding.storeName, '| Vibe:', branding.vibe);
 
       return NextResponse.json({
