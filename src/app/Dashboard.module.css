@@ -27,7 +27,7 @@
   font-size: 30px;
   font-weight: 800;
   letter-spacing: -1px;
-  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -41,7 +41,7 @@
 .periodTabs {
   display: flex;
   gap: 4px;
-  background: var(--panel-bg-hover);
+  background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
   padding: 4px;
@@ -60,9 +60,9 @@
 }
 
 .periodTabActive {
-  background: rgba(139, 92, 246, 0.3);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
-  border: 1px solid rgba(139, 92, 246, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* ============================================
@@ -77,8 +77,8 @@
 
 .kpiCard {
   padding: 20px;
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 18px;
   position: relative;
   overflow: hidden;
@@ -87,7 +87,7 @@
 
 .kpiCard:hover {
   transform: translateY(-3px);
-  background: var(--panel-bg-hover);
+  background: rgba(255,255,255,0.05);
   box-shadow: 0 12px 32px rgba(0,0,0,0.3);
 }
 
@@ -134,13 +134,13 @@
 }
 
 .badgeUp {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e5e5e5;
 }
 
 .badgeDown {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  background: rgba(255, 255, 255, 0.05);
+  color: #71717a;
 }
 
 /* Mini sparkline in KPI */
@@ -166,8 +166,8 @@
    ============================================ */
 
 .sectionBox {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 20px;
   padding: 24px;
 }
@@ -290,7 +290,7 @@
 .donutCenter {
   width: 100px;
   height: 100px;
-  background: #191919;
+  background: #0a0a0a;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
@@ -418,13 +418,13 @@
 }
 
 .activityTable tbody tr {
-  background: var(--panel-bg);
+  background: #0a0a0a;
   border-radius: 10px;
   transition: background 0.2s;
 }
 
 .activityTable tbody tr:hover {
-  background: var(--panel-bg-hover);
+  background: rgba(255,255,255,0.05);
 }
 
 .activityTable tbody tr td:first-child {
@@ -455,7 +455,7 @@
   gap: 0;
   overflow: hidden;
   border-radius: 12px;
-  background: var(--panel-bg);
+  background: #0a0a0a;
 }
 
 .areaSlice {
@@ -519,8 +519,8 @@
 
 .adCard {
   padding: 20px;
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 14px;
   display: flex;
   flex-direction: column;
@@ -529,7 +529,7 @@
 }
 
 .adCard:hover {
-  background: var(--panel-bg-hover);
+  background: rgba(255,255,255,0.05);
   border-color: rgba(255,255,255,0.1);
 }
 
@@ -583,8 +583,8 @@
 .customerMetric {
   text-align: center;
   padding: 20px 12px;
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 14px;
 }
 
@@ -631,7 +631,7 @@
 .gaugeInner {
   width: 72px;
   height: 72px;
-  background: #191919;
+  background: #0a0a0a;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -673,9 +673,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px;
-  background: var(--panel-bg);
+  background: #0a0a0a;
   border-radius: 10px;
-  border: 1px solid var(--panel-border);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .stockInfo {
@@ -724,8 +724,8 @@
 .emailMetric {
   text-align: center;
   padding: 20px;
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 14px;
 }
 
