@@ -121,7 +121,7 @@ Return ONLY valid JSON:
     "announcementText": "#hex (Contrasting text for announcement)"
   },
   "font": "One of: 'Outfit', 'Space Grotesk', 'Syne', 'Clash Display', 'Inter'. Pick the coolest modern font.",
-  "vibe": "One word (e.g. Cyberpunk, Minimalist, Luxury, Futuristic, Ethereal)"
+  "vibe": "One word (e.g. Minimalist, Clean, Classic, Elegant, Trustworthy)"
 }
 
 CRITICAL RULES:

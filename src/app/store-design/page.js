@@ -262,7 +262,7 @@ export default function StoreDesignPage() {
                         </span>
                         <h1 className={styles.mockH1}>{branding.heroTitle}</h1>
                         <p className={styles.mockP}>{branding.heroSubtitle}</p>
-                        <button className={styles.mockButton} style={{ 
+                        <button className={styles.mockHeroBtn} style={{ 
                           background: branding.colors.buttonBg, 
                           color: branding.colors.buttonText
                         }}>
