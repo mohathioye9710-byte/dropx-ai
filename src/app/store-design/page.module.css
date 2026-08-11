@@ -557,7 +557,7 @@
 .mockHeroBtn {
   border: none;
   padding: 14px 32px;
-  border-radius: 50px;
+  border-radius: 0px;
   font-size: 14px;
   font-weight: 700;
   cursor: default;

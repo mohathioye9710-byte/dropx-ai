@@ -83,11 +83,18 @@ export async function POST(req) {
         shopName = data.shop?.name || shopName;
       } catch (e) { console.error('[Store Design] Shop info error:', e.message); }
 
-      let products = [];
+      let rawProducts = [];
+      let productsList = [];
       try {
         const res = await fetch(`https://${shopUrl}/admin/api/2024-04/products.json?limit=10`, { headers });
         const data = await res.json();
-        products = (data.products || []).map(p => p.title);
+        rawProducts = (data.products || []).map(p => ({
+          id: p.id,
+          title: p.title,
+          image: p.image?.src || null,
+          price: p.variants?.[0]?.price || '0.00'
+        }));
+        productsList = rawProducts.map(p => p.title);
       } catch (e) { console.error('[Store Design] Products error:', e.message); }
 
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -95,7 +102,7 @@ export async function POST(req) {
 
 The user has a Shopify store:
 - Current name: "${shopName}"
-- ACTUAL PRODUCTS in the store: ${products.length > 0 ? products.join(', ') : 'No products yet'}
+- ACTUAL PRODUCTS in the store: ${productsList.length > 0 ? productsList.join(', ') : 'No products yet'}
 - Niche/style hint: "${niche}"
 
 IMPORTANT: Base your branding on the ACTUAL PRODUCTS listed above. 
@@ -141,7 +148,10 @@ CRITICAL RULES:
       const branding = JSON.parse(completion.choices[0].message.content);
       console.log('[Store Design] ✅ AI branding generated:', branding.storeName, '| Vibe:', branding.vibe);
 
-      return NextResponse.json({ branding, currentShop: { name: shopName, url: shopUrl, products } });
+      return NextResponse.json({
+        branding: branding,
+        currentShop: { url: shopUrl, name: shopName, products: rawProducts }
+      });
     }
 
     // ========================

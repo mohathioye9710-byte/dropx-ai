@@ -266,7 +266,7 @@ export default function StoreDesignPage() {
                           background: branding.colors.buttonBg, 
                           color: branding.colors.buttonText
                         }}>
-                          Découvrir la Collection ✨
+                          Catalogue
                         </button>
                       </div>
                     </div>
@@ -285,21 +285,29 @@ export default function StoreDesignPage() {
 
                   {/* Product Grid Placeholder */}
                   <div className={styles.mockProductGrid} style={{ background: branding.colors.background }}>
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className={styles.mockProduct} style={{ 
+                    {(shopInfo?.products && shopInfo.products.length > 0 ? shopInfo.products.slice(0, 3) : [{id:1}, {id:2}, {id:3}]).map((p, i) => (
+                      <div key={p.id || i} className={styles.mockProduct} style={{ 
                         background: '#ffffff',
                         border: `1px solid #eaeaea`,
                         boxShadow: `0 4px 12px rgba(0,0,0,0.05)`,
-                        borderRadius: '12px',
+                        borderRadius: '0px',
                         overflow: 'hidden'
                       }}>
                         <div className={styles.mockProductImage} style={{ 
                           background: '#f9f9f9',
-                          borderBottom: `1px solid #eaeaea`
+                          borderBottom: `1px solid #eaeaea`,
+                          backgroundImage: p.image ? `url(${p.image})` : 'none',
+                          backgroundSize: 'contain',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat'
                         }}></div>
                         <div className={styles.mockProductInfo} style={{ padding: '16px' }}>
-                          <div className={styles.mockProductTitle} style={{ background: branding.colors.text + '20', height: '16px', borderRadius: '4px', marginBottom: '8px' }}></div>
-                          <div className={styles.mockProductPrice} style={{ background: branding.colors.primary, height: '24px', width: '50%', borderRadius: '4px' }}></div>
+                          <div className={styles.mockProductTitle} style={p.title ? { color: branding.colors.text, fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' } : { background: branding.colors.text + '20', height: '16px', borderRadius: '4px', marginBottom: '8px' }}>
+                            {p.title || ''}
+                          </div>
+                          <div className={styles.mockProductPrice} style={p.price ? { color: branding.colors.primary, fontSize: '14px', fontWeight: 'bold' } : { background: branding.colors.primary, height: '24px', width: '50%', borderRadius: '4px' }}>
+                            {p.price ? `${p.price} €` : ''}
+                          </div>
                         </div>
                       </div>
                     ))}
