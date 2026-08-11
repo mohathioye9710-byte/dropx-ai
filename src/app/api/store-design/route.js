@@ -100,7 +100,7 @@ export async function POST(req) {
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const themeRules = autoTheme 
       ? `- You MUST generate a beautiful, premium color palette ("colors" object). \nCRITICAL: ONLY use pale, muted, and pastel colors (e.g. pale sage green, soft beige, dusty rose). ABSOLUTELY NO bright, neon, or flashy colors. The 'primary' color MUST be a soft, pale pastel shade.\n- YOU MUST deduce the overarching niche/theme of the store by analyzing the actual products listed (e.g. if you see toothbrushes, the niche is 'oral hygiene').\n- ALL copywriting (Hero text, About text, etc.) MUST be heavily tailored to this deduced niche.`
-      : `- You MUST use the exact colors provided in the JSON template above (#27ae60 etc). Do not change them.`;
+      : `- You MUST use the exact colors provided in the JSON template above. Do not change them.`;
 
     const prompt = `You are an expert Shopify store designer, brand strategist, and elite UI/UX designer.
 
@@ -121,11 +121,11 @@ Return ONLY valid JSON:
   "heroSubtitle": "Hero subtitle in French (1 short sentence, max 12 words, very impactful)",
   "aboutText": "Premium 'About' paragraph in French (2-3 sentences, emotional brand story)",
   "colors": {
-    "primary": "#27ae60",
-    "secondary": "#f3d0db",
-    "background": "#FFFFFF",
+    "primary": "#76a374",
+    "secondary": "#e8dac9",
+    "background": "#F5F6F8",
     "text": "#111111",
-    "buttonBg": "#000000",
+    "buttonBg": "#111111",
     "buttonText": "#FFFFFF",
     "announcementBg": "#76a374",
     "announcementText": "#FFFFFF"
@@ -138,7 +138,7 @@ CRITICAL RULES:
 - The design must scream "Premium D2C E-commerce Brand".
 - DO NOT generate or change the store name. The store name is already "${shopName}".
 ${themeRules}
-- The background MUST be white or extremely light.
+- The background MUST be a very light, soft grey or beige (e.g. #F5F6F8, #FAF9F6) so that white product cards stand out. NEVER use pure white (#FFFFFF).
 - All text must be dark and highly readable.
 - IMPORTANT: Be extremely creative with the copy (heroTitle, subtitle, etc). Here is a unique seed to force variation in copy: ${Math.random()}`;
 
@@ -478,7 +478,7 @@ ${themeRules}
             // === SECTION 1: HERO (TOUJOURS injecté — avec image ou gradient) ===
             const heroBackground = uploadedImageKey
               ? `background-image: url('{{ '${uploadedImageKey}' | asset_url }}'); background-size: cover; background-position: center;`
-              : `background: ${branding.colors.background};`;
+              : `background: transparent;`;
             
             const heroOverlay = uploadedImageKey
               ? `<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.2);"></div>`
@@ -514,7 +514,7 @@ ${themeRules}
 
             // === SECTION 3: À PROPOS (MINIMALISTE) ===
             const aboutHtml = `
-              <div style="padding: 60px 20px; text-align: center; background: ${branding.colors.background};">
+              <div style="padding: 60px 20px; text-align: center; background: transparent;">
                 <div style="max-width: 700px; margin: 0 auto;">
                   <h2 style="font-size: 2rem; margin-bottom: 24px; font-weight: 800; color: ${branding.colors.text}; letter-spacing: -0.5px;">À Propos de ${branding.storeName}</h2>
                   <p style="font-size: 1.1rem; line-height: 1.7; color: ${branding.colors.text}; opacity: 0.8;">${branding.aboutText}</p>
