@@ -20,23 +20,23 @@ export default async function RootLayout({ children }) {
       <body suppressHydrationWarning>
         <div className="dropmagic-grid"></div>
         <Providers>
-          {session ? (
-            <div className="app-container">
-              <Sidebar />
-              <main className="main-content">
-                <Topbar />
-                <div className="page-content animate-fade-in">
-                  {children}
-                </div>
-              </main>
-            </div>
-          ) : (
-            <LanguageProvider>
+          <LanguageProvider>
+            {session ? (
+              <div className="app-container">
+                <Sidebar />
+                <main className="main-content">
+                  <Topbar />
+                  <div className="page-content animate-fade-in">
+                    {children}
+                  </div>
+                </main>
+              </div>
+            ) : (
               <div className="public-content" style={{ minHeight: '100vh', position: 'relative', zIndex: 1 }}>
                 {children}
               </div>
-            </LanguageProvider>
-          )}
+            )}
+          </LanguageProvider>
         </Providers>
       </body>
     </html>
