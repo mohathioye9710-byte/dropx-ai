@@ -8,7 +8,7 @@ import styles from './Sidebar.module.css';
 
 const NAV_ITEMS = [
   { href: '/', icon: Home, label: 'Dashboard' },
-  { href: '/tutorials', icon: GraduationCap, label: 'Tutoriels' },
+  { href: '/tutoriels', icon: GraduationCap, label: 'Tutoriels' },
 ];
 
 export default function Sidebar() {
