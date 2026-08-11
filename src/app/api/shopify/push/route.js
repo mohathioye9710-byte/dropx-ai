@@ -46,11 +46,16 @@ export async function POST(req) {
 
     const safeCompare = baseComparePrice > basePrice ? baseComparePrice : basePrice * 2.8;
 
+    const roundPrice = (p) => {
+      if (currency === 'XOF') return Math.ceil(p / 100) * 100;
+      return Math.floor(p) + 0.99;
+    };
+
     let shopifyOptions = [{ name: "Offres Limitées" }];
     const bundleOffers = [
-      { title: "Pack Découverte (1 Unité)", p: basePrice, cp: safeCompare },
-      { title: "2 Achetés", p: basePrice * 2, cp: safeCompare * 2 },
-      { title: "3 Achetés = 1 OFFERT", p: basePrice * 3, cp: safeCompare * 4 }
+      { title: "1 Unité", p: basePrice, cp: safeCompare },
+      { title: "2 Achetés (-15%)", p: roundPrice(basePrice * 2 * 0.85), cp: roundPrice(safeCompare * 2) },
+      { title: "3 Achetés (-25%)", p: roundPrice(basePrice * 3 * 0.75), cp: roundPrice(safeCompare * 3) }
     ];
 
     let hasExtraOptions = product.options && product.options.length > 0;
