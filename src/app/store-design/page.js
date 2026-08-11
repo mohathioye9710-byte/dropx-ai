@@ -238,9 +238,9 @@ export default function StoreDesignPage() {
                     </div>
 
                     {/* Desktop / Mobile Toggle */}
-                    <div className={styles.mockHeader}>
+                    <div className={styles.mockNav}>
                       <div className={styles.mockLogo} style={{ color: branding.colors.text }}>{branding.storeName}</div>
-                      <div className={styles.mockNav} style={{ color: branding.colors.text }}>
+                      <div className={styles.mockNavLinks} style={{ color: branding.colors.text }}>
                         <span>Collection</span>
                         <span>À Propos</span>
                         <span>Contact</span>
@@ -260,8 +260,8 @@ export default function StoreDesignPage() {
                         }}>
                           {branding.vibe.toUpperCase()}
                         </span>
-                        <h1 className={styles.mockH1}>{branding.heroTitle}</h1>
-                        <p className={styles.mockP}>{branding.heroSubtitle}</p>
+                        <h1 className={styles.mockHeroTitle}>{branding.heroTitle}</h1>
+                        <p className={styles.mockHeroSub}>{branding.heroSubtitle}</p>
                         <button className={styles.mockHeroBtn} style={{ 
                           background: branding.colors.buttonBg, 
                           color: branding.colors.buttonText
