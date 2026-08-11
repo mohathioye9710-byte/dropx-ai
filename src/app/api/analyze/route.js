@@ -44,8 +44,27 @@ export async function POST(req) {
       console.log(`[DEBUG] 🔑 AliExpress détecté. Product ID: ${productId}`);
 
       if (productId) {
+        // ===== STRATÉGIE 0: PROXY SCRAPERAPI (Idéal pour Vercel) =====
+        if (process.env.SCRAPER_API_KEY) {
+          console.log(`[DEBUG] 🚀 Stratégie 0: ScraperAPI (Proxy Résidentiel)...`);
+          try {
+            const targetUrl = encodeURIComponent(`https://www.aliexpress.com/item/${productId}.html`);
+            const proxyUrl = `http://api.scraperapi.com?api_key=${process.env.SCRAPER_API_KEY}&url=${targetUrl}&premium=true`;
+            const proxyRes = await fetch(proxyUrl, { signal: AbortSignal.timeout(30000) });
+            if (proxyRes.ok) {
+              html = await proxyRes.text();
+              console.log(`[DEBUG] ✅ Stratégie 0 réussie. Taille HTML: ${html.length} octets.`);
+            } else {
+              console.log(`[DEBUG] ❌ Stratégie 0 échouée: HTTP ${proxyRes.status}`);
+            }
+          } catch(e) {
+            console.log(`[DEBUG] ❌ Stratégie 0 erreur: ${e.message}`);
+          }
+        }
+
         // ===== STRATÉGIE 1: API Mobile AliExpress =====
-        console.log(`[DEBUG] 🚀 Stratégie 1: API Mobile AliExpress...`);
+        if (!html || html.length < 5000) {
+          console.log(`[DEBUG] 🚀 Stratégie 1: API Mobile AliExpress...`);
         try {
           const apiUrl = `https://m.aliexpress.com/item/${productId}.html`;
           const apiRes = await fetch(apiUrl, {
@@ -69,6 +88,7 @@ export async function POST(req) {
         } catch (e) {
           console.log(`[DEBUG] ❌ Stratégie 1 erreur: ${e.message}`);
         }
+        } // <-- Added closing brace for if (!html || html.length < 5000)
 
         // ===== STRATÉGIE 2: Page Desktop avec headers avancés =====
         if (!html || html.length < 5000) {
