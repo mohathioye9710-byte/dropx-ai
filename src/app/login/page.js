@@ -39,8 +39,8 @@ export default function LoginPage() {
       
       {/* Brand */}
       <div style={{ marginBottom: '40px', textAlign: 'center' }}>
-        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', background: '#111', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '24px', fontWeight: '800', textDecoration: 'none', marginBottom: '16px' }}>
-          D
+        <Link href="/" style={{ display: 'inline-flex', marginBottom: '16px', textDecoration: 'none' }}>
+          <img src="/logo.png" alt="ShopX Logo" style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'cover' }} />
         </Link>
         <h1 style={{ fontSize: '28px', color: '#fff', fontWeight: '800', letterSpacing: '-0.5px' }}>Te revoilà.</h1>
         <p style={{ color: '#a1a1aa', fontSize: '15px', marginTop: '8px' }}>Connecte-toi pour gérer ton empire.</p>

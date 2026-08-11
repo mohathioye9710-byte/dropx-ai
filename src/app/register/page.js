@@ -69,8 +69,10 @@ export default function RegisterPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div style={{ width: '100%', maxWidth: '400px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', padding: '40px', textAlign: 'center' }}>
-        <Sparkles size={32} color="#fff" style={{ marginBottom: '24px' }} />
-        <h1 style={{ fontSize: '28px', color: '#fff', fontWeight: 'bold', marginBottom: '8px' }}>Rejoignez DropX AI</h1>
+        <Link href="/" style={{ display: 'inline-flex', marginBottom: '24px', textDecoration: 'none' }}>
+          <img src="/logo.png" alt="ShopX Logo" style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'cover' }} />
+        </Link>
+        <h1 style={{ fontSize: '28px', color: '#fff', fontWeight: 'bold', marginBottom: '8px' }}>Rejoignez ShopX</h1>
         <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '32px' }}>Créez votre compte pour commencer.</p>
 
         {!showCodeInput ? (
