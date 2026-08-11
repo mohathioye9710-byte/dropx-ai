@@ -88,6 +88,7 @@ export default function StoreBuilder() {
           images: parsed.images && parsed.images.length > 0 ? parsed.images : (parsed.image ? [parsed.image, ...defaultImages.slice(1)] : defaultImages),
           price: finalPrice,
           compareAtPrice: targetCurrency === 'XOF' ? Math.round(finalPrice * 1.6) : Math.round(finalPrice * 1.6 * 100) / 100,
+          landingPage: parsed.landingPage || {},
         });
       } catch (e) {}
     }
@@ -120,16 +121,31 @@ export default function StoreBuilder() {
     setCurrency(newCurrency);
   };
 
-  const generateSmartBundles = (basePrice, comparePrice) => {
+  const generateSmartBundles = (basePrice, comparePrice, currentCurrency) => {
+    const roundPrice = (p) => {
+      if (currentCurrency === 'XOF') return Math.ceil(p / 100) * 100;
+      return Math.floor(p) + 0.99;
+    };
+    
     const safeCompare = comparePrice > basePrice ? comparePrice : basePrice * 2.8;
+    
+    // Algorithme de maximisation des bénéfices
+    // Pack 2: -15% de réduction
+    const b2Price = roundPrice(basePrice * 2 * 0.85);
+    const b2Compare = roundPrice(safeCompare * 2);
+    
+    // Pack 3: -25% de réduction
+    const b3Price = roundPrice(basePrice * 3 * 0.75);
+    const b3Compare = roundPrice(safeCompare * 3);
+
     return [
-      { id: 1, title: "Pack Découverte (1 Unité)", desc: `ÉCONOMISEZ ${Math.round((1 - basePrice / safeCompare) * 100)}%`, price: basePrice, oldPrice: safeCompare, tag: "" },
-      { id: 2, title: "2 Achetés", desc: `ÉCONOMISEZ ${Math.round((1 - basePrice / safeCompare) * 100)}%`, price: basePrice * 2, oldPrice: safeCompare * 2, tag: "Le plus populaire" },
-      { id: 3, title: "3 Achetés = 1 OFFERT", desc: `Vous recevez 4 unités au total !`, price: basePrice * 3, oldPrice: safeCompare * 4, tag: "Meilleure vente" }
+      { id: 1, title: "1 Unité", desc: `Idéal pour tester`, price: basePrice, oldPrice: safeCompare, tag: "" },
+      { id: 2, title: "2 Achetés (-15%)", desc: `ÉCONOMISEZ 15% IMMÉDIATEMENT`, price: b2Price, oldPrice: b2Compare, tag: "Le plus populaire" },
+      { id: 3, title: "3 Achetés (-25%)", desc: `MEILLEURE OFFRE - ÉCONOMISEZ 25%`, price: b3Price, oldPrice: b3Compare, tag: "Meilleure vente" }
     ];
   };
 
-  const smartBundles = generateSmartBundles(product.price, product.compareAtPrice);
+  const smartBundles = generateSmartBundles(product.price, product.compareAtPrice, currency);
 
   const handlePushToShopify = async () => {
     setPushStatus('pushing');
@@ -461,7 +477,155 @@ export default function StoreBuilder() {
                   </div>
 
                 </div>
+                </div>
               </main>
+
+              {/* SECTION 1: BENEFITS */}
+              {product.landingPage?.section1_benefits && (
+                <div style={{ padding: '60px 20px', background: '#fdf2f8', textAlign: 'center' }}>
+                  <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#c85a7c', marginBottom: '40px' }}>{product.landingPage.section1_benefits.sectionTitle}</h2>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center' }}>
+                      {product.landingPage.section1_benefits.items.map((item, i) => (
+                        <div key={i} style={{ flex: '1 1 30%', minWidth: '250px', background: '#fff', padding: '30px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                          <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#111', marginBottom: '12px' }}>{item.title}</h3>
+                          <p style={{ fontSize: '14px', color: '#555', lineHeight: '1.6', margin: 0 }}>{item.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 2: FEATURES GRID */}
+              {product.landingPage?.section2_features && (
+                <div style={{ padding: '60px 20px', background: '#fff' }}>
+                  <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '40px' }}>
+                    <div style={{ flex: '1 1 45%', minWidth: '300px' }}>
+                      {product.images[1] && <img src={product.images[1]} alt="Feature" style={{ width: '100%', borderRadius: '16px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />}
+                    </div>
+                    <div style={{ flex: '1 1 45%', minWidth: '300px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                      {product.landingPage.section2_features.items.map((item, i) => (
+                        <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#fce7f3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
+                            {item.icon}
+                          </div>
+                          <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111', margin: 0 }}>{item.title}</h3>
+                          <p style={{ fontSize: '13px', color: '#666', lineHeight: '1.5', margin: 0 }}>{item.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 3: STEPS */}
+              {product.landingPage?.section3_steps && (
+                <div style={{ padding: '60px 20px', background: '#f9f9f9', textAlign: 'center' }}>
+                  <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <h2 style={{ fontSize: '28px', fontWeight: '800', color: '#111', marginBottom: '40px' }}>{product.landingPage.section3_steps.sectionTitle}</h2>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center' }}>
+                      {product.landingPage.section3_steps.items.map((item, i) => (
+                        <div key={i} style={{ flex: '1 1 30%', minWidth: '250px' }}>
+                          <div style={{ width: '100%', aspectRatio: '1/1', background: '#fff', borderRadius: '16px', overflow: 'hidden', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #eaeaea' }}>
+                            {product.images[i + 2] ? <img src={product.images[i + 2]} alt={`Step ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <div style={{ fontSize: '48px', fontWeight: '900', color: '#fce7f3' }}>{i + 1}</div>}
+                          </div>
+                          <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#111', margin: '0 0 8px' }}>{item.title}</h3>
+                          <p style={{ fontSize: '14px', color: '#555', lineHeight: '1.5', margin: 0 }}>{item.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 4: CTA */}
+              {product.landingPage?.section4_cta && (
+                <div style={{ padding: '60px 20px', background: '#111', color: '#fff', textAlign: 'center' }}>
+                  <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                    <h2 style={{ fontSize: '36px', fontWeight: '900', marginBottom: '16px', lineHeight: '1.2' }}>{product.landingPage.section4_cta.title}</h2>
+                    <p style={{ fontSize: '16px', color: '#a1a1aa', lineHeight: '1.6', marginBottom: '30px' }}>{product.landingPage.section4_cta.text}</p>
+                    <button style={{ background: buttonColor, color: '#fff', border: 'none', padding: '16px 32px', fontWeight: '700', fontSize: '16px', borderRadius: '8px', cursor: 'pointer' }}>{product.landingPage.section4_cta.buttonText}</button>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 5: POWER / SPECS */}
+              {product.landingPage?.section5_power && (
+                <div style={{ padding: '60px 20px', background: '#fff' }}>
+                  <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '40px' }}>
+                    <div style={{ flex: '1 1 45%', minWidth: '300px' }}>
+                      <h2 style={{ fontSize: '28px', fontWeight: '800', color: '#111', marginBottom: '30px' }}>{product.landingPage.section5_power.sectionTitle}</h2>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '30px' }}>
+                        {product.landingPage.section5_power.items.map((item, i) => (
+                          <div key={i} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', padding: '16px', border: '1px solid #eaeaea', borderRadius: '8px', background: '#fafafa' }}>
+                            <div style={{ fontSize: '24px', minWidth: '30px' }}>{item.icon}</div>
+                            <div>
+                              <h3 style={{ fontSize: '15px', fontWeight: '700', margin: '0 0 6px', color: '#111' }}>{item.title}</h3>
+                              <p style={{ fontSize: '13px', color: '#555', lineHeight: '1.5', margin: 0 }}>{item.text}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <button style={{ display: 'block', width: '100%', textAlign: 'center', background: buttonColor, color: '#fff', padding: '16px 32px', fontWeight: '700', fontSize: '16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>{product.landingPage.section5_power.buttonText}</button>
+                      <p style={{ textAlign: 'center', fontSize: '12px', color: '#666', marginTop: '10px', fontWeight: '600' }}>⭐ {product.landingPage.section5_power.ratingText}</p>
+                    </div>
+                    <div style={{ flex: '1 1 45%', minWidth: '300px' }}>
+                      {product.images[0] && <img src={product.images[0]} alt="Power Spec" style={{ width: '100%', borderRadius: '16px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* REVIEWS */}
+              {product.landingPage?.reviews && product.landingPage.reviews.length > 0 && (
+                <div style={{ background: '#eaf8f9', padding: '60px 20px' }}>
+                  <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <p style={{ textAlign: 'center', color: '#16a34a', fontWeight: '700', fontSize: '14px', marginBottom: '8px' }}>⭐⭐⭐⭐⭐ 4.9/5 sur +2500 clients</p>
+                    <h2 style={{ textAlign: 'center', fontSize: '32px', fontWeight: '800', color: '#111', marginBottom: '40px' }}>Ils l'adorent</h2>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
+                      {product.landingPage.reviews.map((r, i) => (
+                        <div key={i} style={{ flex: '1 1 30%', minWidth: '280px', background: '#fff', border: '1px solid #eaeaea', borderRadius: '8px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <strong style={{ fontSize: '16px', color: '#111' }}>{r.name}</strong>
+                            <span style={{ fontSize: '12px', color: '#1d4ed8', fontWeight: '600' }}>&#10003; Acheteur vérifié</span>
+                          </div>
+                          <div style={{ color: '#fbbf24', fontSize: '16px', marginBottom: '12px' }}>{'⭐'.repeat(r.rating || 5)}</div>
+                          <p style={{ margin: '0 0 16px', fontSize: '14px', color: '#444', lineHeight: '1.6' }}>{r.text}</p>
+                          <span style={{ fontSize: '12px', color: '#999' }}>Il y a {Math.floor(Math.random() * 10) + 1}j</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* FAQ */}
+              {product.landingPage?.faq && product.landingPage.faq.length > 0 && (
+                <div style={{ padding: '60px 20px', background: '#fff' }}>
+                  <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: '60px' }}>
+                    <div style={{ flex: '1 1 40%', minWidth: '280px' }}>
+                      <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#111', marginBottom: '16px' }}>Questions Fréquentes</h2>
+                      <p style={{ fontSize: '16px', color: '#666', lineHeight: '1.6', marginBottom: '40px' }}>Découvrez comment ce produit révolutionne votre quotidien en rendant vos tâches aussi simples, rapides et efficaces que jamais auparavant.</p>
+                      <div style={{ background: '#fff', border: '1px solid #eaeaea', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                        <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#1d4ed8', margin: '0 0 12px' }}>Besoin d'un coup de main supplémentaire ?</h4>
+                        <p style={{ margin: 0, fontSize: '14px', color: '#555', lineHeight: '1.5' }}>Notre équipe est disponible 7j/7 pour vous accompagner et répondre à toutes vos interrogations.</p>
+                      </div>
+                    </div>
+                    <div style={{ flex: '1 1 50%', minWidth: '300px' }}>
+                      {product.landingPage.faq.map((f, i) => (
+                        <details key={i} style={{ borderBottom: '1px solid #eaeaea', padding: '20px 0', cursor: 'pointer' }}>
+                          <summary style={{ fontWeight: '600', fontSize: '16px', color: '#111', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            {f.question}
+                            <span style={{ fontSize: '24px', color: '#666', fontWeight: '300' }}>+</span>
+                          </summary>
+                          <p style={{ margin: '16px 0 0', fontSize: '15px', color: '#555', lineHeight: '1.6' }}>{f.answer}</p>
+                        </details>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
             </div>
           </div>
