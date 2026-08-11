@@ -309,7 +309,6 @@ export default function StoreDesignPage() {
                           <div className={styles.mockProductPrice} style={p.price ? { color: branding.colors.primary, fontSize: '16px', fontWeight: '900' } : { background: branding.colors.primary, height: '24px', width: '50%', borderRadius: '4px' }}>
                             {p.price ? `${p.price} €` : ''}
                           </div>
-                          </div>
                         </div>
                       </div>
                     ))}
