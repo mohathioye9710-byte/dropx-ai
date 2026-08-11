@@ -417,6 +417,7 @@ export default function Analyzer() {
         
         // Auto-select first if null
         const currentPersona = selectedPersona || allPersonas[0];
+        const previewPersona = currentPersona.id === 'auto' ? (dynamicPersonas[0] || PERSONAS[0]) : currentPersona;
 
         return renderSelectionLayout(
           "À qui tu vends ?", "Choisis le profil qui correspond à ton acheteur",
@@ -434,10 +435,15 @@ export default function Analyzer() {
               </button>
             ))}
           </div>,
-          <div style={{background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '48px', borderRadius: '24px', textAlign: 'center', width: '300px'}}>
-            <div style={{fontSize: '48px', marginBottom: '16px'}}>{currentPersona?.icon || '👤'}</div>
-            <h3 style={{fontSize: '20px', color: '#fff', fontWeight: '600', marginBottom: '8px', textAlign: 'center'}}>{currentPersona?.title || 'Persona'}</h3>
-            <p style={{color: 'rgba(255,255,255,0.4)', fontSize: '14px', lineHeight: 1.4, textAlign: 'center'}}>{currentPersona?.desc || 'Ton profil acheteur unique'}</p>
+          <div style={{background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '48px', borderRadius: '24px', textAlign: 'center', width: '300px', position: 'relative'}}>
+            {currentPersona.id === 'auto' && (
+              <div style={{position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #3b82f6, #d946ef)', padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', color: '#fff', boxShadow: '0 4px 12px rgba(217, 70, 239, 0.4)'}}>
+                ✨ SÉLECTION DE L'IA
+              </div>
+            )}
+            <div style={{fontSize: '48px', marginBottom: '16px'}}>{previewPersona?.icon || '👤'}</div>
+            <h3 style={{fontSize: '20px', color: '#fff', fontWeight: '600', marginBottom: '8px', textAlign: 'center'}}>{previewPersona?.title || 'Persona'}</h3>
+            <p style={{color: 'rgba(255,255,255,0.4)', fontSize: '14px', lineHeight: 1.4, textAlign: 'center'}}>{previewPersona?.desc || 'Ton profil acheteur unique'}</p>
           </div>,
           () => setState('select_language'),
           () => setState('select_angle')
@@ -453,6 +459,7 @@ export default function Analyzer() {
 
         // Auto-select first if null
         const currentAngle = selectedAngle || allAngles[0];
+        const previewAngle = currentAngle.id === 'auto' ? (dynamicAngles[0] || ANGLES[0]) : currentAngle;
 
         return renderSelectionLayout(
           "Comment tu veux le vendre ?", "Choisis un angle qui accroche tes clients",
@@ -469,12 +476,17 @@ export default function Analyzer() {
               </button>
             ))}
           </div>,
-          <div style={{background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '48px', borderRadius: '24px', textAlign: 'center', width: '300px'}}>
-            <div style={{fontSize: typeof currentAngle?.icon === 'string' ? '48px' : 'inherit', marginBottom: '16px'}}>
-              {currentAngle?.icon || '🎯'}
+          <div style={{background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '48px', borderRadius: '24px', textAlign: 'center', width: '300px', position: 'relative'}}>
+            {currentAngle.id === 'auto' && (
+              <div style={{position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #3b82f6, #d946ef)', padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', color: '#fff', boxShadow: '0 4px 12px rgba(217, 70, 239, 0.4)'}}>
+                ✨ SÉLECTION DE L'IA
+              </div>
+            )}
+            <div style={{fontSize: typeof previewAngle?.icon === 'string' ? '48px' : 'inherit', marginBottom: '16px'}}>
+              {previewAngle?.icon || '🎯'}
             </div>
-            <h3 style={{fontSize: '20px', color: '#fff', fontWeight: '600', marginBottom: '8px', textAlign: 'center'}}>{currentAngle?.title || 'Angle marketing'}</h3>
-            <p style={{color: 'rgba(255,255,255,0.4)', fontSize: '14px', lineHeight: 1.4, textAlign: 'center'}}>{currentAngle?.desc || 'Ton angle marketing unique'}</p>
+            <h3 style={{fontSize: '20px', color: '#fff', fontWeight: '600', marginBottom: '8px', textAlign: 'center'}}>{previewAngle?.title || 'Angle marketing'}</h3>
+            <p style={{color: 'rgba(255,255,255,0.4)', fontSize: '14px', lineHeight: 1.4, textAlign: 'center'}}>{previewAngle?.desc || 'Ton angle marketing unique'}</p>
           </div>,
           () => setState('select_persona'),
           () => setState('select_photos')
