@@ -143,12 +143,14 @@ export async function POST(req) {
       }
       
       // If we failed to get the minimum required data (image and a real title), fallback to mock data!
+      let isDemoMode = false;
       if (!image || !title || title === 'Unknown Product') {
         console.log(`[DEBUG] ❌ Échec critique : Image ou titre manquant dû à la protection anti-bot. Utilisation de données de démonstration.`);
         title = "Smart Desktop Air Purifier Humidifier Essential Oil Diffuser with LED Light for Home Room Office";
         extractedPrice = "$34.50";
         image = "https://images.unsplash.com/photo-1528313437190-302a90da30d5?w=800&q=80"; 
         imageList = [image];
+        isDemoMode = true;
       }
     }
 
@@ -232,14 +234,18 @@ export async function POST(req) {
       }
     `;
 
+    const messagesContent = [
+      { type: "text", text: prompt }
+    ];
+    if (!isDemoMode && image) {
+      messagesContent.push({ type: "image_url", image_url: { url: image } });
+    }
+
     const completion = await openai.chat.completions.create({
       messages: [
         {
           role: "user",
-          content: [
-            { type: "text", text: prompt },
-            { type: "image_url", image_url: { url: image } }
-          ]
+          content: messagesContent
         }
       ],
       model: "gpt-4o-mini",
@@ -252,7 +258,7 @@ export async function POST(req) {
     // Generate the realistic images using Replicate (Flux Dev)
     let generatedImages = [];
     if (analysis.productDescription && imageList.length > 0) {
-      if (!process.env.REPLICATE_API_TOKEN || imageList[0].includes('unsplash.com')) {
+      if (!process.env.REPLICATE_API_TOKEN || isDemoMode) {
         console.log(`[DEBUG] ⚠️ Clé manquante ou image de démo. Impossible de générer les images Flux.`);
         generatedImages = imageList;
       } else {
