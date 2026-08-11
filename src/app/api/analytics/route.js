@@ -54,7 +54,17 @@ export async function GET(req) {
       return NextResponse.json(emptyResponse);
     }
 
-    const { domain, token } = JSON.parse(integration.keyData);
+    let parsedData = {};
+    try {
+      parsedData = JSON.parse(integration.keyData || '{}');
+    } catch (e) {}
+
+    const domain = parsedData.domain || parsedData.shopUrl || parsedData.shop;
+    const token = parsedData.token || parsedData.accessToken;
+
+    if (!domain || !token || domain === 'undefined') {
+       return NextResponse.json(emptyResponse);
+    }
 
     // 2. Fetch from Shopify API
     const shopifyUrl = `https://${domain}/admin/api/2024-01/orders.json?status=any&created_at_min=${dateLimit.toISOString()}&fields=created_at,total_price,financial_status,fulfillment_status`;
