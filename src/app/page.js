@@ -7,7 +7,7 @@ import LandingPage from '@/components/LandingPage';
 import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [stores, setStores] = useState([]);
 
@@ -24,6 +24,15 @@ export default function Dashboard() {
         .catch(err => console.error("Error fetching stores:", err));
     }
   }, [session]);
+
+  if (status === "loading") {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100%' }}>
+        <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   if (!session) return <LandingPage />;
 
