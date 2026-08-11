@@ -38,10 +38,10 @@ export default function Sidebar() {
 
   return (
     <aside className={styles.sidebar}>
-      <div className={styles.logoContainer}>
+      <Link href="/" className={styles.logoContainer} style={{ textDecoration: 'none', cursor: 'pointer' }}>
         <div className={styles.logoIcon}></div>
         <h1 className={styles.logoText}>DropX AI</h1>
-      </div>
+      </Link>
       
       <nav className={styles.nav}>
         {NAV_ITEMS.map((group, gIdx) => (

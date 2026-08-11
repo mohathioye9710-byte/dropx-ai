@@ -27,9 +27,9 @@ export async function GET(req) {
     
     return NextResponse.json({ 
       status: "connected",
-      shopUrl: creds.shopUrl || "",
+      shopUrl: creds.shopUrl || creds.domain || "",
       clientId: creds.clientId || "",
-      clientSecret: creds.clientSecret || ""
+      clientSecret: creds.clientSecret || creds.token || creds.accessToken || ""
     }, { status: 200 });
 
   } catch (error) {
