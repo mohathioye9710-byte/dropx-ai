@@ -99,7 +99,7 @@ export async function POST(req) {
 
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const themeRules = autoTheme 
-      ? `- You MUST generate a beautiful, premium color palette ("colors" object) that perfectly matches the products. The background should remain clean (white or very light).\n- YOU MUST deduce the overarching niche/theme of the store by analyzing the actual products listed (e.g. if you see toothbrushes, the niche is 'oral hygiene').\n- ALL copywriting (Hero text, About text, etc.) MUST be heavily tailored to this deduced niche.`
+      ? `- You MUST generate a beautiful, premium color palette ("colors" object). \nCRITICAL: ONLY use pale, muted, and pastel colors (e.g. pale sage green, soft beige, dusty rose). ABSOLUTELY NO bright, neon, or flashy colors. The 'primary' color MUST be a soft, pale pastel shade.\n- YOU MUST deduce the overarching niche/theme of the store by analyzing the actual products listed (e.g. if you see toothbrushes, the niche is 'oral hygiene').\n- ALL copywriting (Hero text, About text, etc.) MUST be heavily tailored to this deduced niche.`
       : `- You MUST use the exact colors provided in the JSON template above (#27ae60 etc). Do not change them.`;
 
     const prompt = `You are an expert Shopify store designer, brand strategist, and elite UI/UX designer.
@@ -505,7 +505,7 @@ ${themeRules}
             
             // === SECTION 2: MARQUEE SUBTIL (bordure, pas de fond criard) ===
             const marqueeHtml = `
-              <div style="background: ${branding.colors.primary}; color: #ffffff; padding: 12px 0; overflow: hidden; white-space: nowrap;">
+              <div style="background: ${branding.colors.announcementBg}; color: ${branding.colors.announcementText}; padding: 12px 0; overflow: hidden; white-space: nowrap; width: 100vw; position: relative; left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw;">
                 <div style="display: inline-block; animation: marquee 20s linear infinite; font-weight: bold; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase;">
                   ✦ ${branding.storeName} ✦ Qualité Premium ✦ Satisfaction Garantie ✦ Livraison Express ✦ Service 24/7 ✦ ${branding.storeName} ✦ Qualité Premium ✦ Satisfaction Garantie ✦ Livraison Express ✦ Service 24/7 ✦ ${branding.storeName} ✦ Qualité Premium ✦ Satisfaction Garantie ✦ Livraison Express ✦ Service 24/7 ✦
                 </div>
