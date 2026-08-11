@@ -227,8 +227,9 @@ export default function StoreDesignPage() {
                     </div>
                   </div>
                   
-                  {/* Simulated Store */}
+                  {/* Simulated Store - Product Page Layout */}
                   <div className={styles.storeMockup} style={{ background: branding.colors.background }}>
+                    
                     {/* Announcement Bar */}
                     <div className={styles.mockAnnouncement} style={{ 
                       background: branding.colors.announcementBg, 
@@ -237,73 +238,133 @@ export default function StoreDesignPage() {
                       {branding.announcementText}
                     </div>
 
-                    {/* Desktop / Mobile Toggle */}
+                    {/* Navigation */}
                     <div className={styles.mockHeader}>
-                      <div className={styles.mockLogo} style={{ color: branding.colors.text }}>{branding.storeName}</div>
-                      <div className={styles.mockNav} style={{ color: branding.colors.text }}>
-                        <span>Collection</span>
-                        <span>À Propos</span>
-                        <span>Contact</span>
+                      <div className={styles.mockNav} style={{ color: branding.colors.announcementBg }}>
+                        <span style={{fontWeight: 'bold', fontSize: '14px'}}>{branding.storeName}</span>
+                        <span style={{fontSize: '12px', marginLeft: '20px'}}>Catalog</span>
+                        <span style={{fontSize: '12px', marginLeft: '10px'}}>Contact</span>
                       </div>
                     </div>
 
-                    {/* Hero Section */}
-                    <div className={styles.mockHero} style={{ 
-                      background: branding.colors.background,
-                      color: branding.colors.text
-                    }}>
-                      <div className={styles.mockHeroContent}>
-                        <span className={styles.mockBadge} style={{ 
-                          color: branding.colors.primary, 
-                          border: `1px solid ${branding.colors.primary}40`,
-                          background: `${branding.colors.primary}10`
+                    {/* Product Page 2-Column Layout */}
+                    <div style={{ display: 'flex', padding: '30px', gap: '40px' }}>
+                      
+                      {/* Left Column: Product Images */}
+                      <div style={{ flex: 1 }}>
+                        {/* Main Image */}
+                        <div style={{ 
+                          width: '100%', 
+                          aspectRatio: '1', 
+                          background: '#f5f5f5', 
+                          borderRadius: '8px', 
+                          border: '1px solid #e0e0e0',
+                          marginBottom: '10px'
+                        }}></div>
+                        {/* Thumbnails */}
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          <div style={{ flex: 1, aspectRatio: '1', background: '#f5f5f5', borderRadius: '4px', border: '1px solid #e0e0e0' }}></div>
+                          <div style={{ flex: 1, aspectRatio: '1', background: '#f5f5f5', borderRadius: '4px', border: '1px solid #e0e0e0' }}></div>
+                          <div style={{ flex: 1, aspectRatio: '1', background: '#f5f5f5', borderRadius: '4px', border: '1px solid #e0e0e0' }}></div>
+                          <div style={{ flex: 1, aspectRatio: '1', background: '#f5f5f5', borderRadius: '4px', border: '1px solid #e0e0e0' }}></div>
+                        </div>
+                      </div>
+
+                      {/* Right Column: Product Details */}
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px' }}>HAUTE QUALITÉ</div>
+                        
+                        <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0', color: branding.colors.text, lineHeight: '1.2' }}>
+                          {branding.heroTitle}
+                        </h1>
+
+                        {/* Price Row */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <span style={{ fontSize: '20px', fontWeight: 'bold', color: branding.colors.secondary, padding: '4px 10px', background: `${branding.colors.secondary}22`, borderRadius: '4px' }}>
+                            42,85 $US
+                          </span>
+                          <span style={{ fontSize: '14px', textDecoration: 'line-through', color: '#999' }}>
+                            68,56 $US
+                          </span>
+                          <span style={{ fontSize: '12px', color: branding.colors.secondary, background: `${branding.colors.secondary}11`, padding: '2px 6px', border: `1px solid ${branding.colors.secondary}44`, borderRadius: '4px' }}>
+                            Économisez 38%
+                          </span>
+                        </div>
+
+                        {/* Description */}
+                        <p style={{ fontSize: '13px', color: '#555', lineHeight: '1.5', margin: '10px 0' }}>
+                          {branding.heroSubtitle}. {branding.aboutText}
+                        </p>
+
+                        {/* Bundle Section */}
+                        <div style={{ fontSize: '12px', fontWeight: 'bold', textAlign: 'center', marginBottom: '5px' }}>
+                          BUNDLE & ÉCONOMIES
+                        </div>
+
+                        {/* Bundle 1 (Selected) */}
+                        <div style={{ 
+                          border: `2px solid ${branding.colors.primary}`, 
+                          borderRadius: '8px', 
+                          padding: '12px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          background: `${branding.colors.primary}05`
                         }}>
-                          {branding.vibe.toUpperCase()}
-                        </span>
-                        <h1 className={styles.mockH1}>{branding.heroTitle}</h1>
-                        <p className={styles.mockP}>{branding.heroSubtitle}</p>
-                        <button className={styles.mockHeroBtn} style={{ 
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: `4px solid ${branding.colors.primary}`, background: '#fff' }}></div>
+                            <div>
+                              <div style={{ fontSize: '13px', fontWeight: 'bold', color: branding.colors.text }}>Pack Découverte (1 Unité)</div>
+                              <div style={{ fontSize: '11px', color: '#888' }}>ÉCONOMISEZ 38%</div>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 'bold', color: branding.colors.text }}>42,85 $US</div>
+                            <div style={{ fontSize: '11px', textDecoration: 'line-through', color: '#999' }}>68,56 $US</div>
+                          </div>
+                        </div>
+
+                        {/* Bundle 2 (Unselected) */}
+                        <div style={{ 
+                          border: '1px solid #e0e0e0', 
+                          borderRadius: '8px', 
+                          padding: '12px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          position: 'relative',
+                          marginTop: '10px'
+                        }}>
+                          <div style={{ position: 'absolute', top: '-10px', right: '10px', background: branding.colors.secondary, color: '#fff', fontSize: '10px', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold' }}>Le plus populaire</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '1px solid #ccc' }}></div>
+                            <div>
+                              <div style={{ fontSize: '13px', color: branding.colors.text }}>2 Achetés = 1 OFFERT</div>
+                              <div style={{ fontSize: '11px', color: '#888' }}>VOUS RECEVEZ 3 UNITÉS AU TOTAL !</div>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 'bold', color: branding.colors.text }}>85,70 $US</div>
+                          </div>
+                        </div>
+
+                        {/* Add to Cart Button */}
+                        <button style={{ 
                           background: branding.colors.buttonBg, 
-                          color: branding.colors.buttonText
+                          color: branding.colors.buttonText,
+                          width: '100%',
+                          padding: '15px',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          marginTop: '10px'
                         }}>
-                          Découvrir la Collection ✨
+                          Ajouter au Panier
                         </button>
                       </div>
                     </div>
-
-                  {/* Marquee */}
-                  <div className={styles.mockMarquee} style={{ 
-                    background: branding.colors.announcementBg,
-                    borderTop: `1px solid ${branding.colors.primary}22`,
-                    borderBottom: `1px solid ${branding.colors.primary}22`,
-                    color: branding.colors.announcementText
-                  }}>
-                    <div className={styles.mockMarqueeTrack}>
-                      {'✦ ' + branding.storeName + ' ✦ Qualité Premium ✦ Satisfaction Garantie ✦ Livraison Express ✦ '.repeat(3)}
-                    </div>
-                  </div>
-
-                  {/* Product Grid Placeholder */}
-                  <div className={styles.mockProductGrid} style={{ background: branding.colors.background }}>
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className={styles.mockProduct} style={{ 
-                        background: '#ffffff',
-                        border: `1px solid #eaeaea`,
-                        boxShadow: `0 4px 12px rgba(0,0,0,0.05)`,
-                        borderRadius: '12px',
-                        overflow: 'hidden'
-                      }}>
-                        <div className={styles.mockProductImage} style={{ 
-                          background: '#f9f9f9',
-                          borderBottom: `1px solid #eaeaea`
-                        }}></div>
-                        <div className={styles.mockProductInfo} style={{ padding: '16px' }}>
-                          <div className={styles.mockProductTitle} style={{ background: branding.colors.text + '20', height: '16px', borderRadius: '4px', marginBottom: '8px' }}></div>
-                          <div className={styles.mockProductPrice} style={{ background: branding.colors.primary, height: '24px', width: '50%', borderRadius: '4px' }}></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                   </div>
                 </div>
               )}

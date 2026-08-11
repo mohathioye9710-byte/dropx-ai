@@ -111,24 +111,25 @@ Return ONLY valid JSON:
   "heroSubtitle": "Hero subtitle in French (1 short sentence, max 12 words, very impactful)",
   "aboutText": "Premium 'About' paragraph in French (2-3 sentences, emotional brand story)",
   "colors": {
-    "primary": "#hex (A professional, conversion-optimized accent color like Emerald Green, Classic Navy, or Elegant Burgundy)",
-    "secondary": "#hex (A complementary soft color for backgrounds or badges)",
-    "background": "#hex (MUST be clean and light. e.g., #FFFFFF for pure white, or #F9F9F9 for soft gray. NO dark backgrounds.)",
-    "text": "#hex (MUST be very dark #111111 or #333333 for max readability)",
-    "buttonBg": "#hex (Same as primary or a strong call-to-action color)",
-    "buttonText": "#hex (MUST contrast perfectly with buttonBg, e.g. #FFFFFF)",
-    "announcementBg": "#hex (A soft color or the primary color, e.g., #F3F4F6 or primary)",
-    "announcementText": "#hex (Contrasting text for announcement)"
+    "primary": "#27ae60",
+    "secondary": "#f3d0db",
+    "background": "#FFFFFF",
+    "text": "#111111",
+    "buttonBg": "#000000",
+    "buttonText": "#FFFFFF",
+    "announcementBg": "#76a374",
+    "announcementText": "#FFFFFF"
   },
-  "font": "One of: 'Outfit', 'Space Grotesk', 'Syne', 'Clash Display', 'Inter'. Pick the coolest modern font.",
-  "vibe": "One word (e.g. Minimalist, Clean, Classic, Elegant, Trustworthy)"
+  "font": "Inter",
+  "vibe": "Clean & Trustworthy"
 }
 
 CRITICAL RULES:
-- The design must scream "Premium D2C E-commerce Brand" or "High-End Retail".
-- The background MUST be a light, clean color (white or soft gray).
+- The design must scream "Premium D2C E-commerce Brand".
+- You MUST use the exact colors provided in the JSON template above. Do not change them. The user explicitly requested this exact green/pink color scheme.
+- The background MUST be white.
 - All text must be dark and highly readable.
-- IMPORTANT: Be extremely creative in a professional way. Do NOT return the same design twice. Here is a unique seed to force variation: ${Math.random()}`;
+- IMPORTANT: Be extremely creative with the copy (heroTitle, subtitle, etc), but keep the colors exactly as specified. Here is a unique seed to force variation in copy: ${Math.random()}`;
 
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
