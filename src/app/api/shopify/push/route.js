@@ -25,9 +25,9 @@ export async function POST(req) {
     }
 
     const creds = JSON.parse(integration.keyData);
-    let shopUrl = creds.shopUrl || "";
-    // Pour le Dev Dashboard on utilise accessToken (shpat_), sinon on fallback sur clientSecret (anciens comptes)
-    const adminToken = creds.accessToken || creds.clientSecret;
+    // Support both old field names (shopUrl/accessToken/clientSecret) AND new field names (domain/token)
+    let shopUrl = creds.shopUrl || creds.domain || "";
+    const adminToken = creds.accessToken || creds.clientSecret || creds.token || "";
 
     if (!shopUrl || !adminToken) {
       return NextResponse.json({ error: "Identifiants Shopify incomplets. Veuillez vérifier vos paramètres." }, { status: 400 });
