@@ -42,6 +42,7 @@ export async function GET(req) {
       deviceData: [],
       geoData: [],
       funnelData: [],
+      heatmapData: Array(7).fill(0).map(() => Array(24).fill(0)),
       adCampaigns: [],
       totalTraffic: 0,
       emailData: null,
@@ -78,6 +79,7 @@ export async function GET(req) {
     let ordersCount = shopifyOrders.length;
     let shippedCount = 0;
     let pendingCount = 0;
+    const heatmapData = Array(7).fill(0).map(() => Array(24).fill(0));
 
     const revByDay = {};
     for (let i = 0; i < days; i++) {
@@ -99,6 +101,11 @@ export async function GET(req) {
        if (revByDay[key] !== undefined) {
          revByDay[key] += amount;
        }
+
+       let dayIdx = createdAt.getDay() - 1;
+       if (dayIdx === -1) dayIdx = 6;
+       const hour = createdAt.getHours();
+       heatmapData[dayIdx][hour]++;
     });
 
     const aov = ordersCount > 0 ? (revenue / ordersCount) : 0;
@@ -182,6 +189,7 @@ export async function GET(req) {
       trafficSources: [], // Empty for now, needs GA4
       deviceData: [], // Empty for now, needs GA4
       geoData: [], // Empty for now, needs GA4
+      heatmapData,
       funnelData: [
         { name: 'Impressions Pub', value: 0, pct: 0 },
         { name: 'Visites (Pixel)', value: realPageViews, pct: 100 },

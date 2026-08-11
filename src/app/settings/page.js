@@ -265,7 +265,7 @@ export default function SettingsPage() {
                     </span>
                   </div>
                   {existingIntegration ? (
-                    <button type="button" onClick={handleDisconnect} className={styles.saveButton} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <button type="button" onClick={handleDisconnect} className={styles.saveButton} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff' }}>
                       Changer de boutique
                     </button>
                   ) : (

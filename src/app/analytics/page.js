@@ -483,17 +483,15 @@ export default function Analytics() {
             <>
               <div key={`l-${di}`} className={styles.heatmapLabel}>{day}</div>
               {Array.from({ length: 24 }, (_, hi) => {
-                const intensity = Math.sin((hi - 6) * 0.3 + di * 0.5) * 0.5 + 0.5;
-                const weekend = di >= 5 ? 1.3 : 1;
-                const peak = (hi >= 10 && hi <= 14) || (hi >= 19 && hi <= 22) ? 1.5 : 1;
-                const val = Math.min(intensity * weekend * peak, 1);
-                const alpha = (val * 0.85 + 0.05).toFixed(2);
+                const count = analytics?.heatmapData?.[di]?.[hi] || 0;
+                const maxHeatmap = Math.max(...(analytics?.heatmapData?.flat() || []), 1);
+                const displayAlpha = count > 0 ? (Math.max(count / maxHeatmap, 0.1)).toFixed(2) : '0.02';
                 return (
                   <div
                     key={`c-${di}-${hi}`}
                     className={styles.heatmapCell}
-                    style={{ background: `rgba(255, 255, 255, ${alpha})` }}
-                    title={`${day} ${hi}h — ${Math.round(val * 12)} ventes`}
+                    style={{ background: `rgba(255, 255, 255, ${displayAlpha})` }}
+                    title={`${day} ${hi}h — ${count} ventes`}
                   />
                 );
               })}
