@@ -550,8 +550,15 @@ export default function Analyzer() {
           {/* Circular Progress */}
           <div style={{position: 'relative', width: '160px', height: '160px', marginBottom: '40px'}}>
             <svg style={{width: '100%', height: '100%', transform: 'rotate(-90deg)'}}>
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="50%" stopColor="#8b5cf6" />
+                  <stop offset="100%" stopColor="#d946ef" />
+                </linearGradient>
+              </defs>
               <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
-              <circle cx="80" cy="80" r="70" fill="none" stroke="#fff" strokeWidth="8" strokeDasharray="440" strokeDashoffset={440 - (440 * generationProgress) / 100} style={{transition: 'stroke-dashoffset 0.1s linear', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))'}} />
+              <circle cx="80" cy="80" r="70" fill="none" stroke="url(#progressGradient)" strokeWidth="8" strokeLinecap="round" strokeDasharray="440" strokeDashoffset={440 - (440 * Math.min(100, Math.max(0, generationProgress))) / 100} style={{transition: 'stroke-dashoffset 0.1s linear', filter: 'drop-shadow(0 0 12px rgba(139, 92, 246, 0.6))'}} />
             </svg>
             <div style={{position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
               <span style={{fontSize: '36px', fontWeight: 'bold', color: '#fff'}}>{generationProgress}</span>
