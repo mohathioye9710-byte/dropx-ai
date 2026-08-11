@@ -145,7 +145,7 @@ export default function StoreBuilder() {
   }, []);
 
   return (
-    <>
+    <div>
       <style>{`
         .preview-fullscreen .page-content { padding: 0 !important; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         .preview-fullscreen header { display: none !important; }
@@ -449,6 +449,6 @@ export default function StoreBuilder() {
         </div>
       </div>
     </div>
-    </>
+    </div>
   );
 }
