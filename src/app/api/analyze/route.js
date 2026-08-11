@@ -403,13 +403,47 @@ export async function POST(req) {
           "reviewsAnalysis": "...",
           "trendsAnalysis": "..."
         },
-        "productDescription": "Detailed physical description...",
-        "features": [{"icon": "emoji", "title": "...", "text": "..."}],
-        "howToUse": [{"step": 1, "title": "...", "text": "..."}],
-        "faq": [{"question": "...", "answer": "..."}],
+        "section1_benefits": {
+          "sectionTitle": "Title for 3-column benefits (ex: Simplicité absolue)",
+          "items": [
+            {"title": "Column 1 title", "text": "Column 1 text (max 2 sentences)"},
+            {"title": "Column 2 title", "text": "Column 2 text (max 2 sentences)"},
+            {"title": "Column 3 title", "text": "Column 3 text (max 2 sentences)"}
+          ]
+        },
+        "section2_features": {
+          "items": [
+            {"icon": "emoji", "title": "Feature 1", "text": "Short desc"},
+            {"icon": "emoji", "title": "Feature 2", "text": "Short desc"},
+            {"icon": "emoji", "title": "Feature 3", "text": "Short desc"},
+            {"icon": "emoji", "title": "Feature 4", "text": "Short desc"}
+          ]
+        },
+        "section3_steps": {
+          "sectionTitle": "Title for 3-step usage (ex: Votre alliée pro)",
+          "items": [
+            {"title": "Step 1 title", "text": "Step 1 text"},
+            {"title": "Step 2 title", "text": "Step 2 text"},
+            {"title": "Step 3 title", "text": "Step 3 text"}
+          ]
+        },
+        "section4_cta": {
+          "title": "Big impactful CTA title (ex: Cuisinez sans limites, nettoyez sans effort)",
+          "text": "1 persuasive sentence",
+          "buttonText": "Button text (ex: Libérez votre talent)"
+        },
+        "section5_power": {
+          "sectionTitle": "Title for technical specs (ex: La puissance pure)",
+          "items": [
+            {"icon": "emoji", "title": "Spec 1", "text": "Spec 1 desc"},
+            {"icon": "emoji", "title": "Spec 2", "text": "Spec 2 desc"},
+            {"icon": "emoji", "title": "Spec 3", "text": "Spec 3 desc"}
+          ],
+          "buttonText": "Button text (ex: Je nettoie sans effort)",
+          "ratingText": "4.9/5 - Approuvé"
+        },
         "reviews": [{"name": "...", "rating": 5, "text": "...", "verified": true}],
-        "personas": [{"icon": "emoji", "title": "...", "desc": "..."}],
-        "angles": [{"icon": "emoji", "title": "...", "desc": "..."}]
+        "faq": [{"question": "...", "answer": "..."}]
       }
     `;
 
@@ -536,12 +570,13 @@ export async function POST(req) {
       analysis,
       landingPage: {
         commercialDescription: analysis.commercialDescription || '',
-        features: analysis.features || [],
-        howToUse: analysis.howToUse || [],
+        section1_benefits: analysis.section1_benefits || null,
+        section2_features: analysis.section2_features || null,
+        section3_steps: analysis.section3_steps || null,
+        section4_cta: analysis.section4_cta || null,
+        section5_power: analysis.section5_power || null,
         faq: analysis.faq || [],
-        reviews: analysis.reviews || [],
-        personas: analysis.personas || [],
-        angles: analysis.angles || [],
+        reviews: analysis.reviews || []
       }
     });
 
