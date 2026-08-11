@@ -328,43 +328,50 @@ export default function Analyzer() {
               </div>
             )}
           </div>
-          {state === 'results' && result?.product?.title && (
-            <>
-              <h3 style={{color: '#fff', fontSize: '18px', fontWeight: '700', textAlign: 'center', lineHeight: '1.4', marginBottom: '24px'}}>
-                {result.product.title}
-              </h3>
-              
-              {result.analysis && result.analysis.score !== undefined && (
-                <div style={{width: '100%'}}>
-                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
-                    <span style={{fontSize: '15px', fontWeight: '600', color: '#fff'}}>Ton score produit</span>
-                    <span style={{fontSize: '20px', fontWeight: '800', color: '#fff'}}>{result.analysis.score}</span>
-                  </div>
-                  <div style={{display: 'flex', gap: '2px', background: '#111', padding: '8px', borderRadius: '12px'}}>
-                    {Array.from({ length: 40 }).map((_, i) => {
-                      const isActive = (i / 40) * 100 <= result.analysis.score;
-                      // Color gradient from blue (start) to green (end)
-                      const r = Math.round(59 + (i / 40) * (16 - 59));
-                      const g = Math.round(130 + (i / 40) * (185 - 130));
-                      const b = Math.round(246 + (i / 40) * (129 - 246));
-                      const color = `rgb(${r}, ${g}, ${b})`;
-                      return (
-                        <div 
-                          key={i} 
-                          style={{
-                            flex: 1, 
-                            height: '24px', 
-                            borderRadius: '2px', 
-                            background: isActive ? color : 'rgba(255,255,255,0.05)'
-                          }} 
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </>
+          
+          {(state === 'results' && result?.product?.title) ? (
+            <h3 style={{color: '#fff', fontSize: '18px', fontWeight: '700', textAlign: 'center', lineHeight: '1.4', marginBottom: '24px'}}>
+              {result.product.title}
+            </h3>
+          ) : (
+            <div style={{height: '24px', width: '80%', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', margin: '0 auto 24px auto', animation: 'pulse 1.5s infinite'}}></div>
           )}
+          
+          <div style={{width: '100%'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
+              <span style={{fontSize: '15px', fontWeight: '600', color: '#fff'}}>Ton score produit</span>
+              <span style={{fontSize: '20px', fontWeight: '800', color: state === 'results' ? '#fff' : '#a1a1aa'}}>
+                {state === 'results' && result?.analysis?.score !== undefined ? result.analysis.score : '?'}
+              </span>
+            </div>
+            <div style={{display: 'flex', gap: '2px', background: '#111', padding: '8px', borderRadius: '12px'}}>
+              {Array.from({ length: 40 }).map((_, i) => {
+                const isLoaded = state === 'results' && result?.analysis?.score !== undefined;
+                const isActive = isLoaded && (i / 40) * 100 <= result.analysis.score;
+                // Color gradient from blue (start) to green (end)
+                const r = Math.round(59 + (i / 40) * (16 - 59));
+                const g = Math.round(130 + (i / 40) * (185 - 130));
+                const b = Math.round(246 + (i / 40) * (129 - 246));
+                const color = `rgb(${r}, ${g}, ${b})`;
+                
+                // If loading, show a sweeping pulse animation effect across the bars
+                const loadingOpacity = !isLoaded ? (Math.sin((Date.now() / 200) + i) * 0.5 + 0.5) : 0;
+                
+                return (
+                  <div 
+                    key={i} 
+                    style={{
+                      flex: 1, 
+                      height: '24px', 
+                      borderRadius: '2px', 
+                      background: isActive ? color : (isLoaded ? 'rgba(255,255,255,0.05)' : `rgba(${r}, ${g}, ${b}, ${loadingOpacity * 0.3 + 0.1})`),
+                      transition: 'background 0.5s ease'
+                    }} 
+                  />
+                );
+              })}
+            </div>
+          </div>
         </div>,
         () => setState('idle'),
         state === 'results' ? () => setState('select_language') : null
