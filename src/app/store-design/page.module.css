@@ -529,7 +529,7 @@
 }
 
 .mockHero {
-  padding: 60px 24px;
+  padding: 30px 24px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -584,37 +584,37 @@
 
 .mockProductGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  padding: 32px 24px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  padding: 40px 24px;
 }
 
 .mockProduct {
   border-radius: 12px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .mockProductImage {
-  height: 120px;
+  height: 200px;
 }
 
 .mockProductInfo {
   padding: 12px;
   display: flex;
   flex-direction: column;
+  flex: 1;
   gap: 6px;
 }
 
 .mockProductTitle {
-  height: 12px;
-  border-radius: 6px;
-  width: 80%;
+  line-height: 1.4;
+  margin-bottom: 8px;
 }
 
 .mockProductPrice {
-  height: 10px;
-  border-radius: 6px;
-  width: 40%;
+  margin-top: auto;
 }
 
 /* ============================================
