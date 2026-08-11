@@ -148,7 +148,7 @@ export default function StoreBuilder() {
     <>
       <style>{`
         .preview-fullscreen .page-content { padding: 0 !important; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .preview-fullscreen .topbar { display: none !important; }
+        .preview-fullscreen .main-content > header { display: none !important; }
       `}</style>
       <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', background: '#000', overflow: 'hidden', color: '#fff', fontFamily: 'var(--font-family)' }}>
       
@@ -313,7 +313,7 @@ export default function StoreBuilder() {
               width: '100%', maxWidth: isPreviewMode ? '100%' : '1200px', 
               background: '#fff', borderRadius: isPreviewMode ? '0' : '16px', overflow: 'hidden', 
               boxShadow: isPreviewMode ? 'none' : '0 20px 40px rgba(0,0,0,0.4)', border: isPreviewMode ? 'none' : '1px solid rgba(255,255,255,0.1)',
-              display: 'flex', flexDirection: 'column', height: 'max-content'
+              display: 'flex', flexDirection: 'column', height: 'max-content', zoom: 0.65
             }}>
             
             {/* INJECTED STORE PREVIEW CONTENT */}
