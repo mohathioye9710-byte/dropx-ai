@@ -377,12 +377,27 @@ ${themeRules}
                   box-shadow: none !important;
                 }
 
-                html, body, .gradient, .color-background-1, .color-background-2,
+                /* === SUBTLE WALLPAPER PATTERN (WhatsApp Style) === */
+                html, body {
+                  background-color: ${branding.colors.background} !important;
+                  background-image: url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.04'%3E%3Cpath d='M40 40l10 10m0-10l-10 10M120 80a15 15 0 1 0 0-30 15 15 0 0 0 0 30zM220 50h20v20h-20zM80 180c10-20 30-20 40 0M250 150l-15 25h30zM50 250a10 10 0 1 1-20 0 10 10 0 1 1 20 0M180 240l10-10 10 10-10 10zM150 130c0 10-10 10-10 20M20 120q15-15 30 0M260 260c-10-10-10-20 0-30M130 280h20M90 100l5-5'/%3E%3C/g%3E%3C/svg%3E") !important;
+                  background-repeat: repeat !important;
+                  color: ${branding.colors.text} !important;
+                }
+
+                .gradient, .color-background-1, .color-background-2,
                 .footer, .shopify-section, #MainContent, .page-container, 
                 [id^="shopify-section-"] > * {
-                  background-color: ${branding.colors.background} !important;
-                  background: ${branding.colors.background} !important;
+                  background-color: transparent !important;
+                  background: transparent !important;
                   color: ${branding.colors.text} !important;
+                }
+
+                /* Keep cards solid so products stand out against the wallpaper */
+                .product-card, .card-wrapper, .card, .grid__item {
+                  background-color: ${branding.colors.background} !important;
+                  border-radius: 12px;
+                  border: 1px solid rgba(0,0,0,0.05);
                 }
 
                 /* === FORCE ALL TEXT READABLE === */
