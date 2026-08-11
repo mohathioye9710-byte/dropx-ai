@@ -49,8 +49,8 @@ export async function POST(req) {
     let shopifyOptions = [{ name: "Offres Limitées" }];
     const bundleOffers = [
       { title: "Pack Découverte (1 Unité)", p: basePrice, cp: safeCompare },
-      { title: "2 Achetés = 1 OFFERT", p: basePrice * 2, cp: safeCompare * 3 },
-      { title: "3 Achetés = 2 OFFERTS", p: basePrice * 3, cp: safeCompare * 5 }
+      { title: "2 Achetés", p: basePrice * 2, cp: safeCompare * 2 },
+      { title: "3 Achetés = 1 OFFERT", p: basePrice * 3, cp: safeCompare * 4 }
     ];
 
     let hasExtraOptions = product.options && product.options.length > 0;
@@ -349,8 +349,8 @@ export async function POST(req) {
 
       var bundlesData = [
         { title: "Pack D\\u00e9couverte (1 Unit\\u00e9)", tag: "", price: baseP, oldPrice: safeC },
-        { title: "2 Achet\\u00e9s = 1 OFFERT", tag: "Le plus populaire", price: baseP * 2, oldPrice: safeC * 3 },
-        { title: "3 Achet\\u00e9s = 2 OFFERTS", tag: "Meilleure vente", price: baseP * 3, oldPrice: safeC * 5 }
+        { title: "2 Achet\\u00e9s", tag: "Le plus populaire", price: baseP * 2, oldPrice: safeC * 2 },
+        { title: "3 Achet\\u00e9s = 1 OFFERT", tag: "Meilleure vente", price: baseP * 3, oldPrice: safeC * 4 }
       ];
 
       function formatPrice(price) {

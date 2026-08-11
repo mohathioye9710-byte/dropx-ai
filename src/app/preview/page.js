@@ -105,8 +105,8 @@ export default function StoreBuilder() {
     const safeCompare = comparePrice > basePrice ? comparePrice : basePrice * 2.8;
     return [
       { id: 1, title: "Pack Découverte (1 Unité)", desc: `ÉCONOMISEZ ${Math.round((1 - basePrice / safeCompare) * 100)}%`, price: basePrice, oldPrice: safeCompare, tag: "" },
-      { id: 2, title: "2 Achetés = 1 OFFERT", desc: `Vous recevez 3 unités au total !`, price: basePrice * 2, oldPrice: safeCompare * 3, tag: "Le plus populaire" },
-      { id: 3, title: "3 Achetés = 2 OFFERTS", desc: `Vous recevez 5 unités au total !`, price: basePrice * 3, oldPrice: safeCompare * 5, tag: "Meilleure vente" }
+      { id: 2, title: "2 Achetés", desc: `ÉCONOMISEZ ${Math.round((1 - basePrice / safeCompare) * 100)}%`, price: basePrice * 2, oldPrice: safeCompare * 2, tag: "Le plus populaire" },
+      { id: 3, title: "3 Achetés = 1 OFFERT", desc: `Vous recevez 4 unités au total !`, price: basePrice * 3, oldPrice: safeCompare * 4, tag: "Meilleure vente" }
     ];
   };
 

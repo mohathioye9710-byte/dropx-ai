@@ -309,19 +309,6 @@ export default function StoreDesignPage() {
                           <div className={styles.mockProductPrice} style={p.price ? { color: branding.colors.primary, fontSize: '16px', fontWeight: '900' } : { background: branding.colors.primary, height: '24px', width: '50%', borderRadius: '4px' }}>
                             {p.price ? `${p.price} €` : ''}
                           </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
-                            <div style={{ background: `${branding.colors.primary}15`, color: branding.colors.primary, fontSize: '11px', padding: '6px 8px', borderRadius: '6px', fontWeight: 'bold', border: `1px solid ${branding.colors.primary}40`, display: 'flex', justifyContent: 'space-between' }}>
-                              <span>🎁 3 Achetés</span>
-                              <span>= 1 Offert !</span>
-                            </div>
-                            <div style={{ background: '#f9f9f9', color: '#666', fontSize: '11px', padding: '6px 8px', borderRadius: '6px', border: '1px solid #eaeaea', display: 'flex', justifyContent: 'space-between' }}>
-                              <span>📦 2 Achetés</span>
-                              <span style={{fontWeight: 'bold'}}>{p.price ? `${(parseFloat(p.price)*2).toFixed(2)} €` : ''}</span>
-                            </div>
-                            <div style={{ background: '#f9f9f9', color: '#666', fontSize: '11px', padding: '6px 8px', borderRadius: '6px', border: '1px solid #eaeaea', display: 'flex', justifyContent: 'space-between' }}>
-                              <span>📦 1 Acheté</span>
-                              <span style={{fontWeight: 'bold'}}>{p.price ? `${p.price} €` : ''}</span>
-                            </div>
                           </div>
                         </div>
                       </div>
