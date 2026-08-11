@@ -242,7 +242,11 @@ export default function StoreDesignPage() {
                   </div>
                   
                   {/* Simulated Store */}
-                  <div className={styles.storeMockup} style={{ background: branding.colors.background }}>
+                  <div className={styles.storeMockup} style={{ 
+                    backgroundColor: branding.colors.background,
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.12'%3E%3Cpath d='M40 40l10 10m0-10l-10 10M120 80a15 15 0 1 0 0-30 15 15 0 0 0 0 30zM220 50h20v20h-20zM80 180c10-20 30-20 40 0M250 150l-15 25h30zM50 250a10 10 0 1 1-20 0 10 10 0 1 1 20 0M180 240l10-10 10 10-10 10zM150 130c0 10-10 10-10 20M20 120q15-15 30 0M260 260c-10-10-10-20 0-30M130 280h20M90 100l5-5'/%3E%3C/g%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'repeat'
+                  }}>
                     {/* Announcement Bar */}
                     <div className={styles.mockAnnouncement} style={{ 
                       background: branding.colors.announcementBg, 
@@ -263,7 +267,7 @@ export default function StoreDesignPage() {
 
                     {/* Hero Section */}
                     <div className={styles.mockHero} style={{ 
-                      background: branding.colors.background,
+                      background: 'transparent',
                       color: branding.colors.text
                     }}>
                       <div className={styles.mockHeroContent}>
@@ -298,7 +302,7 @@ export default function StoreDesignPage() {
                   </div>
 
                   {/* Product Grid Placeholder */}
-                  <div className={styles.mockProductGrid} style={{ background: branding.colors.background }}>
+                  <div className={styles.mockProductGrid} style={{ background: 'transparent' }}>
                     {(shopInfo?.products && shopInfo.products.length > 0 ? shopInfo.products.slice(0, 3) : [{id:1}, {id:2}, {id:3}]).map((p, i) => (
                       <div key={p.id || i} className={styles.mockProduct} style={{ 
                         background: '#ffffff',
