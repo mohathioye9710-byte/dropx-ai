@@ -100,17 +100,12 @@ export default function LandingPage() {
         {/* Big CTA */}
         <button 
           onClick={() => router.push('/register')}
-          style={{ background: '#ffffff', color: '#000000', padding: '16px 40px', borderRadius: '12px', fontSize: '18px', fontWeight: '700', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 20px rgba(255,255,255,0.1)', marginBottom: '60px' }}
+          style={{ background: '#ffffff', color: '#000000', padding: '16px 40px', borderRadius: '12px', fontSize: '18px', fontWeight: '700', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 20px rgba(255,255,255,0.1)' }}
           onMouseOver={(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 6px 24px rgba(255,255,255,0.15)'; }}
           onMouseOut={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 20px rgba(255,255,255,0.1)'; }}
         >
           {t.start}
         </button>
-
-        {/* Hero Image */}
-        <div style={{ maxWidth: '1000px', width: '100%', margin: '0 auto', position: 'relative' }}>
-          <img src="/hero-image.png" alt="DropX AI Dashboard Preview" style={{ width: '100%', height: 'auto', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 80px rgba(0,0,0,0.8)' }} />
-        </div>
 
       </main>
 

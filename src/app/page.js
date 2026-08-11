@@ -99,8 +99,12 @@ export default function Dashboard() {
               onClick={() => router.push(`/preview?id=${store.id}`)}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                <div style={{ width: '40px', height: '40px', background: '#111', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <Store size={20} color="#a1a1aa" />
+                <div style={{ width: '40px', height: '40px', background: '#111', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                  {store.metadata?.product?.image ? (
+                    <img src={store.metadata.product.image} alt={store.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <Store size={20} color="#a1a1aa" />
+                  )}
                 </div>
                 <span style={{ fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '100px', background: store.status.includes('Publié') ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)', color: store.status.includes('Publié') ? '#10b981' : '#a1a1aa' }}>
                   {store.status}
