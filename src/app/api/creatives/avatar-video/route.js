@@ -13,7 +13,7 @@ import {
 } from '@/lib/videoPipeline.mjs';
 import { resolveMusicPath, getMusicDefaultOffset } from '@/lib/musicLibrary.mjs';
 
-export const maxDuration = 900;
+export const maxDuration = 300;
 
 const RENDERS_DIR = path.join(process.cwd(), 'data', 'renders');
 const FONTS_DIR = path.join(process.cwd(), 'assets', 'fonts');
