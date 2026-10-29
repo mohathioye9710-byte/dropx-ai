@@ -29,7 +29,7 @@ export default function StoreBuilder() {
 
   const [bundle, setBundle] = useState(1);
   const [currency, setCurrency] = useState('XOF'); // Default XOF for Senegal
-  const [merchantPhone, setMerchantPhone] = useState('+221770000000');
+  const [merchantPhone, setMerchantPhone] = useState('+221775447866');
   const [formName, setFormName] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [formCity, setFormCity] = useState('Dakar Centre (Plateau, Médina, Fann, Point E)');

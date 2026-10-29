@@ -71,7 +71,7 @@ export async function POST(req) {
       unitPrice = 0,
       totalPrice = 0,
       currency = 'XOF',
-      merchantPhone = '+221770000000',
+      merchantPhone = '+221775447866',
       note = ''
     } = body;
 
@@ -219,7 +219,7 @@ export async function POST(req) {
       `Merci de confirmer la livraison !`
     );
 
-    const cleanMerchantPhone = (merchantPhone || '221770000000').replace(/[^0-9]/g, '');
+    const cleanMerchantPhone = (merchantPhone && !merchantPhone.includes('770000000') ? merchantPhone : '221775447866').replace(/[^0-9]/g, '');
     const whatsappUrl = `https://wa.me/${cleanMerchantPhone}?text=${waText}`;
 
     return NextResponse.json({

@@ -1114,7 +1114,7 @@ fbq('track', 'PageView');
             "Paiement : " + paymentMethod + ".\n" +
             "Merci de me confirmer la livraison !"
           );
-          var waUrl = "https://wa.me/221770000000?text=" + waText;
+          var waUrl = "https://wa.me/221775447866?text=" + waText;
 
           // Send to DropX COD API
           try {
