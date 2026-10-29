@@ -5,6 +5,7 @@ import { ShoppingBag, ShieldCheck, Truck, ArrowLeft, Check, Zap, Loader2, Layout
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { normalizeLandingPage } from '@/lib/landing-page';
+import { getDeliveryFeeByZone, getWaveFee, formatFCFA, normalizePriceFCFA } from '@/lib/senegalCod';
 
 const TEXT_THEME_COLORS = ['#000000', '#ffffff', '#64748b', '#6b7280', '#7c6a9f', '#a56d7b', '#6f8c82', '#8b7b68', '#7d8e59', '#5e7894'];
 const BUTTON_THEME_COLORS = ['#000000', '#ffffff', '#a7f3d0', '#bfdbfe', '#ddd6fe', '#fbcfe8', '#fed7aa', '#fde68a', '#bae6fd', '#c7d2fe', '#bbf7d0'];
@@ -180,7 +181,10 @@ export default function StoreBuilder() {
 
     setIsSubmittingOrder(true);
     const selectedBundleObj = smartBundles.find(b => b.id === bundle) || smartBundles[0];
-    const totalAmount = selectedBundleObj.price;
+    const rawProductPrice = normalizePriceFCFA(selectedBundleObj.price, currency);
+    const deliveryFee = getDeliveryFeeByZone(formCity);
+    const totalAmount = rawProductPrice + deliveryFee;
+    const waveFee = getWaveFee(totalAmount);
     const fullPhone = '+221 ' + formPhone.replace(/^\+221/, '').trim();
 
     try {
@@ -196,16 +200,18 @@ export default function StoreBuilder() {
           productTitle: product.title,
           bundleTitle: selectedBundleObj.title,
           quantity: bundle,
-          unitPrice: product.price,
+          unitPrice: rawProductPrice,
+          deliveryFee: deliveryFee,
           totalPrice: totalAmount,
-          currency: currency,
+          currency: 'XOF',
           merchantPhone: merchantPhone
         })
       });
       const data = await res.json();
       setOrderModalData({
         productTitle: `${product.title} (${selectedBundleObj.title})`,
-        totalPrice: formatPrice(totalAmount),
+        totalPrice: formatFCFA(totalAmount),
+        deliveryFee: formatFCFA(deliveryFee),
         address: `${formAddress}, ${formCity}`,
         paymentMethod: formPaymentMethod,
         whatsappUrl: data.whatsappUrl || `https://wa.me/${merchantPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Bonjour ShopX ! Je confirme ma commande : ' + product.title)}`
@@ -213,10 +219,11 @@ export default function StoreBuilder() {
     } catch (e) {
       setOrderModalData({
         productTitle: `${product.title} (${selectedBundleObj.title})`,
-        totalPrice: formatPrice(totalAmount),
+        totalPrice: formatFCFA(totalAmount),
+        deliveryFee: formatFCFA(deliveryFee),
         address: `${formAddress}, ${formCity}`,
         paymentMethod: formPaymentMethod,
-        whatsappUrl: `https://wa.me/${merchantPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ! Je confirme ma commande : ${product.title} (${selectedBundleObj.title}) pour ${formatPrice(totalAmount)} à ${formAddress}, ${formCity}.`)}`
+        whatsappUrl: `https://wa.me/${merchantPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ! Je confirme ma commande : ${product.title} (${selectedBundleObj.title}) pour ${formatFCFA(totalAmount)} à ${formAddress}, ${formCity}.`)}`
       });
     } finally {
       setIsSubmittingOrder(false);
@@ -643,16 +650,39 @@ export default function StoreBuilder() {
                         </div>
                       </div>
 
-                      {/* Summary */}
-                      <div style={{ background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: '12px', padding: '14px', margin: '10px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600' }}>Total à régler à la livraison :</div>
-                          <div style={{ fontSize: '13px', color: '#111', fontWeight: '700' }}>{(smartBundles.find(b => b.id === bundle) || smartBundles[0]).title}</div>
-                        </div>
-                        <div style={{ fontSize: '22px', fontWeight: '900', color: buttonColor }}>
-                          {formatPrice((smartBundles.find(b => b.id === bundle) || smartBundles[0]).price)}
-                        </div>
-                      </div>
+                      {/* Summary with Zone Delivery Fee and Wave 1% */}
+                      {(() => {
+                        const selectedBundleObj = smartBundles.find(b => b.id === bundle) || smartBundles[0];
+                        const rawProductPrice = normalizePriceFCFA(selectedBundleObj.price, currency);
+                        const deliveryFee = getDeliveryFeeByZone(formCity);
+                        const totalAmount = rawProductPrice + deliveryFee;
+                        const waveFee = getWaveFee(totalAmount);
+
+                        return (
+                          <div style={{ background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: '12px', padding: '14px', margin: '10px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#4b5563' }}>
+                              <span>Sous-total ({selectedBundleObj.title}) :</span>
+                              <span style={{ fontWeight: '700', color: '#111' }}>{formatFCFA(rawProductPrice)}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#4b5563' }}>
+                              <span>Frais de livraison ({formCity.split('(')[0].trim()}) :</span>
+                              <span style={{ fontWeight: '700', color: '#10b981' }}>+ {formatFCFA(deliveryFee)}</span>
+                            </div>
+                            {formPaymentMethod === 'Wave / Orange Money' && (
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#1d4ed8', background: '#eff6ff', padding: '6px 10px', borderRadius: '6px' }}>
+                                <span>📱 Paiement Wave direct :</span>
+                                <span style={{ fontWeight: '700' }}>1% sécurisé ({formatFCFA(waveFee)})</span>
+                              </div>
+                            )}
+                            <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div style={{ fontSize: '13px', color: '#111', fontWeight: '800' }}>TOTAL À RÉGLER À LA LIVRAISON :</div>
+                              <div style={{ fontSize: '22px', fontWeight: '900', color: buttonColor }}>
+                                {formatFCFA(totalAmount)}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                       {/* CTA Button */}
                       <button 

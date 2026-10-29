@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { prisma } from '@/lib/prisma';
+import fs from 'fs';
+import path from 'path';
+import { getDeliveryFeeByZone, getWaveFee, normalizePriceFCFA } from '@/lib/senegalCod';
 
 export async function GET(req) {
   const session = await getServerSession(authOptions);
@@ -84,12 +87,40 @@ export async function GET(req) {
     const data = await shopifyRes.json();
     const shopifyOrders = data.orders || [];
 
-    // 3. Process Real Shopify Data
+    let localCodOrders = [];
+    try {
+      const dataFilePath = path.join(process.cwd(), 'data', 'cod_orders.json');
+      if (fs.existsSync(dataFilePath)) {
+        localCodOrders = JSON.parse(fs.readFileSync(dataFilePath, 'utf8') || '[]');
+      }
+    } catch(e) {}
+
+    // 3. Process Real Orders Data with Senegal COD Formula (Alibaba, Zone Delivery, Wave 1%)
     let revenue = 0;
-    let ordersCount = shopifyOrders.length;
+    let totalSupplierCost = 0;
+    let totalDeliveryFees = 0;
+    let totalWaveFees = 0;
+    let profit = 0;
     let shippedCount = 0;
     let pendingCount = 0;
     const heatmapData = Array(7).fill(0).map(() => Array(24).fill(0));
+
+    const allCombinedOrders = [...shopifyOrders];
+    const shopifyOrderIds = new Set(shopifyOrders.map(so => String(so.id)));
+    localCodOrders.forEach(lo => {
+      if (!lo.shopifyOrderId || !shopifyOrderIds.has(String(lo.shopifyOrderId))) {
+        allCombinedOrders.push({
+          total_price: lo.normalizedRevenue || lo.totalPrice,
+          currency: lo.currency || 'XOF',
+          created_at: lo.createdAt,
+          fulfillment_status: lo.status === 'LIVRE' ? 'fulfilled' : null,
+          note: lo.note,
+          customerCity: lo.customerCity
+        });
+      }
+    });
+
+    let ordersCount = allCombinedOrders.length;
 
     const revByDay = {};
     for (let i = 0; i < days; i++) {
@@ -99,14 +130,27 @@ export async function GET(req) {
        revByDay[key] = 0;
     }
 
-    shopifyOrders.forEach(o => {
-       const amount = parseFloat(o.total_price);
+    allCombinedOrders.forEach(o => {
+       const amount = normalizePriceFCFA(o.total_price || o.totalPrice, o.currency);
        revenue += amount;
+
+       // City / Zone for delivery fee
+       const city = o.customerCity || o.shipping_address?.city || (o.note?.match(/Région\/Ville:\s*([^\n]+)/i)?.[1]) || 'Dakar';
+       const deliveryFee = getDeliveryFeeByZone(city);
+       const waveFee = getWaveFee(amount);
+       // Alibaba/AliExpress benchmark cost (~28% of retail price)
+       const supplierCost = o.supplierCost ? Number(o.supplierCost) : Math.round((amount * 0.28) / 100) * 100;
+       const orderProfit = amount - supplierCost - deliveryFee - waveFee;
+
+       totalSupplierCost += supplierCost;
+       totalDeliveryFees += deliveryFee;
+       totalWaveFees += waveFee;
+       profit += orderProfit;
 
        if (o.fulfillment_status === 'fulfilled') shippedCount++;
        else if (!o.fulfillment_status) pendingCount++;
 
-       const createdAt = new Date(o.created_at);
+       const createdAt = new Date(o.created_at || Date.now());
        const key = createdAt.toLocaleDateString('fr-FR', { weekday: 'short' });
        if (revByDay[key] !== undefined) {
          revByDay[key] += amount;
@@ -115,10 +159,10 @@ export async function GET(req) {
        let dayIdx = createdAt.getDay() - 1;
        if (dayIdx === -1) dayIdx = 6;
        const hour = createdAt.getHours();
-       heatmapData[dayIdx][hour]++;
+       if (hour >= 0 && hour < 24) heatmapData[dayIdx][hour]++;
     });
 
-    const aov = ordersCount > 0 ? (revenue / ordersCount) : 0;
+    const aov = ordersCount > 0 ? Math.round(revenue / ordersCount) : 0;
     
     // Revenue Chart Data
     const revenueData = Object.keys(revByDay).reverse().slice(-7).map(day => ({
@@ -173,7 +217,6 @@ export async function GET(req) {
     const realPageViews = totalPageViews > 0 ? totalPageViews : totalTraffic;
     const realAddToCart = addToCartCount > 0 ? addToCartCount : Math.floor(totalTraffic * 0.08);
     const convRate = totalTraffic > 0 ? (ordersCount / totalTraffic) * 100 : 0;
-    const profit = revenue * 0.4; // Estimate 40% margin
 
     const shippingData = {
       orders: ordersCount,
@@ -191,9 +234,13 @@ export async function GET(req) {
       kpis: {
         revenue,
         profit,
+        supplierCost: totalSupplierCost,
+        deliveryFees: totalDeliveryFees,
+        waveFees: totalWaveFees,
         ordersCount,
         convRate,
-        aov
+        aov,
+        currency: 'XOF'
       },
       revenueData,
       trafficSources: [], // Empty for now, needs GA4

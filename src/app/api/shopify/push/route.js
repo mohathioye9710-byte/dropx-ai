@@ -827,12 +827,23 @@ fbq('track', 'PageView');
       </div>
     </div>
 
-    <div class="dropx-summary-box">
-      <div>
-        <div style="font-size: 12px; color: #64748b; font-weight: 600;">Total à régler à la livraison :</div>
-        <div id="dropx-cod-pack-label" style="font-size: 13px; color: #111; font-weight: 700;">Pack 1 Unité</div>
+    <div class="dropx-summary-box" style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; color: #4b5563;">
+        <span id="dropx-cod-pack-label">Pack (1 Unité) :</span>
+        <span id="dropx-cod-subtotal-display" style="font-weight: 700; color: #111;">-- FCFA</span>
       </div>
-      <div id="dropx-cod-total-display" style="font-size: 22px; font-weight: 900; color: ${buttonColor};">-- FCFA</div>
+      <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; color: #4b5563;">
+        <span>Frais de livraison (<span id="dropx-cod-zone-name">Dakar Centre</span>) :</span>
+        <span id="dropx-cod-delivery-display" style="font-weight: 700; color: #10b981;">+ 1 500 FCFA</span>
+      </div>
+      <div id="dropx-wave-badge-note" style="display: none; justify-content: space-between; width: 100%; font-size: 12px; color: #1d4ed8; background: #eff6ff; padding: 4px 8px; border-radius: 6px;">
+        <span>📱 Paiement Wave direct :</span>
+        <span id="dropx-cod-wave-fee">1% sécurisé (0 FCFA)</span>
+      </div>
+      <div style="border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-top: 4px; display: flex; justify-content: space-between; width: 100%; align-items: center;">
+        <div style="font-size: 13px; color: #111; font-weight: 800;">TOTAL À RÉGLER :</div>
+        <div id="dropx-cod-total-display" style="font-size: 22px; font-weight: 900; color: ${buttonColor};">-- FCFA</div>
+      </div>
     </div>
 
     <button type="button" id="dropx-cod-submit-btn" class="dropx-submit-btn">
@@ -913,17 +924,60 @@ fbq('track', 'PageView');
         return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(xofAmount) + ' FCFA';
       }
 
-      var selectedBundleIndex = 0;
+      var deliveryZoneFees = {
+        "Dakar Centre": 1500,
+        "Dakar Ouest": 2000,
+        "Dakar Nord": 2000,
+        "Dakar Banlieue": 2500,
+        "Rufisque": 3000,
+        "Thiès": 3500,
+        "Touba": 4000,
+        "Saint-Louis": 4500,
+        "Kaolack": 4500,
+        "Ziguinchor": 5000,
+        "Autre": 4000
+      };
+
+      function getDeliveryFee(cityName) {
+        var name = String(cityName || '');
+        for (var k in deliveryZoneFees) {
+          if (name.indexOf(k) !== -1) return deliveryZoneFees[k];
+        }
+        return 2000;
+      }
 
       function updateCODAmounts() {
         var activeBundle = bundlesData[selectedBundleIndex] || bundlesData[0];
+        var rawPrice = activeBundle.price >= 500 ? activeBundle.price : Math.round(activeBundle.price * 600 / 100) * 100;
+
+        var citySelect = document.getElementById('dropx-cod-city');
+        var selectedCity = citySelect ? citySelect.value : 'Dakar Centre';
+        var deliveryFee = getDeliveryFee(selectedCity);
+        var totalAmount = rawPrice + deliveryFee;
+        var waveFee = Math.round(totalAmount * 0.01);
+
         var packLabelEl = document.getElementById('dropx-cod-pack-label');
+        var subtotalEl = document.getElementById('dropx-cod-subtotal-display');
+        var zoneNameEl = document.getElementById('dropx-cod-zone-name');
+        var deliveryEl = document.getElementById('dropx-cod-delivery-display');
+        var waveBadgeEl = document.getElementById('dropx-wave-badge-note');
+        var waveFeeEl = document.getElementById('dropx-cod-wave-fee');
         var totalEl = document.getElementById('dropx-cod-total-display');
-        if (packLabelEl) packLabelEl.innerText = activeBundle.title;
-        if (totalEl) totalEl.innerText = formatPrice(activeBundle.price);
+
+        if (packLabelEl) packLabelEl.innerText = activeBundle.title + " :";
+        if (subtotalEl) subtotalEl.innerText = formatPrice(rawPrice);
+        if (zoneNameEl) zoneNameEl.innerText = selectedCity.split('(')[0].trim();
+        if (deliveryEl) deliveryEl.innerText = "+ " + formatPrice(deliveryFee);
+
+        var waveRadio = document.querySelector('input[name="dropx_pay_method"]:checked');
+        var isWave = waveRadio && waveRadio.value && waveRadio.value.indexOf('Wave') !== -1;
+        if (waveBadgeEl) waveBadgeEl.style.display = isWave ? 'flex' : 'none';
+        if (waveFeeEl) waveFeeEl.innerText = "1% sécurisé (" + formatPrice(waveFee) + ")";
+
+        if (totalEl) totalEl.innerText = formatPrice(totalAmount);
 
         var priceEl = document.getElementById('dropx-price-display');
-        if(priceEl) priceEl.innerText = formatPrice(activeBundle.price);
+        if(priceEl) priceEl.innerText = formatPrice(rawPrice);
         var oldPriceEl = document.getElementById('dropx-oldprice-display');
         if(oldPriceEl) oldPriceEl.innerText = formatPrice(activeBundle.oldPrice);
         var savingsEl = document.getElementById('dropx-savings-display');
@@ -1052,7 +1106,13 @@ fbq('track', 'PageView');
             if(waveLbl) waveLbl.classList.add('active');
             if(cashLbl) cashLbl.classList.remove('active');
           }
+          updateCODAmounts();
         };
+      }
+
+      var citySelectEl = document.getElementById('dropx-cod-city');
+      if (citySelectEl) {
+        citySelectEl.onchange = updateCODAmounts;
       }
 
       // COD Form Submission
@@ -1084,7 +1144,9 @@ fbq('track', 'PageView');
           }
 
           var activeBundle = bundlesData[selectedBundleIndex] || bundlesData[0];
-          var totalAmount = activeBundle.price;
+          var rawPrice = activeBundle.price >= 500 ? activeBundle.price : Math.round(activeBundle.price * 600 / 100) * 100;
+          var deliveryFee = getDeliveryFee(city);
+          var totalAmount = rawPrice + deliveryFee;
 
           submitBtn.disabled = true;
           submitBtn.innerHTML = '<span>Validation en cours... ⏳</span>';
@@ -1107,7 +1169,8 @@ fbq('track', 'PageView');
           // Prepare WhatsApp link
           var waText = encodeURIComponent(
             "Bonjour ShopX ! Je viens de commander : " + productTitle + " (" + activeBundle.title + ").\n" +
-            "Montant total : " + formatPrice(totalAmount) + ".\n" +
+            "Sous-total : " + formatPrice(rawPrice) + " + Livraison (" + city.split('(')[0].trim() + ") : " + formatPrice(deliveryFee) + ".\n" +
+            "Montant total à régler : " + formatPrice(totalAmount) + ".\n" +
             "Nom : " + name + "\n" +
             "Téléphone : " + fullPhone + "\n" +
             "Ville / Quartier : " + city + " - " + address + "\n" +
@@ -1132,7 +1195,8 @@ fbq('track', 'PageView');
                 productTitle: productTitle,
                 bundleTitle: activeBundle.title,
                 quantity: selectedBundleIndex + 1,
-                unitPrice: baseP,
+                unitPrice: rawPrice,
+                deliveryFee: deliveryFee,
                 totalPrice: totalAmount,
                 currency: 'XOF'
               })

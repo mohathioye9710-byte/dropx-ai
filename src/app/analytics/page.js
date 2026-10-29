@@ -11,6 +11,7 @@ import {
   BarChart2, Hash, Flame, Loader2
 } from 'lucide-react';
 import styles from '../Dashboard.module.css';
+import { formatFCFA } from '@/lib/senegalCod';
 
 /* ===========================================
    COULEURS FIXES pour les sources et appareils
@@ -132,15 +133,15 @@ export default function Analytics() {
 
   // Derive display values from API data
   const kpis = analytics ? [
-    { label: 'Chiffre d\'Affaires', value: `€${analytics.kpis.revenue.toLocaleString('fr-FR', {maximumFractionDigits:0})}`, change: '+18.2%', up: analytics.kpis.revenue > 0, color: '#ffffff',
+    { label: "Chiffre d'Affaires (Site)", value: formatFCFA(analytics.kpis.revenue), change: '+18.2%', up: analytics.kpis.revenue > 0, color: '#ffffff',
       spark: analytics.revenueData?.map(d => Number(d.rev)) || [] },
-    { label: 'Bénéfice Net', value: `€${analytics.kpis.profit.toLocaleString('fr-FR', {maximumFractionDigits:0})}`, change: analytics.kpis.profit >= 0 ? '+' : '', up: analytics.kpis.profit >= 0, color: '#ffffff',
+    { label: 'Bénéfice Net Réel', value: formatFCFA(analytics.kpis.profit), change: analytics.kpis.profit >= 0 ? '+' : '', up: analytics.kpis.profit >= 0, color: '#ffffff',
       spark: analytics.revenueData?.map(d => Math.max(Number(d.rev) - Number(d.ads), 0)) || [] },
     { label: 'Commandes', value: analytics.kpis.ordersCount.toLocaleString('fr-FR'), change: '+24.1%', up: true, color: '#ffffff',
       spark: analytics.revenueData?.map(d => Number(d.rev) * 0.3) || [] },
     { label: 'Taux Conversion', value: `${analytics.kpis.convRate.toFixed(1)}%`, change: analytics.kpis.convRate > 3 ? '+0.5%' : '-0.3%', up: analytics.kpis.convRate > 3, color: '#ffffff',
       spark: analytics.revenueData?.map(() => analytics.kpis.convRate + (Math.random() - 0.5) * 2) || [] },
-    { label: 'Panier Moyen', value: `€${analytics.kpis.aov.toFixed(2)}`, change: '+5.4%', up: true, color: '#ffffff',
+    { label: 'Panier Moyen', value: formatFCFA(analytics.kpis.aov), change: '+5.4%', up: true, color: '#ffffff',
       spark: analytics.revenueData?.map(() => analytics.kpis.aov + (Math.random() - 0.5) * 10) || [] },
   ] : [];
 
@@ -250,7 +251,7 @@ export default function Analytics() {
                       background: 'linear-gradient(to top, rgba(255,255,255,0.1), #ffffff)',
                       animationDelay: `${i * 0.06}s`,
                     }}
-                    title={`Revenus: €${d.realRev?.toFixed(0) || d.rev}`}
+                    title={`Revenus: ${formatFCFA(d.realRev || d.rev)}`}
                   />
                   <div
                     className={styles.bar}
@@ -264,7 +265,7 @@ export default function Analytics() {
                       bottom: 0,
                       right: '10%',
                     }}
-                    title={`Pub: €${d.realAds?.toFixed(0) || d.ads}`}
+                    title={`Pub: ${formatFCFA(d.realAds || d.ads)}`}
                   />
                 </div>
                 <span className={styles.barLabel}>{d.day}</span>
@@ -543,7 +544,7 @@ export default function Analytics() {
         <div className={styles.customerGrid}>
           {[
             { val: fmt(totalTraffic), label: 'Visiteurs Uniques', color: '#ffffff' },
-            { val: `€${analytics?.kpis.aov.toFixed(2) || '0'}`, label: 'Panier Moyen', color: '#ffffff' },
+            { val: formatFCFA(analytics?.kpis.aov || 0), label: 'Panier Moyen', color: '#ffffff' },
             { val: `${analytics?.kpis.convRate.toFixed(1) || '0'}%`, label: 'Taux de Conversion', color: '#e5e5e5' },
             { val: `${analytics?.kpis.ordersCount || 0}`, label: 'Commandes Totales', color: '#ffffff' },
           ].map((m, i) => (
@@ -586,10 +587,12 @@ export default function Analytics() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[
-              { name: 'Revenus Totaux', val: `€${analytics?.kpis.revenue.toFixed(0) || 0}`, color: '#ffffff' },
-              { name: 'Dépenses Pub', val: `€${adCampaigns.reduce((s,a) => s + a.spend, 0).toFixed(0)}`, color: '#71717a' },
-              { name: 'Bénéfice Net', val: `€${analytics?.kpis.profit.toFixed(0) || 0}`, color: analytics?.kpis.profit >= 0 ? '#ffffff' : '#71717a' },
-              { name: 'Panier Moyen', val: `€${analytics?.kpis.aov.toFixed(2) || 0}`, color: '#ffffff' },
+              { name: 'Chiffre d\'Affaires (Site)', val: formatFCFA(analytics?.kpis.revenue || 0), color: '#ffffff' },
+              { name: 'Coût Fournisseur Alibaba', val: `- ${formatFCFA(analytics?.kpis.supplierCost || 0)}`, color: '#f87171' },
+              { name: 'Frais Livraison (Zone Sénégal)', val: `- ${formatFCFA(analytics?.kpis.deliveryFees || 0)}`, color: '#f87171' },
+              { name: 'Frais Wave (1%)', val: `- ${formatFCFA(analytics?.kpis.waveFees || 0)}`, color: '#f87171' },
+              { name: 'Bénéfice Net Réel', val: `+ ${formatFCFA(analytics?.kpis.profit || 0)}`, color: analytics?.kpis.profit >= 0 ? '#34d399' : '#f87171' },
+              { name: 'Panier Moyen (AOV)', val: formatFCFA(analytics?.kpis.aov || 0), color: '#ffffff' },
               { name: 'Taux de Conversion', val: `${analytics?.kpis.convRate.toFixed(1) || 0}%`, color: '#e5e5e5' },
             ].map((s, i) => (
               <div key={i} className={styles.stockItem}>

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import fs from 'fs';
 import path from 'path';
+import { getDeliveryFeeByZone, getWaveFee, normalizePriceFCFA, calculateOrderFinances } from '@/lib/senegalCod';
 
 // Helper for local file persistence as a high-reliability fallback
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -85,6 +86,13 @@ export async function POST(req) {
     const orderId = `COD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const now = new Date().toISOString();
 
+    const normalizedRevenue = normalizePriceFCFA(totalPrice, currency);
+    const calculatedDeliveryFee = body.deliveryFee !== undefined ? Number(body.deliveryFee) : getDeliveryFeeByZone(customerCity);
+    const waveFee = getWaveFee(normalizedRevenue);
+    const supplierCost = body.supplierCost ? normalizePriceFCFA(body.supplierCost, currency) : Math.round((normalizedRevenue * 0.28) / 100) * 100;
+    const netProfit = normalizedRevenue - supplierCost - calculatedDeliveryFee - waveFee;
+    const marginPct = normalizedRevenue > 0 ? Math.round((netProfit / normalizedRevenue) * 100) : 0;
+
     const orderRecord = {
       id: orderId,
       shopifyOrderId: null,
@@ -102,6 +110,13 @@ export async function POST(req) {
       unitPrice: Number(unitPrice) || 0,
       totalPrice: Number(totalPrice) || 0,
       currency: currency || 'XOF',
+      normalizedRevenue,
+      deliveryFee: calculatedDeliveryFee,
+      deliveryZone: customerCity.trim(),
+      waveFee,
+      supplierCost,
+      netProfit,
+      marginPct,
       status: 'NOUVEAU', // NOUVEAU, CONFIRME, EN_LIVRAISON, LIVRE, ANNULE
       note: note || '',
       merchantPhone,
@@ -348,35 +363,113 @@ export async function GET(req) {
     const existingShopifyIds = new Set(shopifyOrders.map(o => String(o.shopifyOrderId)));
     const uniqueLocalOrders = localOrders.filter(o => !o.shopifyOrderId || !existingShopifyIds.has(String(o.shopifyOrderId)));
 
+// Helper for order overrides (custom Alibaba cost, status) for both Shopify and COD orders
+const OVERRIDES_FILE = path.join(DATA_DIR, 'order_overrides.json');
+
+function getOrderOverrides() {
+  if (!fs.existsSync(OVERRIDES_FILE)) return {};
+  try {
+    return JSON.parse(fs.readFileSync(OVERRIDES_FILE, 'utf8'));
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveOrderOverride(orderId, patchData) {
+  ensureDataFile();
+  const overrides = getOrderOverrides();
+  overrides[orderId] = { ...(overrides[orderId] || {}), ...patchData, updatedAt: new Date().toISOString() };
+  fs.writeFileSync(OVERRIDES_FILE, JSON.stringify(overrides, null, 2), 'utf8');
+  return overrides[orderId];
+}
+
     // Combined real orders sorted newest first
     const allOrders = [...shopifyOrders, ...uniqueLocalOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+    const overrides = getOrderOverrides();
+
+    // Enrich all real orders with exact financial breakdown (Alibaba, Delivery by zone, Wave fee, Net Profit)
+    const enrichedOrders = allOrders.map(order => {
+      const override = overrides[order.id] || overrides[order.shopifyOrderId] || overrides[order.shopifyOrderNumber] || {};
+      const effectiveStatus = override.status || order.status;
+      const customSupplierCost = override.supplierCost !== undefined ? Number(override.supplierCost) : (order.supplierCost || null);
+
+      const finances = calculateOrderFinances(order, customSupplierCost);
+      return {
+        ...order,
+        status: effectiveStatus,
+        normalizedRevenue: finances.revenue,
+        deliveryFee: finances.deliveryFee,
+        deliveryZone: finances.zone,
+        waveFee: finances.waveFee,
+        supplierCost: finances.supplierCost,
+        netProfit: finances.netProfit,
+        marginPct: finances.marginPct
+      };
+    });
+
+    const activeOrders = enrichedOrders.filter(o => o.status !== "ANNULE");
+    const totalRevenue = activeOrders.reduce((sum, o) => sum + (o.normalizedRevenue || 0), 0);
+    const totalSupplierCost = activeOrders.reduce((sum, o) => sum + (o.supplierCost || 0), 0);
+    const totalDeliveryFees = activeOrders.reduce((sum, o) => sum + (o.deliveryFee || 0), 0);
+    const totalWaveFees = activeOrders.reduce((sum, o) => sum + (o.waveFee || 0), 0);
+    const totalNetProfit = activeOrders.reduce((sum, o) => sum + (o.netProfit || 0), 0);
+    const averageMarginPct = totalRevenue > 0 ? Math.round((totalNetProfit / totalRevenue) * 100) : 0;
+
     return NextResponse.json({
       success: true,
-      orders: allOrders,
+      orders: enrichedOrders,
       shopDomain: connectedShopDomain,
-      count: allOrders.length
+      count: enrichedOrders.length,
+      finances: {
+        totalRevenue,
+        totalSupplierCost,
+        totalDeliveryFees,
+        totalWaveFees,
+        totalNetProfit,
+        averageMarginPct,
+        currency: 'XOF'
+      }
     }, { headers: corsHeaders });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
   }
 }
 
-// PATCH: Update order status (Nouveau, Confirmé, En Livraison, Livré, Annulé)
+// PATCH: Update order status or supplier cost (Alibaba/AliExpress)
 export async function PATCH(req) {
   try {
-    const { orderId, status } = await req.json();
+    const { orderId, status, supplierCost } = await req.json();
+    if (!orderId) {
+      return NextResponse.json({ error: 'orderId requis' }, { status: 400, headers: corsHeaders });
+    }
+
+    const patchData = {};
+    if (status) patchData.status = status;
+    if (supplierCost !== undefined && !isNaN(Number(supplierCost))) {
+      patchData.supplierCost = Number(supplierCost);
+    }
+
+    saveOrderOverride(orderId, patchData);
+
     ensureDataFile();
     const orders = getLocalOrders();
     const idx = orders.findIndex(o => o.id === orderId);
     if (idx !== -1) {
-      orders[idx].status = status;
+      if (status) orders[idx].status = status;
+      if (supplierCost !== undefined) {
+        orders[idx].supplierCost = Number(supplierCost);
+        const fin = calculateOrderFinances(orders[idx], Number(supplierCost));
+        orders[idx].netProfit = fin.netProfit;
+        orders[idx].marginPct = fin.marginPct;
+      }
       orders[idx].updatedAt = new Date().toISOString();
       fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf8');
-      return NextResponse.json({ success: true, order: orders[idx] }, { headers: corsHeaders });
     }
-    return NextResponse.json({ error: 'Commande introuvable' }, { status: 404, headers: corsHeaders });
+
+    return NextResponse.json({ success: true, orderId, updated: patchData }, { headers: corsHeaders });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
   }
 }
+

@@ -18,16 +18,24 @@ import {
   Clock, 
   XCircle, 
   PackageCheck,
-  Send
+  Send,
+  TrendingUp,
+  Edit2,
+  Check,
+  X
 } from "lucide-react";
+import { formatFCFA } from "@/lib/senegalCod";
 
 export default function CodOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [shopDomain, setShopDomain] = useState(null);
+  const [finances, setFinances] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [editingSupplierCostId, setEditingSupplierCostId] = useState(null);
+  const [tempSupplierCost, setTempSupplierCost] = useState("");
 
   const fetchOrders = async (showRefreshing = false) => {
     if (showRefreshing) setIsRefreshing(true);
@@ -37,6 +45,7 @@ export default function CodOrdersPage() {
       if (data.success && data.orders) {
         setOrders(data.orders);
         if (data.shopDomain) setShopDomain(data.shopDomain);
+        if (data.finances) setFinances(data.finances);
       }
     } catch (e) {
       console.error("Error fetching orders:", e);
@@ -61,26 +70,32 @@ export default function CodOrdersPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId, status: newStatus })
       });
+      fetchOrders();
     } catch (e) {
       console.error("Status update error:", e);
       fetchOrders();
     }
   };
 
-  const formatPrice = (p, curr = "XOF") => {
-    const amount = Number(p) || 0;
-    if (curr === "EUR" || curr === "USD") {
-      return new Intl.NumberFormat("fr-FR", { style: "currency", currency: curr }).format(amount);
+  const handleSaveSupplierCost = async (orderId) => {
+    const cost = Number(tempSupplierCost);
+    if (isNaN(cost) || cost < 0) {
+      alert("Veuillez saisir un coût fournisseur valide en FCFA");
+      return;
     }
-    return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "XOF", minimumFractionDigits: 0 })
-      .format(amount)
-      .replace("XOF", "FCFA");
+    try {
+      await fetch("/api/orders/cod", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, supplierCost: cost })
+      });
+      setEditingSupplierCostId(null);
+      fetchOrders();
+    } catch (e) {
+      console.error("Supplier cost update error:", e);
+    }
   };
 
-  // Stats calculation
-  const totalRevenue = orders
-    .filter(o => o.status !== "ANNULE")
-    .reduce((sum, o) => sum + (o.totalPrice || 0), 0);
   const newOrdersCount = orders.filter(o => o.status === "NOUVEAU").length;
   const inDeliveryCount = orders.filter(o => o.status === "EN_LIVRAISON").length;
   const deliveredCount = orders.filter(o => o.status === "LIVRE").length;
@@ -92,6 +107,7 @@ export default function CodOrdersPage() {
       (o.customerName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       (o.customerPhone || "").includes(searchQuery) ||
       (o.customerCity || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (o.deliveryZone || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       (o.productTitle || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
@@ -110,7 +126,7 @@ export default function CodOrdersPage() {
             )}
           </h1>
           <p className={styles.subtitle}>
-            Toutes les commandes réelles synchronisées en temps réel depuis votre boutique Shopify et les formulaires de commande.
+            Calcul transparent en temps réel : Chiffre d&apos;Affaires (Site) - Coût Fournisseur (Alibaba/AliExpress) - Frais de Livraison (Zone Sénégal) - Frais Wave (1%) = Bénéfice Net Réel.
           </p>
         </div>
 
@@ -126,45 +142,56 @@ export default function CodOrdersPage() {
         </div>
       </header>
 
-      {/* KPI METRICS */}
+      {/* KPI METRICS — FORMULE ENCAISSEMENTS COD SÉNÉGAL */}
       <div className={styles.statsGrid}>
+        {/* 1. Chiffre d'Affaires Brut */}
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ background: "rgba(16, 185, 129, 0.15)", color: "#10b981" }}>
             <DollarSign size={24} />
           </div>
           <div className={styles.statInfo}>
-            <span className={styles.statLabel}>Chiffre d&apos;Affaires COD</span>
-            <span className={styles.statValue}>{formatPrice(totalRevenue)}</span>
+            <span className={styles.statLabel}>Chiffre d&apos;Affaires (Site)</span>
+            <span className={styles.statValue}>{formatFCFA(finances?.totalRevenue || 0)}</span>
+            <span className={styles.statSub}>Total ventes clients ({orders.filter(o => o.status !== "ANNULE").length} cmd)</span>
           </div>
         </div>
 
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: "rgba(234, 179, 8, 0.15)", color: "#facc15" }}>
-            <Clock size={24} />
+        {/* 2. Bénéfice Net Réel */}
+        <div className={styles.statCard} style={{ borderColor: "rgba(16, 185, 129, 0.4)", background: "rgba(16, 185, 129, 0.05)" }}>
+          <div className={styles.statIcon} style={{ background: "rgba(16, 185, 129, 0.25)", color: "#10b981" }}>
+            <TrendingUp size={24} />
           </div>
           <div className={styles.statInfo}>
-            <span className={styles.statLabel}>Nouvelles / À Confirmer</span>
-            <span className={styles.statValue}>{newOrdersCount}</span>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <span className={styles.statLabel}>Bénéfice Net Réel</span>
+              <span className={styles.statBadge}>{finances?.averageMarginPct || 0}% marge</span>
+            </div>
+            <span className={styles.statValue} style={{ color: "#34d399" }}>{formatFCFA(finances?.totalNetProfit || 0)}</span>
+            <span className={styles.statSub}>Après Alibaba, Transport & Wave</span>
           </div>
         </div>
 
+        {/* 3. Coût Fournisseur Alibaba */}
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: "rgba(59, 130, 246, 0.15)", color: "#60a5fa" }}>
+            <ShoppingBag size={24} />
+          </div>
+          <div className={styles.statInfo}>
+            <span className={styles.statLabel}>Coût Fournisseur Alibaba</span>
+            <span className={styles.statValue}>{formatFCFA(finances?.totalSupplierCost || 0)}</span>
+            <span className={styles.statSub}>Achats produits AliExpress / Alibaba</span>
+          </div>
+        </div>
+
+        {/* 4. Livraison par Zone & Wave */}
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ background: "rgba(168, 85, 247, 0.15)", color: "#c084fc" }}>
             <Truck size={24} />
           </div>
           <div className={styles.statInfo}>
-            <span className={styles.statLabel}>En Cours de Livraison</span>
-            <span className={styles.statValue}>{inDeliveryCount}</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: "rgba(37, 211, 102, 0.15)", color: "#25D366" }}>
-            <CheckCircle2 size={24} />
-          </div>
-          <div className={styles.statInfo}>
-            <span className={styles.statLabel}>Livrées & Encaissées</span>
-            <span className={styles.statValue}>{deliveredCount}</span>
+            <span className={styles.statLabel}>Frais Livraison & Wave</span>
+            <span className={styles.statValue}>{formatFCFA((finances?.totalDeliveryFees || 0) + (finances?.totalWaveFees || 0))}</span>
+            <span className={styles.statSub}>Livraison: {formatFCFA(finances?.totalDeliveryFees || 0)} | Wave: {formatFCFA(finances?.totalWaveFees || 0)}</span>
           </div>
         </div>
       </div>
@@ -214,7 +241,7 @@ export default function CodOrdersPage() {
           <Search size={18} color="#71717a" />
           <input 
             type="text" 
-            placeholder="Rechercher par nom, tel, ville..." 
+            placeholder="Rechercher par nom, tel, ville, région..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={styles.searchInput}
@@ -234,8 +261,8 @@ export default function CodOrdersPage() {
             <h3 style={{ fontSize: "18px", color: "#fff", marginBottom: "8px" }}>Aucune commande pour le moment</h3>
             <p style={{ fontSize: "14px", color: "#71717a", maxWidth: "460px", margin: "0 auto 20px" }}>
               {shopDomain 
-                ? `Votre boutique (${shopDomain}) est connectée. Dès qu'un client passe commande sur votre boutique ou via le bouton EasySell, elle s'affichera ici automatiquement.` 
-                : "Vos commandes réelles de votre boutique Shopify et EasySell apparaîtront ici automatiquement dès qu'un client passe commande."}
+                ? `Votre boutique (${shopDomain}) est connectée. Dès qu'un client passe commande sur votre boutique ou via le bouton EasySell, elle s'affichera ici avec le calcul automatique.` 
+                : "Vos commandes réelles apparaîtront ici automatiquement dès qu'un client passe commande."}
             </p>
             <button 
               className={`${styles.actionButton} ${styles.primaryButton}`}
@@ -253,7 +280,7 @@ export default function CodOrdersPage() {
                 <th>Client & Contact</th>
                 <th>Destination (Sénégal)</th>
                 <th>Produit & Offre</th>
-                <th>Montant & Règlement</th>
+                <th>Décomposition Financière (CA, Alibaba, Zone, Wave)</th>
                 <th>Statut</th>
               </tr>
             </thead>
@@ -315,10 +342,90 @@ export default function CodOrdersPage() {
                       </div>
                     </td>
 
-                    {/* MONTANT */}
+                    {/* DÉCOMPOSITION FINANCIÈRE COMPLÈTE */}
                     <td>
-                      <div className={styles.amount}>{formatPrice(order.totalPrice, order.currency)}</div>
-                      <span className={styles.paymentTag}>{order.paymentMethod}</span>
+                      <div className={styles.financeBox}>
+                        {/* 1. Vente Client (Chiffre d'Affaires Brut) */}
+                        <div className={`${styles.financeRow} ${styles.financeRowCA}`}>
+                          <span>Vente Site (CA) :</span>
+                          <span>{formatFCFA(order.normalizedRevenue || order.totalPrice)}</span>
+                        </div>
+
+                        {/* 2. Coût Fournisseur Alibaba/AliExpress */}
+                        <div className={styles.financeRow}>
+                          <span>
+                            Fournisseur Alibaba :
+                            {editingSupplierCostId !== order.id && (
+                              <button 
+                                className={styles.alibabaEditBtn}
+                                onClick={() => {
+                                  setEditingSupplierCostId(order.id);
+                                  setTempSupplierCost(String(order.supplierCost || ''));
+                                }}
+                                title="Modifier le prix d'achat réel sur Alibaba ou AliExpress"
+                              >
+                                ✏️ Prix
+                              </button>
+                            )}
+                          </span>
+
+                          {editingSupplierCostId === order.id ? (
+                            <div className={styles.alibabaInputWrap}>
+                              <input 
+                                type="number"
+                                value={tempSupplierCost}
+                                onChange={(e) => setTempSupplierCost(e.target.value)}
+                                className={styles.alibabaInput}
+                                placeholder="FCFA"
+                                autoFocus
+                              />
+                              <button 
+                                className={styles.alibabaSaveBtn}
+                                onClick={() => handleSaveSupplierCost(order.id)}
+                                title="Sauvegarder"
+                              >
+                                ✓
+                              </button>
+                              <button 
+                                className={styles.alibabaCancelBtn}
+                                onClick={() => setEditingSupplierCostId(null)}
+                                title="Annuler"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : (
+                            <span style={{ color: "#f87171" }}>- {formatFCFA(order.supplierCost || 0)}</span>
+                          )}
+                        </div>
+
+                        {/* 3. Livraison selon Zone Sénégal */}
+                        <div className={styles.financeRow}>
+                          <span title={order.deliveryZone || order.customerCity}>
+                            Livraison ({order.deliveryZone ? (order.deliveryZone.length > 16 ? order.deliveryZone.slice(0, 16) + '...' : order.deliveryZone) : 'Zone'}) :
+                          </span>
+                          <span style={{ color: "#f87171" }}>- {formatFCFA(order.deliveryFee || 0)}</span>
+                        </div>
+
+                        {/* 4. Frais Wave 1% */}
+                        <div className={styles.financeRow}>
+                          <span>Frais Wave (1%) :</span>
+                          <span style={{ color: "#f87171" }}>- {formatFCFA(order.waveFee || 0)}</span>
+                        </div>
+
+                        {/* 5. Bénéfice Net Réel */}
+                        <div className={styles.financeNet}>
+                          <span>Bénéfice Net :</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <span>+ {formatFCFA(order.netProfit || 0)}</span>
+                            <span className={styles.marginPill}>{order.marginPct || 0}%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ marginTop: "4px" }}>
+                        <span className={styles.paymentTag}>{order.paymentMethod}</span>
+                      </div>
                     </td>
 
                     {/* STATUT */}
@@ -345,3 +452,4 @@ export default function CodOrdersPage() {
     </div>
   );
 }
+
