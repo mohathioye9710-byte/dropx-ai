@@ -567,7 +567,9 @@ export async function POST(req) {
         const themeId = activeTheme.id;
         
         // 2. Create the Snippet (EasySell COD Senegal)
-        const appApiUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+        const appApiUrl = (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes('localhost'))
+          ? process.env.NEXT_PUBLIC_APP_URL
+          : 'https://dropx-ai.vercel.app';
         const snippetContent = `
 <style>
   body, button, input, select, textarea { font-family: 'Trebuchet MS', 'Segoe UI', sans-serif !important; }
@@ -605,6 +607,17 @@ fbq('track', 'PageView');
   body.dropx-product-active #shopify-section-announcement-bar,
   body.dropx-product-active .announcement-bar-section { display: none !important; }
   body.dropx-product-active main { padding: 0 !important; margin: 0 !important; max-width: none !important; }
+
+  /* HIDE ALL DEFAULT PAYPAL / STRIPE / DYNAMIC CHECKOUT BUTTONS */
+  .shopify-payment-button,
+  .shopify-payment-button__button,
+  [data-shopify="payment-button"],
+  iframe[name^="__privateStripeMetricsController"],
+  .paypal-buttons,
+  .product-form__buttons,
+  .product-form__submit {
+    display: none !important;
+  }
 
   /* EasySell COD Senegal Styles */
   .dropx-cod-card {
@@ -893,7 +906,11 @@ fbq('track', 'PageView');
       ];
 
       function formatPrice(price) {
-        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', minimumFractionDigits: 0 }).format(price).replace('XOF', 'FCFA');
+        if (price >= 500) {
+          return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(price) + ' FCFA';
+        }
+        var xofAmount = Math.round(price * 600 / 100) * 100;
+        return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(xofAmount) + ' FCFA';
       }
 
       var selectedBundleIndex = 0;
