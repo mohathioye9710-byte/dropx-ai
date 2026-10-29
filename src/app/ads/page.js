@@ -137,6 +137,7 @@ export default function CreativeStudioPage() {
   const [remixingMusic, setRemixingMusic] = useState(false);
   const [musicSearchQuery, setMusicSearchQuery] = useState('');
   const [searchingMusic, setSearchingMusic] = useState(false);
+  const [downloadingVideo, setDownloadingVideo] = useState(false);
 
   const audioRef = useRef(null);
   const videoRef = useRef(null);
@@ -192,6 +193,32 @@ export default function CreativeStudioPage() {
       }
     } catch (err) {
       alert('Erreur upload: ' + err.message);
+    }
+  };
+
+  const handleDownloadVideo = async (e) => {
+    if (e) e.preventDefault();
+    if (!avatarVideoUrl) return;
+    setDownloadingVideo(true);
+    try {
+      const cleanName = (productName || 'ads-video').toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+      const filename = `dropx-${cleanName}.mp4`;
+      
+      const response = await fetch(avatarVideoUrl);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.warn("Direct blob download fallback:", err);
+      window.open(avatarVideoUrl, '_blank');
+    } finally {
+      setDownloadingVideo(false);
     }
   };
 
@@ -874,14 +901,19 @@ export default function CreativeStudioPage() {
             {/* Actions below video */}
             <div className={styles.previewActions}>
               {avatarVideoUrl && (
-                <a
-                  href={`${avatarVideoUrl}${avatarVideoUrl.includes('?') ? '&' : '?'}download=1`}
-                  download={`dropx-${productName.toLowerCase().replace(/\s+/g, '-')}.mp4`}
+                <button
+                  type="button"
+                  onClick={handleDownloadVideo}
+                  disabled={downloadingVideo}
                   className={styles.btnDownload}
                 >
-                  <Download size={16} />
-                  <span>Télécharger la Vidéo MP4</span>
-                </a>
+                  {downloadingVideo ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Download size={16} />
+                  )}
+                  <span>{downloadingVideo ? 'Téléchargement MP4...' : 'Télécharger la Vidéo MP4'}</span>
+                </button>
               )}
 
               {avatarVideoUrl && (
