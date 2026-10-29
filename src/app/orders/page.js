@@ -120,9 +120,26 @@ export default function CodOrdersPage() {
           <h1 className={styles.title}>
             Commandes Réelles (Boutique & COD)
             {shopDomain ? (
-              <span className={styles.flagBadge}>🛍️ {shopDomain}</span>
+              <a 
+                href={`https://${shopDomain}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className={styles.flagBadge}
+                style={{ textDecoration: 'none', cursor: 'pointer' }}
+                title="Ouvrir votre boutique Shopify ShopX"
+              >
+                🛍️ {shopDomain.includes('98fny6') ? 'sen-shopx.myshopify.com' : shopDomain}
+              </a>
             ) : (
-              <span className={styles.flagBadge}>🇸🇳 EasySell DropX</span>
+              <a 
+                href="https://sen-shopx.myshopify.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className={styles.flagBadge}
+                style={{ textDecoration: 'none' }}
+              >
+                🛍️ sen-shopx.myshopify.com
+              </a>
             )}
           </h1>
           <p className={styles.subtitle}>

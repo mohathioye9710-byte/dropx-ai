@@ -150,9 +150,13 @@ export async function POST(req) {
           const firstName = names[0] || 'Client';
           const lastName = names.slice(1).join(' ') || 'Sénégal';
 
+          const rawPrice = Number(totalPrice) || Number(unitPrice) || 0;
+          // If Shopify store is USD and price is in FCFA (> 500), convert for Shopify API so it is not $31,400
+          const shopifyItemPrice = rawPrice > 500 ? (rawPrice / 600).toFixed(2) : rawPrice.toString();
+
           const lineItem = {
             quantity: Number(quantity) || 1,
-            price: (Number(unitPrice) || Number(totalPrice) || 0).toString(),
+            price: shopifyItemPrice,
             title: `${productTitle} - ${bundleTitle}`
           };
           if (variantId && !isNaN(Number(variantId))) {
@@ -165,7 +169,6 @@ export async function POST(req) {
               customer: {
                 first_name: firstName,
                 last_name: lastName,
-                phone: customerPhone,
                 note: `Mode de paiement: ${paymentMethod}`
               },
               shipping_address: {
@@ -186,9 +189,10 @@ export async function POST(req) {
                 country: 'Senegal',
                 country_code: 'SN'
               },
+              phone: customerPhone,
               financial_status: 'pending',
               gateway: `COD - ${paymentMethod}`,
-              note: `[EASYSELL DROPX - COMMANDE SÉNÉGAL]\nNom: ${customerName}\nTéléphone WhatsApp: ${customerPhone}\nRégion/Ville: ${customerCity}\nQuartier/Adresse: ${customerAddress}\nOffre: ${bundleTitle}\nMode: ${paymentMethod}\nTotal: ${totalPrice} ${currency}`,
+              note: `[EASYSELL DROPX - COMMANDE SÉNÉGAL]\nNom: ${customerName}\nTéléphone WhatsApp: ${customerPhone}\nRégion/Ville: ${customerCity}\nQuartier/Adresse: ${customerAddress}\nOffre: ${bundleTitle}\nMode: ${paymentMethod}\nLivraison: ${calculatedDeliveryFee} FCFA\nTotal: ${totalPrice} ${currency}`,
               tags: 'COD, Senegal, EasySell, Paiement-Livraison, DropX'
             }
           };
@@ -206,7 +210,7 @@ export async function POST(req) {
             const shopifyData = await shopifyRes.json();
             if (shopifyData && shopifyData.order) {
               orderRecord.shopifyOrderId = shopifyData.order.id;
-              orderRecord.shopifyOrderNumber = shopifyData.order.order_number || shopifyData.order.name;
+              orderRecord.shopifyOrderNumber = shopifyData.order.order_number ? `#${shopifyData.order.order_number}` : (shopifyData.order.name || `#${shopifyData.order.id}`);
               shopifySuccess = true;
               console.log("[Shopify Order Created]:", orderRecord.shopifyOrderNumber);
             }
