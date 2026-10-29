@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   DollarSign, TrendingUp, Package, Activity, BarChart3, Zap,
@@ -480,8 +480,8 @@ export default function Analytics() {
             <div key={h} className={styles.heatmapHeaderCell}>{h}h</div>
           ))}
           {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, di) => (
-            <>
-              <div key={`l-${di}`} className={styles.heatmapLabel}>{day}</div>
+            <Fragment key={`row-${di}`}>
+              <div className={styles.heatmapLabel}>{day}</div>
               {Array.from({ length: 24 }, (_, hi) => {
                 const count = analytics?.heatmapData?.[di]?.[hi] || 0;
                 const maxHeatmap = Math.max(...(analytics?.heatmapData?.flat() || []), 1);
@@ -495,7 +495,7 @@ export default function Analytics() {
                   />
                 );
               })}
-            </>
+            </Fragment>
           ))}
         </div>
       </div>

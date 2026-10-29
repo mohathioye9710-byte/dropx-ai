@@ -65,25 +65,85 @@
 
 .navItem {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 52px;
   border-radius: 12px;
-  color: rgba(255, 255, 255, 0.5);
-  transition: all 0.3s ease;
+  color: rgba(255, 255, 255, 0.45);
+  transition: all 0.2s ease;
   position: relative;
   background: transparent;
+  text-decoration: none;
+  gap: 3px;
 }
 
 .navItem:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .navItem.active {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.iconWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navBadge {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 8px;
+  font-weight: 900;
+  padding: 1px 4px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+
+.navLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: inherit;
+  letter-spacing: -0.2px;
+  text-align: center;
+  white-space: nowrap;
+  max-width: 62px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tooltip {
+  position: absolute;
+  left: 72px;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.15s ease;
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+}
+
+.navItem:hover .tooltip {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .userCard {

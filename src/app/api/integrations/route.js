@@ -70,14 +70,15 @@ export async function GET(req) {
       }
     });
 
-    if (!integration) {
+    if (!integration || integration.status !== 'connected') {
       return NextResponse.json({ connected: false });
     }
 
     const keyData = JSON.parse(integration.keyData || '{}');
+    const domain = keyData.domain || keyData.shopUrl || '';
     return NextResponse.json({ 
-      connected: true, 
-      domain: keyData.domain 
+      connected: !!domain, 
+      domain 
     });
 
   } catch (error) {

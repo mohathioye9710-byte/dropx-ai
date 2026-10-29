@@ -28,8 +28,8 @@ export async function GET(req) {
     const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
     const redirectUri = `${baseUrl}/api/shopify/callback`;
 
-    // Scopes needed for analytics
-    const scopes = 'read_orders,read_products,write_products,read_themes,write_themes,read_script_tags,write_script_tags';
+    // Scopes needed for analytics and COD orders
+    const scopes = 'read_orders,write_orders,read_products,write_products,read_themes,write_themes,read_script_tags,write_script_tags';
 
     // Build the Shopify OAuth authorization URL
     const authUrl = `https://${cleanShop}/admin/oauth/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}`;

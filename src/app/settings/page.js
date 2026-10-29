@@ -12,6 +12,8 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
   const [shopifyStatus, setShopifyStatus] = useState(null);
   const [existingIntegration, setExistingIntegration] = useState(null);
+  const [shopDomain, setShopDomain] = useState('');
+  const [integrationLoading, setIntegrationLoading] = useState(true);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -31,11 +33,14 @@ export default function SettingsPage() {
       try {
         const res = await fetch('/api/integrations');
         const data = await res.json();
-        if (data.connected) {
+        if (data.connected && data.domain) {
           setExistingIntegration(data.domain);
+          setShopDomain(data.domain);
         }
       } catch (err) {
         console.error("Failed to fetch integration", err);
+      } finally {
+        setIntegrationLoading(false);
       }
     };
     fetchIntegration();
@@ -73,6 +78,7 @@ export default function SettingsPage() {
     // But for this UI update, we'll just show how it would look
     alert("Fonctionnalité de déconnexion à implémenter. Pour l'instant, vous pouvez vous reconnecter avec une autre boutique pour l'écraser.");
     setExistingIntegration(null);
+    setShopDomain('');
   };
 
   return (
@@ -243,37 +249,55 @@ export default function SettingsPage() {
               )}
 
               <div className={styles.profileCard}>
-                <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '24px', fontSize: '14px' }}>
-                  Connectez votre boutique Shopify pour récupérer vos vraies commandes, revenus et statistiques en temps réel. La connexion se fait en un clic via le système sécurisé de Shopify.
-                </p>
-                <form onSubmit={handleShopifyConnect}>
-                  <div className={styles.formGroup}>
-                    <label>URL de la Boutique (.myshopify.com)</label>
-                    <input 
-                      type="text" 
-                      name="domain"
-                      defaultValue={existingIntegration || ''}
-                      placeholder="ma-boutique.myshopify.com" 
-                      required 
-                      disabled={!!existingIntegration}
-                      className={styles.input} 
-                    />
-                    <span className={styles.hint}>
-                      {existingIntegration 
-                        ? "Votre boutique est connectée. Si vous souhaitez la changer, déconnectez-la d'abord."
-                        : "Entrez l'URL de votre boutique Shopify. Vous serez redirigé vers Shopify pour autoriser la connexion."}
-                    </span>
-                  </div>
-                  {existingIntegration ? (
-                    <button type="button" onClick={handleDisconnect} className={styles.saveButton} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff' }}>
-                      Changer de boutique
-                    </button>
-                  ) : (
-                    <button type="submit" className={styles.saveButton} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Globe size={16} /> Connecter Shopify
-                    </button>
-                  )}
-                </form>
+                {integrationLoading ? (
+                  <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Chargement de l&apos;intégration Shopify...</p>
+                ) : (
+                  <>
+                    {existingIntegration && (
+                      <div style={{ padding: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '20px' }}>🟢</span>
+                        <div>
+                          <h4 style={{ color: '#10b981', marginBottom: '4px' }}>Boutique connectée</h4>
+                          <p style={{ color: '#fff', fontSize: '14px', fontWeight: 600, margin: 0 }}>{existingIntegration}</p>
+                          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginTop: '4px', margin: 0 }}>Synchronisation active — commandes et analytics en temps réel</p>
+                        </div>
+                      </div>
+                    )}
+                    <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '24px', fontSize: '14px' }}>
+                      Connectez votre boutique Shopify pour récupérer vos vraies commandes, revenus et statistiques en temps réel. La connexion se fait en un clic via le système sécurisé de Shopify.
+                    </p>
+                    <form onSubmit={handleShopifyConnect}>
+                      <div className={styles.formGroup}>
+                        <label>URL de la Boutique (.myshopify.com)</label>
+                        <input 
+                          type="text" 
+                          name="domain"
+                          value={shopDomain}
+                          onChange={(e) => setShopDomain(e.target.value)}
+                          placeholder="ma-boutique.myshopify.com" 
+                          required 
+                          disabled={!!existingIntegration}
+                          autoComplete="off"
+                          className={styles.input} 
+                        />
+                        <span className={styles.hint}>
+                          {existingIntegration
+                            ? "Votre boutique est connectée. Cliquez sur « Changer de boutique » pour en utiliser une autre."
+                            : "Entrez l'URL de votre boutique Shopify. Vous serez redirigé vers Shopify pour autoriser la connexion."}
+                        </span>
+                      </div>
+                      {existingIntegration ? (
+                        <button type="button" onClick={handleDisconnect} className={styles.saveButton} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff' }}>
+                          Changer de boutique
+                        </button>
+                      ) : (
+                        <button type="submit" className={styles.saveButton} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Globe size={16} /> Connecter Shopify
+                        </button>
+                      )}
+                    </form>
+                  </>
+                )}
               </div>
 
               {/* Pixel de Tracking Section */}

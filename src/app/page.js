@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Plus, ArrowRight, Store, Settings, ExternalLink } from 'lucide-react';
+import { Plus, ArrowRight, Store, Settings, ExternalLink, Video, Sparkles, Music } from 'lucide-react';
 import LandingPage from '@/components/LandingPage';
 import { useRouter } from 'next/navigation';
 
@@ -73,7 +73,7 @@ export default function Dashboard() {
             Profite de 3 mois de Shopify pour 1€/mois
           </h2>
           <p style={{ color: '#a1a1aa', fontSize: '15px', lineHeight: '1.6', marginBottom: '32px' }}>
-            Crée ta boutique avec DropX AI et bénéficie de l'offre exclusive partenaire Shopify. Valable sur tes prochaines créations.
+            Crée ta boutique avec DropX AI et bénéficie de l&apos;offre exclusive partenaire Shopify. Valable sur tes prochaines créations.
           </p>
           <button 
             onClick={() => window.open('https://shopify.pxf.io/dropxai', '_blank')}
@@ -82,6 +82,99 @@ export default function Dashboard() {
             onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
           >
             En profiter <ArrowRight size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* Senegal COD EasySell Quick Banner */}
+      <div style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 5, 5, 0.8) 100%)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '20px', padding: '28px 32px', marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+        <div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: '800', marginBottom: '10px' }}>
+            <span>🇸🇳</span> EASYSELL INTÉGRÉ — PAIEMENT À LA LIVRAISON
+          </div>
+          <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#fff', margin: '0 0 6px' }}>
+            Gestionnaire de Commandes Sénégal (COD)
+          </h3>
+          <p style={{ color: '#a1a1aa', fontSize: '14px', margin: 0, maxWidth: '600px' }}>
+            Vos clients commandent en 1 clic sans Stripe ni PayPal. Suivez les livraisons (Dakar & Régions) et contactez vos clients sur WhatsApp en 1 clic.
+          </p>
+        </div>
+        <button 
+          onClick={() => router.push('/orders')}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#10b981', color: '#000', padding: '12px 22px', borderRadius: '12px', fontSize: '14px', fontWeight: '800', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)' }}
+        >
+          Voir les commandes COD <ArrowRight size={16} />
+        </button>
+      </div>
+
+      {/* DropX Ads Studio IA Banner */}
+      <div style={{ 
+        background: '#0a0a0a', 
+        border: '1px solid rgba(255, 255, 255, 0.08)', 
+        borderRadius: '24px', 
+        padding: '36px', 
+        marginBottom: '44px', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        flexWrap: 'wrap', 
+        gap: '24px',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{ maxWidth: '680px', position: 'relative', zIndex: 2 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#ffffff', padding: '5px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '700', marginBottom: '14px', letterSpacing: '0.5px' }}>
+            <Sparkles size={13} color="#ffffff" /> NOUVEAU — ADS STUDIO IA (TIKTOK & REELS)
+          </div>
+          
+          <h2 style={{ fontSize: '26px', fontWeight: '800', color: '#fff', letterSpacing: '-0.5px', margin: '0 0 10px', lineHeight: '1.25' }}>
+            Générez des Vidéos Publicitaires avec Avatars & Musiques Virales
+          </h2>
+          
+          <p style={{ color: '#a1a1aa', fontSize: '14px', lineHeight: '1.6', margin: '0 0 18px', maxWidth: '640px' }}>
+            Transformez un simple lien AliExpress ou Alibaba en vidéo UGC 9:16 complète : avatar parlant IA ultra-réaliste (Aminata, Moussa, Victoria...), voix off studio ElevenLabs, sous-titres dynamiques et les vrais tubes viraux de TikTok (Papaoutai Afro Soul, Tam Sir, Rema...).
+          </p>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+            <span style={{ fontSize: '12px', fontWeight: '600', padding: '5px 12px', borderRadius: '8px', background: '#111111', color: '#d4d4d8', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              👤 Avatars Parlants IA
+            </span>
+            <span style={{ fontSize: '12px', fontWeight: '600', padding: '5px 12px', borderRadius: '8px', background: '#111111', color: '#d4d4d8', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              🎙️ Voix Off Studio
+            </span>
+            <span style={{ fontSize: '12px', fontWeight: '600', padding: '5px 12px', borderRadius: '8px', background: '#111111', color: '#d4d4d8', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              🎵 Musiques Virales
+            </span>
+            <span style={{ fontSize: '12px', fontWeight: '600', padding: '5px 12px', borderRadius: '8px', background: '#111111', color: '#d4d4d8', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              ⚡ Format 9:16 TikTok
+            </span>
+          </div>
+        </div>
+
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <button 
+            onClick={() => router.push('/ads')}
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '10px', 
+              background: '#ffffff', 
+              color: '#000000', 
+              padding: '16px 28px', 
+              borderRadius: '14px', 
+              fontSize: '15px', 
+              fontWeight: '700', 
+              border: 'none', 
+              cursor: 'pointer', 
+              boxShadow: '0 4px 16px rgba(255, 255, 255, 0.1)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = '#e4e4e7'; }}
+            onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#ffffff'; }}
+          >
+            <Video size={18} />
+            <span>Créer une Vidéo Ad</span>
+            <ArrowRight size={16} />
           </button>
         </div>
       </div>

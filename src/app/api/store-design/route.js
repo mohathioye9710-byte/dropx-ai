@@ -394,10 +394,28 @@ ${themeRules}
                 }
 
                 /* Keep cards solid so products stand out against the wallpaper */
-                .product-card, .card-wrapper, .card, .grid__item {
+                .product-card, .card-wrapper, .card, .collection .card-wrapper, .product-grid .card-wrapper, li.grid__item .card-wrapper {
                   background-color: ${branding.colors.background} !important;
-                  border-radius: 12px;
-                  border: 1px solid rgba(0,0,0,0.05);
+                  border-radius: 18px !important;
+                  border: 1.5px solid rgba(82, 115, 104, 0.42) !important;
+                  overflow: hidden;
+                  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.08) !important;
+                  box-sizing: border-box !important;
+                  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif !important;
+                }
+
+                /* Product cards: rounded image top and breathing room around the copy. */
+                .card__inner, .card__media, .card__media .media, .card__media img {
+                  border-radius: 15px 15px 0 0 !important;
+                  overflow: hidden;
+                }
+                .card__information, .card-information, .card__content {
+                  padding: 16px 18px 18px !important;
+                }
+                .card__heading, .card-information__text, .price {
+                  margin-left: 0 !important;
+                  margin-right: 0 !important;
+                  line-height: 1.45 !important;
                 }
 
                 /* === FORCE ALL TEXT READABLE === */

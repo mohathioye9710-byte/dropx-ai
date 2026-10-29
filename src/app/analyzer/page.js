@@ -34,6 +34,7 @@ export default function Analyzer() {
   const [error, setError] = useState('');
   
   const [loadingStep, setLoadingStep] = useState(0);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
   const [activeStep, setActiveStep] = useState(null);
   const router = useRouter();
 
@@ -47,6 +48,11 @@ export default function Analyzer() {
   
   // AI thinking state
   const [isAiThinking, setIsAiThinking] = useState(null); // 'persona', 'angle'
+
+  useEffect(() => {
+    document.body.classList.add('analyzer-fullscreen');
+    return () => document.body.classList.remove('analyzer-fullscreen');
+  }, []);
 
   // Layout linear progress
   const getProgressPercentage = () => {
@@ -66,11 +72,22 @@ export default function Analyzer() {
     if (!url) return;
     setState('loading');
     setLoadingStep(0);
+    setAnalysisProgress(0);
     setError('');
+
+    let visualScore = 0;
 
     const timer = setInterval(() => {
       setLoadingStep(prev => prev < 4 ? prev + 1 : prev);
     }, 1500);
+
+    // Fill the score bar one point at a time while the analysis is running.
+    const scoreTimer = setInterval(() => {
+      if (visualScore < 68) {
+        visualScore += 1;
+        setAnalysisProgress(visualScore);
+      }
+    }, 180);
 
     try {
       const res = await fetch('/api/analyze', {
@@ -81,17 +98,38 @@ export default function Analyzer() {
       
       const data = await res.json();
       clearInterval(timer);
+      clearInterval(scoreTimer);
       
       if (!res.ok) throw new Error(data.error || 'Failed to analyze product');
       
       setLoadingStep(5);
-      setResult(data);
-      if (data?.product?.images) {
-        setSelectedPhotos(data.product.images.map((_, i) => i));
+      const targetScore = Math.max(0, Math.min(100, Math.round(Number(data?.analysis?.score) || 0)));
+      const direction = targetScore >= visualScore ? 1 : -1;
+
+      const finishAnalysis = () => {
+        setAnalysisProgress(targetScore);
+        setResult(data);
+        if (data?.product?.images) {
+          setSelectedPhotos(data.product.images.map((_, i) => i));
+        }
+        setState('results');
+      };
+
+      if (visualScore === targetScore) {
+        finishAnalysis();
+      } else {
+        const finalScoreTimer = setInterval(() => {
+          visualScore += direction;
+          setAnalysisProgress(visualScore);
+          if (visualScore === targetScore) {
+            clearInterval(finalScoreTimer);
+            finishAnalysis();
+          }
+        }, 28);
       }
-      setState('results');
     } catch (err) {
       clearInterval(timer);
+      clearInterval(scoreTimer);
       setError(err.message);
       setState('idle');
     }
@@ -198,10 +236,86 @@ export default function Analyzer() {
     </div>
   );
 
+  const renderAnalysisLayout = () => {
+    const analysisScore = state === 'results' && result?.analysis?.score !== undefined
+      ? result.analysis.score
+      : analysisProgress;
+    const isFinished = state === 'results';
+    const steps = [
+      { label: 'Récupération des données', key: 'dataRetrieval' },
+      { label: 'Contraintes de marge', key: 'marginConstraints' },
+      { label: 'Valeur perçue', key: 'perceivedValue' },
+      { label: 'Analyse des avis', key: 'reviewsAnalysis' },
+      { label: 'Analyse des tendances', key: 'trendsAnalysis' },
+    ];
+
+    return (
+      <div style={{ minHeight: '100%', display: 'flex', background: '#050505', color: '#fff' }}>
+        <section style={{ width: '55%', minWidth: '520px', background: '#121212', borderRight: '1px solid #2a2a2a', padding: '56px clamp(36px, 9vw, 156px) 32px', display: 'flex', flexDirection: 'column' }}>
+          <button onClick={() => setState('idle')} aria-label="Retour" style={{ position: 'absolute', top: '18px', left: '18px', background: 'transparent', border: 0, color: '#d4d4d4', cursor: 'pointer', padding: '8px' }}>
+            <ArrowLeft size={18} />
+          </button>
+
+          <div style={{ width: '140px', height: '3px', background: '#303030', alignSelf: 'flex-end', marginBottom: '34px' }}>
+            <div style={{ width: isFinished ? '35%' : '25%', height: '100%', background: '#fff', transition: 'width 250ms ease' }} />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '14px' }}>
+            <span style={{ fontSize: '15px', fontWeight: 700 }}>Ton score produit</span>
+            <span style={{ fontSize: '22px', fontWeight: 800 }}>{Math.round(analysisScore)}</span>
+          </div>
+          <div style={{ display: 'flex', gap: '4px', background: '#050505', padding: '10px', borderRadius: '10px', marginBottom: '18px' }}>
+            {Array.from({ length: 40 }).map((_, index) => {
+              const active = ((index + 1) / 40) * 100 <= analysisScore;
+              const hue = 205 - (index / 39) * 205;
+              return <div key={index} style={{ flex: 1, height: '42px', borderRadius: '2px', background: active ? `hsl(${hue}, 95%, 56%)` : '#222', transition: 'background 260ms ease' }} />;
+            })}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {steps.map((step, index) => {
+              const complete = isFinished || loadingStep > index;
+              const current = !complete && loadingStep === index;
+              const expanded = activeStep === index;
+              return (
+                <div key={step.key} onClick={() => isFinished && setActiveStep(expanded ? null : index)} style={{ border: '1px solid #343434', borderRadius: '5px', cursor: isFinished ? 'pointer' : 'default', overflow: 'hidden' }}>
+                  <div style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: complete ? '#20d47a' : '#8a8a8a' }} />
+                      <span style={{ color: complete ? '#f5f5f5' : '#b3b3b3', fontSize: '12px', fontWeight: 600, textDecoration: complete ? 'line-through' : 'none' }}>{step.label}</span>
+                    </div>
+                    {complete ? <Check size={15} color="#20d47a" /> : current ? <span style={{ width: '14px', height: '14px', border: '2px solid #555', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /> : null}
+                  </div>
+                  {expanded && result?.analysis?.details?.[step.key] && <p style={{ margin: 0, padding: '0 12px 12px 30px', color: '#a3a3a3', fontSize: '12px', lineHeight: 1.5 }}>{result.analysis.details[step.key]}</p>}
+                </div>
+              );
+            })}
+          </div>
+
+          {isFinished && <button onClick={() => setState('select_language')} style={{ width: '100%', marginTop: 'auto', padding: '18px', background: '#fff', color: '#050505', border: 0, borderRadius: '7px', fontSize: '14px', fontWeight: 800, cursor: 'pointer' }}>Continuer</button>}
+          {isFinished && <p style={{ margin: '10px 0 0', color: '#a3a3a3', fontSize: '10px', textAlign: 'center' }}>Essayer gratuitement</p>}
+        </section>
+
+        <section style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at center, #061723 0%, #03070a 46%, #000 100%)' }}>
+          <div style={{ width: '240px', aspectRatio: '1 / 1', background: '#111', border: '1px solid #44505a', borderRadius: '12px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 32px rgba(26, 153, 201, 0.14)' }}>
+            {isFinished && result?.product?.image ? <img src={result.product.image} alt="Produit analysé" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Sparkles size={42} color="#8b9299" />}
+          </div>
+          <p style={{ color: isFinished ? '#5ee7ff' : '#a3a3a3', fontSize: '12px', fontWeight: 600, marginTop: '16px' }}>{isFinished ? 'Analyse terminée' : 'Analyse en cours...'}</p>
+        </section>
+      </div>
+    );
+  };
+
   const isFullScreen = state !== 'idle';
 
   return (
     <div style={{height: '100vh', width: '100vw', background: '#000000', color: '#ffffff', fontFamily: 'var(--font-family)', overflow: 'hidden', position: 'fixed', inset: 0, zIndex: 9999}}>
+      <style>{`
+        .analyzer-fullscreen aside,
+        .analyzer-fullscreen header { display: none !important; }
+        .analyzer-fullscreen .main-content { margin-left: 0 !important; }
+        .analyzer-fullscreen .page-content { padding: 0 !important; margin-top: 0 !important; height: 100vh; overflow: hidden; }
+      `}</style>
       
       {state === 'idle' && (
         <div style={{height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative'}}>
@@ -213,7 +327,7 @@ export default function Analyzer() {
           <div style={{maxWidth: '600px', width: '100%', padding: '20px'}}>
             <h1 style={{fontSize: '36px', fontWeight: '800', letterSpacing: '-1px', marginBottom: '16px', textAlign: 'center'}}>Comment veux-tu démarrer ?</h1>
             <p style={{color: '#a1a1aa', fontSize: '16px', textAlign: 'center', marginBottom: '48px'}}>
-              L'IA génère ta boutique complète en quelques minutes.
+              L&apos;IA génère ta boutique complète en quelques minutes.
             </p>
 
             <div style={{display: 'flex', gap: '16px', marginBottom: '32px'}}>
@@ -272,6 +386,9 @@ export default function Analyzer() {
         </div>
       )}
 
+      {(state === 'loading' || state === 'results') && renderAnalysisLayout()}
+
+      {/* Legacy analysis layout kept temporarily for reference while the new compact flow is active.
       {(state === 'loading' || state === 'results') && renderSelectionLayout(
         "Ton produit", "L'IA analyse le produit et ses possibilités",
         <div style={{display: 'flex', flexDirection: 'column', gap: '16px', flex: 1}}>
@@ -376,6 +493,7 @@ export default function Analyzer() {
         () => setState('idle'),
         state === 'results' ? () => setState('select_language') : null
       )}
+      */}
 
       {state === 'select_language' && renderSelectionLayout(
         "Langue de ta boutique", "Choisis la langue principale de ta boutique",
@@ -399,22 +517,25 @@ export default function Analyzer() {
       )}
 
       {state === 'select_persona' && (() => {
-        const dynamicPersonas = result?.landingPage?.personas?.map((p, i) => ({ id: `dyn_p_${i}`, ...p })) || PERSONAS.slice(0, 4);
+        const dynamicPersonas = (result?.landingPage?.personas?.length
+          ? result.landingPage.personas.map((p, i) => ({ id: `dyn_p_${i}`, ...p }))
+          : PERSONAS.slice(0, 4));
+        const recommendedPersona = dynamicPersonas[result?.landingPage?.recommendation?.personaIndex] || dynamicPersonas[0] || PERSONAS[0];
         const allPersonas = [
-          { id: 'auto', icon: '🤖', title: 'Laisser l\'IA décider', desc: 'L\'IA croise les avis et les tendances pour trouver l\'audience la plus rentable.' },
+          { id: 'auto', icon: '🤖', title: 'Laisser l\'IA décider', desc: 'Choix calculé à partir du produit, de son prix et de son potentiel commercial.' },
           ...dynamicPersonas
         ];
         
         const currentPersona = selectedPersona || allPersonas[0];
-        const previewPersona = currentPersona.id === 'auto' ? (dynamicPersonas[0] || PERSONAS[0]) : currentPersona;
+        const previewPersona = currentPersona.id === 'auto' ? recommendedPersona : currentPersona;
 
         const handleSelectPersona = (p) => {
           if (p.id === 'auto') {
             setIsAiThinking('persona');
             setTimeout(() => {
               setIsAiThinking(null);
-              setSelectedPersona(dynamicPersonas[0] || PERSONAS[0]);
-            }, 2000);
+              setSelectedPersona(recommendedPersona);
+            }, 450);
           } else {
             setSelectedPersona(p);
           }
@@ -446,13 +567,14 @@ export default function Analyzer() {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                 <div style={{width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite'}}></div>
                 <h3 style={{fontSize: '18px', color: '#fff', fontWeight: '700', marginTop: '16px'}}>Analyse en cours...</h3>
-                <p style={{color: '#a1a1aa', fontSize: '13px', lineHeight: 1.5}}>L'IA croise les données du marché pour identifier l'audience la plus rentable.</p>
+                <p style={{color: '#a1a1aa', fontSize: '13px', lineHeight: 1.5}}>Sélection de l&apos;audience la plus cohérente avec les données analysées.</p>
               </div>
             ) : (
               <>
                 <div style={{fontSize: '64px', marginBottom: '24px'}}>{previewPersona?.icon || '👤'}</div>
                 <h3 style={{fontSize: '24px', color: '#fff', fontWeight: '700', marginBottom: '12px'}}>{previewPersona?.title || 'Persona'}</h3>
                 <p style={{color: '#a1a1aa', fontSize: '15px', lineHeight: 1.5}}>{previewPersona?.desc || 'Ton profil acheteur unique'}</p>
+                {currentPersona.id === 'auto' && result?.landingPage?.recommendation?.rationale && <p style={{color: '#7dd3fc', fontSize: '12px', lineHeight: 1.5, marginTop: '16px'}}>{result.landingPage.recommendation.rationale}</p>}
               </>
             )}
           </div>,
@@ -462,22 +584,25 @@ export default function Analyzer() {
       })()}
 
       {state === 'select_angle' && (() => {
-        const dynamicAngles = result?.landingPage?.angles?.map((a, i) => ({ id: `dyn_a_${i}`, ...a })) || ANGLES.slice(0, 4);
+        const dynamicAngles = (result?.landingPage?.angles?.length
+          ? result.landingPage.angles.map((a, i) => ({ id: `dyn_a_${i}`, ...a }))
+          : ANGLES.slice(0, 4));
+        const recommendedAngle = dynamicAngles[result?.landingPage?.recommendation?.angleIndex] || dynamicAngles[0] || ANGLES[0];
         const allAngles = [
-          { id: 'auto', icon: <BrainCircuit size={28} color="#fff" />, title: 'Laisser l\'IA décider', desc: 'L\'IA analyse le marché pour créer l\'angle marketing parfait.' },
+          { id: 'auto', icon: <BrainCircuit size={28} color="#fff" />, title: 'Laisser l\'IA décider', desc: 'Choix fondé sur le besoin client, la valeur perçue et la marge calculée.' },
           ...dynamicAngles
         ];
 
         const currentAngle = selectedAngle || allAngles[0];
-        const previewAngle = currentAngle.id === 'auto' ? (dynamicAngles[0] || ANGLES[0]) : currentAngle;
+        const previewAngle = currentAngle.id === 'auto' ? recommendedAngle : currentAngle;
 
         const handleSelectAngle = (a) => {
           if (a.id === 'auto') {
             setIsAiThinking('angle');
             setTimeout(() => {
               setIsAiThinking(null);
-              setSelectedAngle(dynamicAngles[0] || ANGLES[0]);
-            }, 2000);
+              setSelectedAngle(recommendedAngle);
+            }, 450);
           } else {
             setSelectedAngle(a);
           }
@@ -510,8 +635,8 @@ export default function Analyzer() {
             {isAiThinking === 'angle' ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                 <div style={{width: '32px', height: '32px', border: '3px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite'}}></div>
-                <h3 style={{fontSize: '18px', color: '#fff', fontWeight: '700', marginTop: '16px'}}>Génération de l'angle...</h3>
-                <p style={{color: '#a1a1aa', fontSize: '13px', lineHeight: 1.5}}>{`L'IA analyse le persona "${currentPersona?.title || 'choisi'}" pour formuler un argumentaire irrésistible.`}</p>
+                <h3 style={{fontSize: '18px', color: '#fff', fontWeight: '700', marginTop: '16px'}}>Génération de l&apos;angle...</h3>
+                <p style={{color: '#a1a1aa', fontSize: '13px', lineHeight: 1.5}}>{`L'IA analyse le persona "${selectedPersona?.title || 'choisi'}" pour formuler un argumentaire irrésistible.`}</p>
               </div>
             ) : (
               <>

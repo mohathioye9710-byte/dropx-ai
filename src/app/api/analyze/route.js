@@ -2,6 +2,84 @@ import { NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
 import OpenAI from 'openai';
 
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+function getNumericPrice(price) {
+  const match = String(price || '').replace(',', '.').match(/\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : null;
+}
+
+function getRetailMultiplier(cost) {
+  if (cost < 15) return 3;
+  if (cost <= 40) return 2.5;
+  return 2;
+}
+
+// The final score is deliberately calculated here, not delegated to the model.
+// The model only evaluates the qualitative evidence it receives (value, demand, review confidence).
+function calculateProductScore({ title, description, image, imageList, productOptions, supplierPrice, marketEvaluation }) {
+  const cost = getNumericPrice(supplierPrice);
+  const hasReliableTitle = title && title !== 'Unknown Product' && !/^ItemDetailResp/i.test(title);
+  const dataRetrieval =
+    (hasReliableTitle ? 6 : 1) +
+    (description && description.length >= 80 ? 3 : 0) +
+    (cost !== null ? 4 : 0) +
+    (image ? 3 : 0) +
+    (imageList.length >= 3 ? 2 : imageList.length ? 1 : 0) +
+    (productOptions.length ? 2 : 0);
+
+  let marginConstraints = 0;
+  let retail = null;
+  if (cost !== null) {
+    retail = cost * getRetailMultiplier(cost);
+    // Products between $5 and $40 leave the most usable room for delivery, ads and returns.
+    marginConstraints = cost < 5 ? 13 : cost < 15 ? 18 : cost <= 40 ? 20 : cost <= 70 ? 14 : 8;
+    marginConstraints += productOptions.length ? 2 : 0;
+    marginConstraints += 3; // A precise supplier price was captured.
+  }
+
+  const perceivedValue = clamp(Math.round(Number(marketEvaluation?.perceivedValue) || 0), 0, 20);
+  const reviewsAnalysis = clamp(Math.round(Number(marketEvaluation?.reviewsConfidence) || 0), 0, 15);
+  const trendsAnalysis = clamp(Math.round(Number(marketEvaluation?.demandSignals) || 0), 0, 20);
+  const breakdown = {
+    dataRetrieval: clamp(dataRetrieval, 0, 20),
+    marginConstraints: clamp(marginConstraints, 0, 25),
+    perceivedValue,
+    reviewsAnalysis,
+    trendsAnalysis,
+  };
+
+  return {
+    score: Object.values(breakdown).reduce((total, value) => total + value, 0),
+    breakdown,
+    retail,
+  };
+}
+
+function extractBalancedArray(source, startIndex) {
+  const start = source.indexOf('[', startIndex);
+  if (start === -1) return '';
+  let depth = 0;
+  let quoted = false;
+  let escaped = false;
+  for (let index = start; index < source.length; index += 1) {
+    const char = source[index];
+    if (quoted) {
+      if (!escaped && char === '"') quoted = false;
+      escaped = !escaped && char === '\\';
+      if (char !== '\\') escaped = false;
+      continue;
+    }
+    if (char === '"') quoted = true;
+    if (char === '[') depth += 1;
+    if (char === ']') {
+      depth -= 1;
+      if (depth === 0) return source.slice(start, index + 1);
+    }
+  }
+  return '';
+}
+
 export async function POST(req) {
   try {
     const { url } = await req.json();
@@ -257,6 +335,65 @@ export async function POST(req) {
           } catch(e) {}
         }
 
+        // Recent AliExpress pages often expose variants in a different, escaped JSON shape
+        // (skuPropertyName/propertyValues instead of productSKUPropertyList). Read both shapes.
+        if (productOptions.length === 0) {
+          const optionSources = [
+            html,
+            html.replace(/\\"/g, '"').replace(/\\u002F/gi, '/').replace(/&quot;/gi, '"'),
+          ];
+          const discoveredOptions = [];
+          const addOption = (name, values) => {
+            const cleanName = String(name || '').replace(/\\u[0-9a-f]{4}/gi, '').trim();
+            const cleanValues = [...new Set(values
+              .map(value => String(value || '').replace(/\\u[0-9a-f]{4}/gi, '').trim())
+              .filter(value => value && value.length < 80))];
+            if (!cleanName || cleanValues.length === 0) return;
+            const existing = discoveredOptions.find(option => option.name.toLowerCase() === cleanName.toLowerCase());
+            if (existing) {
+              existing.values = [...new Set([...existing.values, ...cleanValues])];
+            } else {
+              discoveredOptions.push({ name: cleanName, values: cleanValues });
+            }
+          };
+
+          optionSources.forEach(source => {
+            // AliExpress SKU arrays contain nested image data, so a regular expression that stops at
+            // the first closing bracket loses the values. Read the full balanced array instead.
+            const propertyNames = source.matchAll(/"(?:skuPropertyName|propertyName|propertyNameDisplay|propertyNameTrans)"\s*:\s*"([^"\\]+)"/g);
+            for (const property of propertyNames) {
+              const section = source.slice(property.index, property.index + 15000);
+              const arrayMarker = section.match(/"(?:skuPropertyValues|propertyValues|values)"\s*:/);
+              if (!arrayMarker) continue;
+              const valuesBlock = extractBalancedArray(section, arrayMarker.index);
+              const values = [...valuesBlock.matchAll(/"(?:propertyValueDefinitionName|propertyValueDisplayName|propertyValueName|valueName|valueNameTrans)"\s*:\s*"([^"\\]+)"/g)].map(match => match[1]);
+              addOption(property[1], values);
+            }
+          });
+
+          // Last resort: if AliExpress only provides the option values, still preserve them as a Color option.
+          if (discoveredOptions.length === 0) {
+            const values = [...new Set([...optionSources[1].matchAll(/"(?:propertyValueDefinitionName|propertyValueDisplayName|propertyValueName|valueName)"\s*:\s*"([^"\\]+)"/g)].map(match => match[1]))];
+            if (values.length >= 2 && values.length <= 30) addOption('Color', values);
+          }
+
+          // Some page versions render colour swatches in HTML instead of the SKU JSON. When a
+          // "Color:" selector is present, preserve the distinct colour names found in that selector.
+          if (discoveredOptions.length === 0 && /(?:^|[^a-z])color\s*:/i.test(optionSources[1])) {
+            const supportedColors = /(?:black|white|grey|gray|blue|red|green|yellow|pink|purple|orange|beige|brown|silver|gold|navy|khaki)/gi;
+            const colors = [...new Set([...optionSources[1].matchAll(supportedColors)].map(match => match[0].toLowerCase()))];
+            if (colors.length >= 2) addOption('Color', colors);
+          }
+
+          productOptions = discoveredOptions.filter(option => option.values.length > 0);
+          if (productOptions.length > 0) {
+            console.log(`[DEBUG] ✅ Options trouvées via format AliExpress récent: ${productOptions.map(option => `${option.name} (${option.values.join(', ')})`).join(' | ')}`);
+          } else {
+            const variantSignals = (optionSources[1].match(/skuProperty|propertyValue|color\s*:/gi) || []).length;
+            console.log(`[DEBUG] ⚠️ Aucune variante lisible. Signaux de variantes dans le HTML: ${variantSignals}.`);
+          }
+        }
+
         // --- PRICE from URL (pdp_npi) ---
         if (!extractedPrice && url.includes('pdp_npi')) {
           const decodedUrl = decodeURIComponent(url);
@@ -363,14 +500,15 @@ export async function POST(req) {
       You MUST calculate the "margin" strictly as: (suggestedRetail - supplierCost).
       DO NOT guess the margin or retail price, compute them mathematically. If the extracted price is missing, estimate a realistic supplier cost and apply the exact same mathematical formulas. Always return the values as strings with the currency symbol.
       
-      CRITICAL INSTRUCTION 2: To calculate the final "score", you MUST evaluate the product based on these 5 specific criteria:
-      1. Récupération des données (Data Retrieval/Reliability)
-      2. Contraintes de marge (Margin Constraints - is there enough room for ad spend?)
-      3. Valeur perçue (Perceived Value - does it look expensive/high-quality?)
-      4. Analyse des avis (Reviews Analysis - expected customer satisfaction)
-      5. Analyse des tendances (Trends Analysis - is it currently viral or seasonal?)
-      
-      Weigh these factors to determine a score out of 100.
+      CRITICAL INSTRUCTION 2: DO NOT calculate the final product score. The application calculates it deterministically.
+      Instead return a "marketEvaluation" object with these three conservative, evidence-based integer ratings:
+      - perceivedValue (0 to 20): how clearly the image/title communicate a premium, understandable benefit.
+      - reviewsConfidence (0 to 15): confidence in likely satisfaction. Do not invent supplier reviews; use a low score when no review evidence was extracted.
+      - demandSignals (0 to 20): durable demand signs inferred from the product category and use case. Do not claim live trend data or virality unless it was supplied.
+      For each rating, give a concise French explanation in "marketReasons".
+
+      CRITICAL INSTRUCTION 2B: Make a concrete recommendation, not a random choice.
+      Generate exactly 4 personas and exactly 4 angles, then return a "recommendation" object containing the zero-based personaIndex and angleIndex of the most commercially coherent pair, plus a short French rationale. The choice must follow the product benefit, price positioning, perceived value and the cautious market evaluation above.
 
       CRITICAL INSTRUCTION 3: You MUST write a single highly detailed product description ("productDescription").
       We are using an AI Image Upscaler/Cleaner. The AI needs a flawless physical description of the product so it doesn't hallucinate.
@@ -387,7 +525,9 @@ export async function POST(req) {
 
       Return ONLY valid JSON matching this structure:
       {
-        "score": number (0 to 100),
+        "marketEvaluation": {"perceivedValue": number (0 to 20), "reviewsConfidence": number (0 to 15), "demandSignals": number (0 to 20)},
+        "marketReasons": {"perceivedValue": "string", "reviewsConfidence": "string", "demandSignals": "string"},
+        "recommendation": {"personaIndex": number (0 to 3), "angleIndex": number (0 to 3), "rationale": "string"},
         "commercialTitle": "string",
         "commercialDescription": "string",
         "potentialLevel": "string",
@@ -443,7 +583,9 @@ export async function POST(req) {
           "ratingText": "4.9/5 - Approuvé"
         },
         "reviews": [{"name": "...", "rating": 5, "text": "...", "verified": true}],
-        "faq": [{"question": "...", "answer": "..."}]
+        "faq": [{"question": "...", "answer": "..."}],
+        "personas": [{"icon": "emoji", "title": "...", "desc": "..."}],
+        "angles": [{"icon": "emoji", "title": "...", "desc": "..."}]
       }
     `;
 
@@ -466,7 +608,30 @@ export async function POST(req) {
     });
 
     const analysis = JSON.parse(completion.choices[0].message.content);
-    console.log(`[DEBUG] ✅ Analyse OpenAI terminée avec succès. Score obtenu : ${analysis.score}`);
+    const scorecard = calculateProductScore({
+      title,
+      description,
+      image,
+      imageList,
+      productOptions,
+      supplierPrice: extractedPrice,
+      marketEvaluation: analysis.marketEvaluation,
+    });
+    analysis.score = scorecard.score;
+    analysis.scoreBreakdown = scorecard.breakdown;
+    analysis.details = {
+      dataRetrieval: `${scorecard.breakdown.dataRetrieval}/20 — titre, prix, images et variantes réellement extraits.`,
+      marginConstraints: `${scorecard.breakdown.marginConstraints}/25 — coût fournisseur ${extractedPrice || 'non confirmé'}${scorecard.retail ? `, prix de vente calculé $${scorecard.retail.toFixed(2)}` : ''}. Les frais d'expédition et le coût publicitaire restent à vérifier avant de lancer des annonces.`,
+      perceivedValue: `${scorecard.breakdown.perceivedValue}/20 — ${analysis.marketReasons?.perceivedValue || 'évaluation visuelle et de la clarté du bénéfice.'}`,
+      reviewsAnalysis: `${scorecard.breakdown.reviewsAnalysis}/15 — ${analysis.marketReasons?.reviewsConfidence || 'niveau de confiance limité aux données réellement disponibles.'}`,
+      trendsAnalysis: `${scorecard.breakdown.trendsAnalysis}/20 — ${analysis.marketReasons?.demandSignals || 'évaluation du besoin produit, sans prétendre à des tendances en direct.'}`,
+    };
+    analysis.recommendation = {
+      personaIndex: clamp(Math.round(Number(analysis.recommendation?.personaIndex) || 0), 0, 3),
+      angleIndex: clamp(Math.round(Number(analysis.recommendation?.angleIndex) || 0), 0, 3),
+      rationale: String(analysis.recommendation?.rationale || 'Choix basé sur le bénéfice produit, le prix et l’évaluation commerciale.'),
+    };
+    console.log(`[DEBUG] ✅ Analyse OpenAI terminée. Score calculé : ${analysis.score}/100 (${Object.values(scorecard.breakdown).join(' + ')}).`);
     
     // Generate the realistic images using Replicate (Flux Dev)
     let generatedImages = [];
@@ -576,7 +741,10 @@ export async function POST(req) {
         section4_cta: analysis.section4_cta || null,
         section5_power: analysis.section5_power || null,
         faq: analysis.faq || [],
-        reviews: analysis.reviews || []
+        reviews: analysis.reviews || [],
+        personas: Array.isArray(analysis.personas) ? analysis.personas.slice(0, 4) : [],
+        angles: Array.isArray(analysis.angles) ? analysis.angles.slice(0, 4) : [],
+        recommendation: analysis.recommendation,
       }
     });
 

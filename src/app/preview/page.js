@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 import { ShoppingBag, ShieldCheck, Truck, ArrowLeft, Check, Zap, Loader2, LayoutTemplate, Palette, Image as ImageIcon, Settings, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { normalizeLandingPage } from '@/lib/landing-page';
+
+const TEXT_THEME_COLORS = ['#000000', '#ffffff', '#64748b', '#6b7280', '#7c6a9f', '#a56d7b', '#6f8c82', '#8b7b68', '#7d8e59', '#5e7894'];
+const BUTTON_THEME_COLORS = ['#000000', '#ffffff', '#a7f3d0', '#bfdbfe', '#ddd6fe', '#fbcfe8', '#fed7aa', '#fde68a', '#bae6fd', '#c7d2fe', '#bbf7d0'];
 
 export default function StoreBuilder() {
   const router = useRouter();
@@ -24,7 +28,15 @@ export default function StoreBuilder() {
   });
 
   const [bundle, setBundle] = useState(1);
-  const [currency, setCurrency] = useState('EUR'); // EUR, XOF, USD
+  const [currency, setCurrency] = useState('XOF'); // Default XOF for Senegal
+  const [merchantPhone, setMerchantPhone] = useState('+221770000000');
+  const [formName, setFormName] = useState('');
+  const [formPhone, setFormPhone] = useState('');
+  const [formCity, setFormCity] = useState('Dakar Centre (Plateau, Médina, Fann, Point E)');
+  const [formAddress, setFormAddress] = useState('');
+  const [formPaymentMethod, setFormPaymentMethod] = useState('Espèces à la livraison');
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [orderModalData, setOrderModalData] = useState(null); // EUR, XOF, USD
   
   // Builder state
   const [activeTab, setActiveTab] = useState('content'); // content, theme, options
@@ -80,6 +92,8 @@ export default function StoreBuilder() {
           finalPrice = Math.floor(finalPrice * 3) + 0.99;
         }
 
+        // The values are read from browser storage only after the first client render.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrency(targetCurrency);
         setProduct({
           ...product,
@@ -146,6 +160,68 @@ export default function StoreBuilder() {
   };
 
   const smartBundles = generateSmartBundles(product.price, product.compareAtPrice, currency);
+  const landingPage = normalizeLandingPage(product.landingPage, product.title);
+  const themeForeground = themeColor.toLowerCase() === '#ffffff' ? '#111111' : '#ffffff';
+  const buttonForeground = buttonColor.toLowerCase() === '#000000' ? '#ffffff' : '#111111';
+
+  const handleTestCODOrder = async () => {
+    if (!formName.trim()) {
+      alert("Veuillez saisir votre prénom et nom.");
+      return;
+    }
+    if (!formPhone.trim()) {
+      alert("Veuillez saisir votre numéro de téléphone.");
+      return;
+    }
+    if (!formAddress.trim()) {
+      alert("Veuillez préciser votre quartier ou adresse de livraison.");
+      return;
+    }
+
+    setIsSubmittingOrder(true);
+    const selectedBundleObj = smartBundles.find(b => b.id === bundle) || smartBundles[0];
+    const totalAmount = selectedBundleObj.price;
+    const fullPhone = '+221 ' + formPhone.replace(/^\+221/, '').trim();
+
+    try {
+      const res = await fetch('/api/orders/cod', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: formName,
+          customerPhone: fullPhone,
+          customerCity: formCity,
+          customerAddress: formAddress,
+          paymentMethod: formPaymentMethod,
+          productTitle: product.title,
+          bundleTitle: selectedBundleObj.title,
+          quantity: bundle,
+          unitPrice: product.price,
+          totalPrice: totalAmount,
+          currency: currency,
+          merchantPhone: merchantPhone
+        })
+      });
+      const data = await res.json();
+      setOrderModalData({
+        productTitle: `${product.title} (${selectedBundleObj.title})`,
+        totalPrice: formatPrice(totalAmount),
+        address: `${formAddress}, ${formCity}`,
+        paymentMethod: formPaymentMethod,
+        whatsappUrl: data.whatsappUrl || `https://wa.me/${merchantPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Bonjour ShopX ! Je confirme ma commande : ' + product.title)}`
+      });
+    } catch (e) {
+      setOrderModalData({
+        productTitle: `${product.title} (${selectedBundleObj.title})`,
+        totalPrice: formatPrice(totalAmount),
+        address: `${formAddress}, ${formCity}`,
+        paymentMethod: formPaymentMethod,
+        whatsappUrl: `https://wa.me/${merchantPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ! Je confirme ma commande : ${product.title} (${selectedBundleObj.title}) pour ${formatPrice(totalAmount)} à ${formAddress}, ${formCity}.`)}`
+      });
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  };
 
   const handlePushToShopify = async () => {
     setPushStatus('pushing');
@@ -154,7 +230,7 @@ export default function StoreBuilder() {
       const res = await fetch('/api/shopify/push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product, currency })
+        body: JSON.stringify({ product, currency, themeColor, buttonColor })
       });
       const data = await res.json();
       if (res.ok) {
@@ -321,6 +397,18 @@ export default function StoreBuilder() {
                   </div>
 
                   <div>
+                    <label style={{ display: 'block', fontSize: '12px', color: '#10b981', fontWeight: '700', marginBottom: '8px', textTransform: 'uppercase' }}>Numéro WhatsApp Vendeur (Sénégal)</label>
+                    <input 
+                      type="text" 
+                      value={merchantPhone}
+                      onChange={(e) => setMerchantPhone(e.target.value)}
+                      placeholder="+221 77 000 00 00"
+                      style={{ width: '100%', background: '#111', border: '1px solid #10b981', color: '#fff', padding: '12px', borderRadius: '8px', fontSize: '14px', marginBottom: '6px' }}
+                    />
+                    <span style={{ fontSize: '11px', color: '#a1a1aa' }}>Vos clients vous confirmeront leur commande sur ce numéro.</span>
+                  </div>
+
+                  <div>
                     <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', fontWeight: '600', marginBottom: '8px', textTransform: 'uppercase' }}>Description Marketing</label>
                     <textarea 
                       value={product.description}
@@ -335,16 +423,16 @@ export default function StoreBuilder() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', fontWeight: '600', marginBottom: '12px', textTransform: 'uppercase' }}>Couleur Principale (Texte)</label>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      {['#000000', '#1f2937', '#4338ca', '#be123c', '#0f766e'].map(c => (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {TEXT_THEME_COLORS.map(c => (
                         <div key={c} onClick={() => setThemeColor(c)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: c, cursor: 'pointer', border: themeColor === c ? '2px solid #fff' : '2px solid transparent' }} />
                       ))}
                     </div>
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', fontWeight: '600', marginBottom: '12px', textTransform: 'uppercase' }}>Couleur Bouton Ajout Panier</label>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      {['#10b981', '#000000', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'].map(c => (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {BUTTON_THEME_COLORS.map(c => (
                         <div key={c} onClick={() => setButtonColor(c)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: c, cursor: 'pointer', border: buttonColor === c ? '2px solid #fff' : '2px solid transparent' }} />
                       ))}
                     </div>
@@ -381,14 +469,14 @@ export default function StoreBuilder() {
             }}>
             
             {/* INJECTED STORE PREVIEW CONTENT */}
-            <div style={{ minHeight: '100%', color: themeColor, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+            <div style={{ minHeight: '100%', color: themeColor, fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif' }}>
               
-              <div style={{ background: themeColor, color: '#fff', textAlign: 'center', padding: '8px', fontSize: '12px', fontWeight: '600', letterSpacing: '1px' }}>
+              <div style={{ background: themeColor, color: themeForeground, textAlign: 'center', padding: '8px', fontSize: '12px', fontWeight: '600', letterSpacing: '1px' }}>
                 Livraison rapide 🚚
               </div>
 
               <div style={{ padding: '20px 5%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f0f0f0' }}>
-                <h1 style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', margin: 0, color: themeColor }}>Ma Boutique</h1>
+                <Link href="/stores" style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', margin: 0, color: themeColor, textDecoration: 'none', cursor: 'pointer' }}>ShopX</Link>
                 <ShoppingBag size={24} strokeWidth={1.5} color={themeColor} />
               </div>
 
@@ -438,7 +526,7 @@ export default function StoreBuilder() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {smartBundles.map(opt => (
                         <label key={opt.id} onClick={() => setBundle(opt.id)} style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', border: bundle === opt.id ? `2px solid ${themeColor}` : '1px solid #e5e7eb', borderRadius: '12px', cursor: 'pointer', background: bundle === opt.id ? '#f8fafc' : '#fff', transition: 'all 0.2s' }}>
-                          {opt.tag && <div style={{ position: 'absolute', top: '-10px', right: '16px', background: themeColor, color: '#fff', fontSize: '11px', fontWeight: '800', padding: '4px 10px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>{opt.tag}</div>}
+                          {opt.tag && <div style={{ position: 'absolute', top: '-10px', right: '16px', background: themeColor, color: themeForeground, fontSize: '11px', fontWeight: '800', padding: '4px 10px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>{opt.tag}</div>}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                             <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: bundle === opt.id ? `6px solid ${themeColor}` : '2px solid #d1d5db' }}></div>
                             <div>
@@ -455,38 +543,186 @@ export default function StoreBuilder() {
                     </div>
                   </div>
 
-                  <button style={{ width: '100%', background: buttonColor, color: '#fff', padding: '20px', borderRadius: '12px', fontSize: '18px', fontWeight: '800', border: 'none', cursor: 'pointer', marginBottom: '16px', transition: 'transform 0.1s', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', boxShadow: `0 8px 24px ${buttonColor}40` }} onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.98)'; }} onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
-                    <ShoppingBag size={22} /> Ajouter au Panier
-                  </button>
-
-                  <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', padding: '16px', borderRadius: '12px', flex: 1 }}>
-                      <ShieldCheck size={24} color={themeColor} />
-                      <div>
-                        <div style={{ fontSize: '13px', fontWeight: '700', color: themeColor }}>Paiement Sécurisé</div>
-                        <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Cryptage SSL 256-bit</div>
-                      </div>
+                  {/* FORMULAIRE EASYSELL SÉNÉGAL (COD 1-CLIC) */}
+                  <div style={{ background: '#fff', border: `2px solid ${buttonColor}`, borderRadius: '16px', padding: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', marginTop: '20px' }}>
+                    
+                    <div style={{ background: buttonColor, color: buttonForeground, padding: '10px 14px', borderRadius: '10px', textAlign: 'center', fontWeight: '800', fontSize: '14px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <span>⚡</span> COMMANDE RAPIDE EN 1 CLIC (PAIEMENT À LA LIVRAISON)
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', padding: '16px', borderRadius: '12px', flex: 1 }}>
-                      <Truck size={24} color={themeColor} />
+
+                    <p style={{ fontSize: '13px', color: '#4b5563', textAlign: 'center', margin: '0 0 18px', lineHeight: '1.4' }}>
+                      Pas besoin de carte bancaire ! Remplissez vos coordonnées, nous vous livrons chez vous et vous réglez à la réception.
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: '700', color: themeColor }}>Livraison Rapide</div>
-                        <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Expédition en 24/48h</div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#1f2937', marginBottom: '6px' }}>
+                          👤 Votre Prénom et Nom <span style={{ color: '#ef4444' }}>*</span>
+                        </label>
+                        <input 
+                          type="text" 
+                          value={formName} 
+                          onChange={(e) => setFormName(e.target.value)}
+                          placeholder="Ex: Mamadou Diallo" 
+                          style={{ width: '100%', boxSizing: 'border-box', padding: '13px 14px', border: '1.5px solid #d1d5db', borderRadius: '10px', fontSize: '15px', color: '#111', background: '#f9fafb', outline: 'none' }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#1f2937', marginBottom: '6px' }}>
+                          📞 Numéro WhatsApp / Téléphone <span style={{ color: '#ef4444' }}>*</span>
+                        </label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', padding: '0 12px', background: '#e5e7eb', borderRadius: '10px', fontWeight: '700', fontSize: '14px', color: '#374151' }}>🇸🇳 +221</span>
+                          <input 
+                            type="tel" 
+                            value={formPhone} 
+                            onChange={(e) => setFormPhone(e.target.value)}
+                            placeholder="77 123 45 67" 
+                            style={{ flex: 1, boxSizing: 'border-box', padding: '13px 14px', border: '1.5px solid #d1d5db', borderRadius: '10px', fontSize: '15px', color: '#111', background: '#f9fafb', outline: 'none' }}
+                          />
+                        </div>
+                        <span style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px', display: 'block' }}>Notre livreur vous appellera sur ce numéro avant de passer.</span>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#1f2937', marginBottom: '6px' }}>
+                          📍 Ville / Région <span style={{ color: '#ef4444' }}>*</span>
+                        </label>
+                        <select 
+                          value={formCity} 
+                          onChange={(e) => setFormCity(e.target.value)}
+                          style={{ width: '100%', boxSizing: 'border-box', padding: '13px 14px', border: '1.5px solid #d1d5db', borderRadius: '10px', fontSize: '15px', color: '#111', background: '#f9fafb', outline: 'none', cursor: 'pointer' }}
+                        >
+                          <option value="Dakar Centre (Plateau, Médina, Fann, Point E)">Dakar Centre (Plateau, Médina, Fann, Point E)</option>
+                          <option value="Dakar Ouest (Almadies, Ngor, Ouakam, Mermoz)">Dakar Ouest (Almadies, Ngor, Ouakam, Mermoz)</option>
+                          <option value="Dakar Nord (Yoff, Ouest-Foire, Nord-Foire, Maristes)">Dakar Nord (Yoff, Ouest-Foire, Nord-Foire, Maristes)</option>
+                          <option value="Dakar Banlieue (Pikine, Guédiawaye, Parcelles Assainies)">Dakar Banlieue (Pikine, Guédiawaye, Parcelles Assainies)</option>
+                          <option value="Rufisque / Keur Massar / Diamniadio">Rufisque / Keur Massar / Diamniadio</option>
+                          <option value="Thiès / Mbour / Saly">Thiès / Mbour / Saly</option>
+                          <option value="Touba / Mbacké / Diourbel">Touba / Mbacké / Diourbel</option>
+                          <option value="Saint-Louis">Saint-Louis</option>
+                          <option value="Kaolack">Kaolack</option>
+                          <option value="Ziguinchor">Ziguinchor</option>
+                          <option value="Autre région du Sénégal">Autre région du Sénégal</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#1f2937', marginBottom: '6px' }}>
+                          🏠 Quartier / Adresse de livraison <span style={{ color: '#ef4444' }}>*</span>
+                        </label>
+                        <input 
+                          type="text" 
+                          value={formAddress} 
+                          onChange={(e) => setFormAddress(e.target.value)}
+                          placeholder="Ex: Sacré-Cœur 3, près de la boulangerie..." 
+                          style={{ width: '100%', boxSizing: 'border-box', padding: '13px 14px', border: '1.5px solid #d1d5db', borderRadius: '10px', fontSize: '15px', color: '#111', background: '#f9fafb', outline: 'none' }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#1f2937', marginBottom: '6px' }}>
+                          💵 Mode de Paiement à la réception
+                        </label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <label 
+                            onClick={() => setFormPaymentMethod('Espèces à la livraison')}
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', border: formPaymentMethod === 'Espèces à la livraison' ? '2px solid #10b981' : '1.5px solid #e5e7eb', borderRadius: '10px', background: formPaymentMethod === 'Espèces à la livraison' ? '#f0fdf4' : '#f9fafb', cursor: 'pointer', fontSize: '13px', fontWeight: '700', color: formPaymentMethod === 'Espèces à la livraison' ? '#15803d' : '#374151', transition: 'all 0.2s' }}
+                          >
+                            <input type="radio" checked={formPaymentMethod === 'Espèces à la livraison'} onChange={() => {}} style={{ accentColor: '#10b981' }} />
+                            <span>💵 Espèces</span>
+                          </label>
+                          <label 
+                            onClick={() => setFormPaymentMethod('Wave / Orange Money')}
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', border: formPaymentMethod === 'Wave / Orange Money' ? '2px solid #1d4ed8' : '1.5px solid #e5e7eb', borderRadius: '10px', background: formPaymentMethod === 'Wave / Orange Money' ? '#eff6ff' : '#f9fafb', cursor: 'pointer', fontSize: '13px', fontWeight: '700', color: formPaymentMethod === 'Wave / Orange Money' ? '#1e40af' : '#374151', transition: 'all 0.2s' }}
+                          >
+                            <input type="radio" checked={formPaymentMethod === 'Wave / Orange Money'} onChange={() => {}} style={{ accentColor: '#1d4ed8' }} />
+                            <span>📱 Wave / OM</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Summary */}
+                      <div style={{ background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: '12px', padding: '14px', margin: '10px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600' }}>Total à régler à la livraison :</div>
+                          <div style={{ fontSize: '13px', color: '#111', fontWeight: '700' }}>{(smartBundles.find(b => b.id === bundle) || smartBundles[0]).title}</div>
+                        </div>
+                        <div style={{ fontSize: '22px', fontWeight: '900', color: buttonColor }}>
+                          {formatPrice((smartBundles.find(b => b.id === bundle) || smartBundles[0]).price)}
+                        </div>
+                      </div>
+
+                      {/* CTA Button */}
+                      <button 
+                        type="button" 
+                        onClick={handleTestCODOrder}
+                        disabled={isSubmittingOrder}
+                        style={{ width: '100%', background: buttonColor, color: buttonForeground, padding: '18px 20px', borderRadius: '12px', fontSize: '17px', fontWeight: '900', border: 'none', cursor: isSubmittingOrder ? 'not-allowed' : 'pointer', transition: 'transform 0.1s, box-shadow 0.2s', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', boxShadow: `0 8px 22px ${buttonColor}50` }}
+                      >
+                        {isSubmittingOrder ? "Traitement de la commande..." : "COMMANDER MAINTENANT (PAIEMENT À LA LIVRAISON) 🚚"}
+                      </button>
+
+                      {/* Senegal Trust Highlights */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '12px', fontSize: '11px', color: '#4b5563' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>📦</span> <b>Vérifiez avant de payer</b></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>🚀</span> <b>Livraison 24h/48h Sénégal</b></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>📞</span> <b>Confirmation WhatsApp</b></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>🔒</span> <b>Paiement 100% sécurisé</b></div>
                       </div>
                     </div>
                   </div>
 
-                </div>
+                  {/* Confirmation Modal in Preview */}
+                  {orderModalData && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999999, padding: '20px' }}>
+                      <div style={{ background: '#fff', borderRadius: '20px', padding: '30px', maxWidth: '480px', width: '100%', textAlign: 'center', boxShadow: '0 25px 50px rgba(0,0,0,0.3)', color: '#111' }}>
+                        <div style={{ width: '70px', height: '70px', background: '#dcfce7', color: '#16a34a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px', margin: '0 auto 16px' }}>
+                          ✓
+                        </div>
+                        <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#111', margin: '0 0 8px' }}>Félicitations ! 🎉</h2>
+                        <p style={{ fontSize: '15px', color: '#4b5563', margin: '0 0 16px', lineHeight: '1.5' }}>
+                          Votre commande a été enregistrée avec succès. Notre équipe va vous appeler pour organiser la livraison.
+                        </p>
+
+                        <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '14px', textAlign: 'left', fontSize: '13px', color: '#374151', marginBottom: '20px' }}>
+                          <div style={{ marginBottom: '6px' }}><b>📦 Produit :</b> {orderModalData.productTitle}</div>
+                          <div style={{ marginBottom: '6px' }}><b>💰 Montant :</b> <span style={{ fontWeight: '800', color: '#10b981' }}>{orderModalData.totalPrice}</span></div>
+                          <div style={{ marginBottom: '6px' }}><b>📍 Livraison :</b> {orderModalData.address}</div>
+                          <div><b>💵 Règlement :</b> {orderModalData.paymentMethod}</div>
+                        </div>
+
+                        <a 
+                          href={orderModalData.whatsappUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#25D366', color: '#fff', padding: '16px 24px', borderRadius: '12px', fontSize: '16px', fontWeight: '800', textDecoration: 'none', boxShadow: '0 8px 20px rgba(37,211,102,0.4)' }}
+                        >
+                          <span style={{ fontSize: '20px' }}>💬</span> Confirmer rapidement sur WhatsApp
+                        </a>
+
+                        <button 
+                          type="button" 
+                          onClick={() => setOrderModalData(null)} 
+                          style={{ marginTop: '14px', background: 'transparent', border: 'none', color: '#6b7280', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}
+                        >
+                          Fermer cette fenêtre
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                 </div>
               </main>
 
               {/* SECTION 1: BENEFITS */}
-              {product.landingPage?.section1_benefits && (
+              {landingPage.section1_benefits && (
                 <div style={{ padding: '60px 20px', background: '#fdf2f8', textAlign: 'center' }}>
                   <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#c85a7c', marginBottom: '40px' }}>{product.landingPage.section1_benefits.sectionTitle}</h2>
+                    <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#c85a7c', marginBottom: '40px' }}>{landingPage.section1_benefits.sectionTitle}</h2>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center' }}>
-                      {product.landingPage.section1_benefits.items.map((item, i) => (
+                      {landingPage.section1_benefits.items.map((item, i) => (
                         <div key={i} style={{ flex: '1 1 30%', minWidth: '250px', background: '#fff', padding: '30px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                           <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#111', marginBottom: '12px' }}>{item.title}</h3>
                           <p style={{ fontSize: '14px', color: '#555', lineHeight: '1.6', margin: 0 }}>{item.text}</p>
@@ -498,14 +734,14 @@ export default function StoreBuilder() {
               )}
 
               {/* SECTION 2: FEATURES GRID */}
-              {product.landingPage?.section2_features && (
+              {landingPage.section2_features && (
                 <div style={{ padding: '60px 20px', background: '#fff' }}>
                   <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '40px' }}>
                     <div style={{ flex: '1 1 45%', minWidth: '300px' }}>
                       {product.images[1] && <img src={product.images[1]} alt="Feature" style={{ width: '100%', borderRadius: '16px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />}
                     </div>
                     <div style={{ flex: '1 1 45%', minWidth: '300px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                      {product.landingPage.section2_features.items.map((item, i) => (
+                      {landingPage.section2_features.items.map((item, i) => (
                         <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                           <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#fce7f3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
                             {item.icon}
@@ -520,12 +756,12 @@ export default function StoreBuilder() {
               )}
 
               {/* SECTION 3: STEPS */}
-              {product.landingPage?.section3_steps && (
+              {landingPage.section3_steps && (
                 <div style={{ padding: '60px 20px', background: '#f9f9f9', textAlign: 'center' }}>
                   <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h2 style={{ fontSize: '28px', fontWeight: '800', color: '#111', marginBottom: '40px' }}>{product.landingPage.section3_steps.sectionTitle}</h2>
+                    <h2 style={{ fontSize: '28px', fontWeight: '800', color: '#111', marginBottom: '40px' }}>{landingPage.section3_steps.sectionTitle}</h2>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center' }}>
-                      {product.landingPage.section3_steps.items.map((item, i) => (
+                      {landingPage.section3_steps.items.map((item, i) => (
                         <div key={i} style={{ flex: '1 1 30%', minWidth: '250px' }}>
                           <div style={{ width: '100%', aspectRatio: '1/1', background: '#fff', borderRadius: '16px', overflow: 'hidden', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #eaeaea' }}>
                             {product.images[i + 2] ? <img src={product.images[i + 2]} alt={`Step ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <div style={{ fontSize: '48px', fontWeight: '900', color: '#fce7f3' }}>{i + 1}</div>}
@@ -540,24 +776,24 @@ export default function StoreBuilder() {
               )}
 
               {/* SECTION 4: CTA */}
-              {product.landingPage?.section4_cta && (
+              {landingPage.section4_cta && (
                 <div style={{ padding: '60px 20px', background: '#111', color: '#fff', textAlign: 'center' }}>
                   <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                    <h2 style={{ fontSize: '36px', fontWeight: '900', marginBottom: '16px', lineHeight: '1.2' }}>{product.landingPage.section4_cta.title}</h2>
-                    <p style={{ fontSize: '16px', color: '#a1a1aa', lineHeight: '1.6', marginBottom: '30px' }}>{product.landingPage.section4_cta.text}</p>
-                    <button style={{ background: buttonColor, color: '#fff', border: 'none', padding: '16px 32px', fontWeight: '700', fontSize: '16px', borderRadius: '8px', cursor: 'pointer' }}>{product.landingPage.section4_cta.buttonText}</button>
+                    <h2 style={{ fontSize: '36px', fontWeight: '900', marginBottom: '16px', lineHeight: '1.2' }}>{landingPage.section4_cta.title}</h2>
+                    <p style={{ fontSize: '16px', color: '#a1a1aa', lineHeight: '1.6', marginBottom: '30px' }}>{landingPage.section4_cta.text}</p>
+                    <button style={{ background: buttonColor, color: buttonForeground, border: 'none', padding: '16px 32px', fontWeight: '700', fontSize: '16px', borderRadius: '8px', cursor: 'pointer' }}>{landingPage.section4_cta.buttonText}</button>
                   </div>
                 </div>
               )}
 
               {/* SECTION 5: POWER / SPECS */}
-              {product.landingPage?.section5_power && (
+              {landingPage.section5_power && (
                 <div style={{ padding: '60px 20px', background: '#fff' }}>
                   <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '40px' }}>
                     <div style={{ flex: '1 1 45%', minWidth: '300px' }}>
-                      <h2 style={{ fontSize: '28px', fontWeight: '800', color: '#111', marginBottom: '30px' }}>{product.landingPage.section5_power.sectionTitle}</h2>
+                      <h2 style={{ fontSize: '28px', fontWeight: '800', color: '#111', marginBottom: '30px' }}>{landingPage.section5_power.sectionTitle}</h2>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '30px' }}>
-                        {product.landingPage.section5_power.items.map((item, i) => (
+                        {landingPage.section5_power.items.map((item, i) => (
                           <div key={i} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', padding: '16px', border: '1px solid #eaeaea', borderRadius: '8px', background: '#fafafa' }}>
                             <div style={{ fontSize: '24px', minWidth: '30px' }}>{item.icon}</div>
                             <div>
@@ -567,8 +803,8 @@ export default function StoreBuilder() {
                           </div>
                         ))}
                       </div>
-                      <button style={{ display: 'block', width: '100%', textAlign: 'center', background: buttonColor, color: '#fff', padding: '16px 32px', fontWeight: '700', fontSize: '16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>{product.landingPage.section5_power.buttonText}</button>
-                      <p style={{ textAlign: 'center', fontSize: '12px', color: '#666', marginTop: '10px', fontWeight: '600' }}>⭐ {product.landingPage.section5_power.ratingText}</p>
+                      <button style={{ display: 'block', width: '100%', textAlign: 'center', background: buttonColor, color: buttonForeground, padding: '16px 32px', fontWeight: '700', fontSize: '16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>{landingPage.section5_power.buttonText}</button>
+                      <p style={{ textAlign: 'center', fontSize: '12px', color: '#666', marginTop: '10px', fontWeight: '600' }}>⭐ {landingPage.section5_power.ratingText}</p>
                     </div>
                     <div style={{ flex: '1 1 45%', minWidth: '300px' }}>
                       {product.images[0] && <img src={product.images[0]} alt="Power Spec" style={{ width: '100%', borderRadius: '16px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />}
@@ -582,7 +818,7 @@ export default function StoreBuilder() {
                 <div style={{ background: '#eaf8f9', padding: '60px 20px' }}>
                   <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <p style={{ textAlign: 'center', color: '#16a34a', fontWeight: '700', fontSize: '14px', marginBottom: '8px' }}>⭐⭐⭐⭐⭐ 4.9/5 sur +2500 clients</p>
-                    <h2 style={{ textAlign: 'center', fontSize: '32px', fontWeight: '800', color: '#111', marginBottom: '40px' }}>Ils l'adorent</h2>
+                    <h2 style={{ textAlign: 'center', fontSize: '32px', fontWeight: '800', color: '#111', marginBottom: '40px' }}>Ils l&apos;adorent</h2>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
                       {product.landingPage.reviews.map((r, i) => (
                         <div key={i} style={{ flex: '1 1 30%', minWidth: '280px', background: '#fff', border: '1px solid #eaeaea', borderRadius: '8px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
@@ -592,28 +828,37 @@ export default function StoreBuilder() {
                           </div>
                           <div style={{ color: '#fbbf24', fontSize: '16px', marginBottom: '12px' }}>{'⭐'.repeat(r.rating || 5)}</div>
                           <p style={{ margin: '0 0 16px', fontSize: '14px', color: '#444', lineHeight: '1.6' }}>{r.text}</p>
-                          <span style={{ fontSize: '12px', color: '#999' }}>Il y a {Math.floor(Math.random() * 10) + 1}j</span>
+                          <span style={{ fontSize: '12px', color: '#999' }}>Avis récent</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
               )}
+              {landingPage.reviews.length === 0 && (
+                <div style={{ background: '#eaf8f9', padding: '60px 20px' }}>
+                  <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+                    <p style={{ color: '#16a34a', fontWeight: '700', fontSize: '14px', marginBottom: '8px' }}>AVIS CLIENTS</p>
+                    <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#111', marginBottom: '20px' }}>Ils partagent leur expérience</h2>
+                    <p style={{ maxWidth: '600px', margin: '0 auto', padding: '24px', background: '#fff', color: '#555', borderRadius: '8px' }}>Les avis vérifiés seront affichés ici dès qu’ils seront disponibles.</p>
+                  </div>
+                </div>
+              )}
 
               {/* FAQ */}
-              {product.landingPage?.faq && product.landingPage.faq.length > 0 && (
+              {landingPage.faq.length > 0 && (
                 <div style={{ padding: '60px 20px', background: '#fff' }}>
                   <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: '60px' }}>
                     <div style={{ flex: '1 1 40%', minWidth: '280px' }}>
                       <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#111', marginBottom: '16px' }}>Questions Fréquentes</h2>
                       <p style={{ fontSize: '16px', color: '#666', lineHeight: '1.6', marginBottom: '40px' }}>Découvrez comment ce produit révolutionne votre quotidien en rendant vos tâches aussi simples, rapides et efficaces que jamais auparavant.</p>
                       <div style={{ background: '#fff', border: '1px solid #eaeaea', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                        <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#1d4ed8', margin: '0 0 12px' }}>Besoin d'un coup de main supplémentaire ?</h4>
+                        <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#1d4ed8', margin: '0 0 12px' }}>Besoin d&apos;un coup de main supplémentaire ?</h4>
                         <p style={{ margin: 0, fontSize: '14px', color: '#555', lineHeight: '1.5' }}>Notre équipe est disponible 7j/7 pour vous accompagner et répondre à toutes vos interrogations.</p>
                       </div>
                     </div>
                     <div style={{ flex: '1 1 50%', minWidth: '300px' }}>
-                      {product.landingPage.faq.map((f, i) => (
+                      {landingPage.faq.map((f, i) => (
                         <details key={i} style={{ borderBottom: '1px solid #eaeaea', padding: '20px 0', cursor: 'pointer' }}>
                           <summary style={{ fontWeight: '600', fontSize: '16px', color: '#111', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             {f.question}

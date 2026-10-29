@@ -52,6 +52,15 @@
   color: var(--text-secondary);
 }
 
+.searchInput:-webkit-autofill,
+.searchInput:-webkit-autofill:hover,
+.searchInput:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgba(11, 15, 25, 1) inset;
+  -webkit-text-fill-color: var(--text-primary);
+  caret-color: var(--text-primary);
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .actions {
   display: flex;
   align-items: center;
@@ -107,4 +116,36 @@
 .notificationItem:hover {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.adsStudioBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.adsStudioBtn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.newPill {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: #ffffff;
+  color: #000000;
+  padding: 2px 6px;
+  border-radius: 6px;
+  text-transform: uppercase;
 }

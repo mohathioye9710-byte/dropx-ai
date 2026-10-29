@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, LogOut } from 'lucide-react';
+import { Bell, Search, LogOut, Video } from 'lucide-react';
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
@@ -33,13 +33,33 @@ export default function Topbar() {
       <div className={styles.searchContainer}>
         <Search className={styles.searchIcon} size={18} />
         <input 
-          type="text" 
-          placeholder="Search products, campaigns..." 
+          type="search"
+          name="dropx-search"
+          id="dropx-search"
+          placeholder="Search products, campaigns..."
           className={styles.searchInput}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-lpignore="true"
+          data-form-type="other"
+          readOnly
+          onFocus={(e) => e.target.removeAttribute('readOnly')}
         />
       </div>
       
       <div className={styles.actions}>
+        <button 
+          onClick={() => router.push('/ads')}
+          className={styles.adsStudioBtn}
+          title="Studio Vidéo & Avatars IA pour TikTok et Reels"
+        >
+          <Video size={15} color="#ffffff" />
+          <span>Ads Studio</span>
+          <span className={styles.newPill}>IA</span>
+        </button>
+
         <div style={{ position: 'relative' }}>
           <button 
             className={styles.iconButton}

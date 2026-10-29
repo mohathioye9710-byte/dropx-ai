@@ -23,8 +23,12 @@ export default function LandingPage() {
           </h1>
         </div>
         
-        <nav style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '40px' }}>
+        <nav style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '32px', alignItems: 'center' }}>
           <Link href="/inspirations" style={{ color: '#a1a1aa', fontSize: '15px', fontWeight: '500', transition: 'color 0.2s', textDecoration: 'none' }} onMouseOver={(e) => e.target.style.color = '#fff'} onMouseOut={(e) => e.target.style.color = '#a1a1aa'}>{t.nav1}</Link>
+          <Link href="/ads" style={{ color: '#ffffff', fontSize: '15px', fontWeight: '500', transition: 'color 0.2s', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }} onMouseOver={(e) => e.target.style.color = '#fff'} onMouseOut={(e) => e.target.style.color = '#ffffff'}>
+            Ads Studio
+            <span style={{ fontSize: '10px', background: 'rgba(255, 255, 255, 0.12)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.2)', padding: '2px 6px', borderRadius: '6px', fontWeight: '700' }}>IA</span>
+          </Link>
           <Link href="/affiliation" style={{ color: '#a1a1aa', fontSize: '15px', fontWeight: '500', transition: 'color 0.2s', textDecoration: 'none' }} onMouseOver={(e) => e.target.style.color = '#fff'} onMouseOut={(e) => e.target.style.color = '#a1a1aa'}>{t.nav2}</Link>
           <Link href="/tutoriels" style={{ color: '#a1a1aa', fontSize: '15px', fontWeight: '500', transition: 'color 0.2s', textDecoration: 'none' }} onMouseOver={(e) => e.target.style.color = '#fff'} onMouseOut={(e) => e.target.style.color = '#a1a1aa'}>{t.nav3}</Link>
         </nav>
@@ -107,6 +111,43 @@ export default function LandingPage() {
         >
           {t.start}
         </button>
+
+        {/* Ads Studio Teaser */}
+        <div 
+          onClick={() => router.push('/ads')}
+          style={{ 
+            marginTop: '36px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '14px',
+            padding: '12px 24px',
+            borderRadius: '16px',
+            background: '#0a0a0a',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)'
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+          onMouseOut={(e) => { e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+        >
+          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+            🎬
+          </div>
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '14px', fontWeight: '700', color: '#fff' }}>
+                Nouveau : DropX Ads Studio IA
+              </span>
+              <span style={{ fontSize: '10px', fontWeight: '700', background: 'rgba(255, 255, 255, 0.08)', color: '#d4d4d8', border: '1px solid rgba(255, 255, 255, 0.12)', padding: '1px 6px', borderRadius: '6px' }}>
+                TIKTOK & REELS
+              </span>
+            </div>
+            <div style={{ fontSize: '13px', color: '#a1a1aa', marginTop: '2px' }}>
+              Générez vos vidéos publicitaires avec Avatars parlants, voix off et musiques virales →
+            </div>
+          </div>
+        </div>
 
       </main>
 
