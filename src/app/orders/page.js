@@ -23,6 +23,7 @@ import {
 
 export default function CodOrdersPage() {
   const [orders, setOrders] = useState([]);
+  const [shopDomain, setShopDomain] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,6 +36,7 @@ export default function CodOrdersPage() {
       const data = await res.json();
       if (data.success && data.orders) {
         setOrders(data.orders);
+        if (data.shopDomain) setShopDomain(data.shopDomain);
       }
     } catch (e) {
       console.error("Error fetching orders:", e);
@@ -65,40 +67,13 @@ export default function CodOrdersPage() {
     }
   };
 
-  const handleCreateTestOrder = async () => {
-    try {
-      const demoNames = ["Awa Sow", "Ibrahima Fall", "Fatou Kiné Diop", "Modou Lo"];
-      const demoCities = ["Dakar Centre (Plateau, Médina)", "Thiès / Mbour / Saly", "Dakar Banlieue (Keur Massar)", "Touba"];
-      const randomName = demoNames[Math.floor(Math.random() * demoNames.length)];
-      const randomCity = demoCities[Math.floor(Math.random() * demoCities.length)];
-      const randomPhone = `+221 77 ${Math.floor(100 + Math.random() * 900)} ${Math.floor(10 + Math.random() * 90)} ${Math.floor(10 + Math.random() * 90)}`;
-
-      await fetch("/api/orders/cod", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName: randomName,
-          customerPhone: randomPhone,
-          customerCity: randomCity,
-          customerAddress: "Quartier Résidentiel, Rue Principale",
-          paymentMethod: Math.random() > 0.5 ? "Espèces à la livraison" : "Wave / Orange Money",
-          productTitle: "Déshumidificateur Électrique Portatif",
-          bundleTitle: "Pack 2 Achetés (-15%)",
-          quantity: 2,
-          unitPrice: 15000,
-          totalPrice: 25500,
-          currency: "XOF"
-        })
-      });
-      fetchOrders();
-    } catch (e) {
-      alert("Erreur lors de la création du test");
+  const formatPrice = (p, curr = "XOF") => {
+    const amount = Number(p) || 0;
+    if (curr === "EUR" || curr === "USD") {
+      return new Intl.NumberFormat("fr-FR", { style: "currency", currency: curr }).format(amount);
     }
-  };
-
-  const formatPrice = (p) => {
     return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "XOF", minimumFractionDigits: 0 })
-      .format(p)
+      .format(amount)
       .replace("XOF", "FCFA");
   };
 
@@ -127,29 +102,26 @@ export default function CodOrdersPage() {
       <header className={styles.header}>
         <div className={styles.titleArea}>
           <h1 className={styles.title}>
-            Commandes COD (Sénégal)
-            <span className={styles.flagBadge}>🇸🇳 EasySell DropX</span>
+            Commandes Réelles (Boutique & COD)
+            {shopDomain ? (
+              <span className={styles.flagBadge}>🛍️ {shopDomain}</span>
+            ) : (
+              <span className={styles.flagBadge}>🇸🇳 EasySell DropX</span>
+            )}
           </h1>
           <p className={styles.subtitle}>
-            Gérez vos commandes avec paiement à la livraison (Cash & Wave/Orange Money). Contactez vos clients sur WhatsApp en 1 clic.
+            Toutes les commandes réelles synchronisées en temps réel depuis votre boutique Shopify et les formulaires de commande.
           </p>
         </div>
 
         <div className={styles.headerActions}>
           <button 
-            className={styles.actionButton} 
-            onClick={fetchOrders}
-            title="Rafraîchir la liste"
+            className={`${styles.actionButton} ${styles.primaryButton}`}
+            onClick={() => fetchOrders(true)}
+            title="Synchroniser avec votre boutique Shopify"
           >
             <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
-            Actualiser
-          </button>
-          <button 
-            className={`${styles.actionButton} ${styles.primaryButton}`}
-            onClick={handleCreateTestOrder}
-          >
-            <Plus size={16} />
-            Créer Commande Test
+            Synchroniser Shopify
           </button>
         </div>
       </header>
@@ -259,15 +231,18 @@ export default function CodOrdersPage() {
         ) : filteredOrders.length === 0 ? (
           <div className={styles.emptyState}>
             <PackageCheck className={styles.emptyIcon} />
-            <h3 style={{ fontSize: "18px", color: "#fff", marginBottom: "8px" }}>Aucune commande trouvée</h3>
-            <p style={{ fontSize: "14px", color: "#71717a", maxWidth: "420px", margin: "0 auto 20px" }}>
-              Dès qu&apos;un client remplit votre formulaire EasySell sur Shopify ou en preview, sa commande apparaîtra ici avec son numéro WhatsApp direct.
+            <h3 style={{ fontSize: "18px", color: "#fff", marginBottom: "8px" }}>Aucune commande pour le moment</h3>
+            <p style={{ fontSize: "14px", color: "#71717a", maxWidth: "460px", margin: "0 auto 20px" }}>
+              {shopDomain 
+                ? `Votre boutique (${shopDomain}) est connectée. Dès qu'un client passe commande sur votre boutique ou via le bouton EasySell, elle s'affichera ici automatiquement.` 
+                : "Vos commandes réelles de votre boutique Shopify et EasySell apparaîtront ici automatiquement dès qu'un client passe commande."}
             </p>
             <button 
               className={`${styles.actionButton} ${styles.primaryButton}`}
-              onClick={handleCreateTestOrder}
+              onClick={() => fetchOrders(true)}
             >
-              <Plus size={16} /> Générer une commande de test
+              <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
+              Synchroniser les commandes
             </button>
           </div>
         ) : (
@@ -342,7 +317,7 @@ export default function CodOrdersPage() {
 
                     {/* MONTANT */}
                     <td>
-                      <div className={styles.amount}>{formatPrice(order.totalPrice)}</div>
+                      <div className={styles.amount}>{formatPrice(order.totalPrice, order.currency)}</div>
                       <span className={styles.paymentTag}>{order.paymentMethod}</span>
                     </td>
 

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import fs from 'fs';
 import path from 'path';
 
@@ -237,13 +239,123 @@ export async function POST(req) {
   }
 }
 
-// GET: Fetch COD orders for DropX dashboard
+// GET: Fetch real orders (Shopify connected store + real COD orders)
 export async function GET(req) {
   try {
-    const orders = getLocalOrders();
+    let shopifyOrders = [];
+    let connectedShopDomain = null;
+
+    try {
+      const session = await getServerSession(authOptions);
+      let integration = null;
+
+      if (session?.user?.id) {
+        integration = await prisma.integration.findFirst({
+          where: { userId: session.user.id, platform: 'shopify' }
+        });
+      }
+      if (!integration) {
+        integration = await prisma.integration.findFirst({
+          where: { platform: 'shopify', status: 'connected' }
+        }) || await prisma.integration.findFirst({
+          where: { platform: 'shopify' }
+        });
+      }
+
+      if (integration?.keyData) {
+        const creds = JSON.parse(integration.keyData);
+        const shopUrl = (creds.domain || creds.shopUrl || '').trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+        const adminToken = creds.token || creds.accessToken || creds.clientSecret || '';
+
+        if (shopUrl && adminToken) {
+          connectedShopDomain = shopUrl;
+          const shopifyRes = await fetch(`https://${shopUrl}/admin/api/2024-04/orders.json?status=any&limit=50`, {
+            headers: {
+              'X-Shopify-Access-Token': adminToken,
+              'Content-Type': 'application/json'
+            },
+            cache: 'no-store'
+          });
+
+          if (shopifyRes.ok) {
+            const shopifyData = await shopifyRes.json();
+            const rawOrders = shopifyData.orders || [];
+
+            shopifyOrders = rawOrders.map(so => {
+              let status = "NOUVEAU";
+              if (so.cancelled_at) {
+                status = "ANNULE";
+              } else if (so.fulfillment_status === "fulfilled") {
+                status = "LIVRE";
+              } else if (so.fulfillment_status === "partial" || so.financial_status === "paid") {
+                status = "EN_LIVRAISON";
+              } else if (so.financial_status === "authorized" || so.confirmed) {
+                status = "CONFIRME";
+              }
+
+              const customer = so.customer || {};
+              const shipping = so.shipping_address || {};
+              const customerName = (
+                `${customer.first_name || ''} ${customer.last_name || ''}`.trim() ||
+                `${shipping.first_name || ''} ${shipping.last_name || ''}`.trim() ||
+                'Client Boutique'
+              );
+              const customerPhone = customer.phone || shipping.phone || so.billing_address?.phone || '-';
+              const customerCity = shipping.city || shipping.province || 'Sénégal';
+              const customerAddress = [shipping.address1, shipping.address2].filter(Boolean).join(', ') || '-';
+
+              const lineItems = so.line_items || [];
+              const productTitle = lineItems.map(li => li.title).join(', ') || 'Produit Boutique';
+              const totalQty = lineItems.reduce((acc, li) => acc + (li.quantity || 1), 0) || 1;
+              const bundleTitle = lineItems.length > 0 ? `${totalQty} article(s)` : '1 Unité';
+
+              const totalPrice = parseFloat(so.total_price || 0);
+
+              return {
+                id: `SHOPIFY-${so.id}`,
+                shopifyOrderId: so.id,
+                shopifyOrderNumber: so.order_number ? `#${so.order_number}` : (so.name || `#${so.id}`),
+                shopDomain: shopUrl,
+                customerName,
+                customerPhone,
+                customerCity,
+                customerAddress,
+                paymentMethod: so.gateway || (so.payment_gateway_names && so.payment_gateway_names.join(', ')) || 'Paiement Shopify',
+                productTitle,
+                bundleTitle,
+                quantity: totalQty,
+                unitPrice: totalPrice / (totalQty || 1),
+                totalPrice: totalPrice,
+                currency: so.currency || 'XOF',
+                status,
+                note: so.note || '',
+                createdAt: so.created_at || new Date().toISOString(),
+                updatedAt: so.updated_at || new Date().toISOString(),
+                source: 'shopify'
+              };
+            });
+          }
+        }
+      }
+    } catch (shopifyErr) {
+      console.warn("[Orders API Shopify Fetch Warning]:", shopifyErr.message);
+    }
+
+    // Get real local orders (excluding old mock demo IDs)
+    const localOrders = getLocalOrders().filter(o => !String(o.id).startsWith('COD-1729000100'));
+
+    // Deduplicate if any local order already has shopifyOrderId matching a shopifyOrder
+    const existingShopifyIds = new Set(shopifyOrders.map(o => String(o.shopifyOrderId)));
+    const uniqueLocalOrders = localOrders.filter(o => !o.shopifyOrderId || !existingShopifyIds.has(String(o.shopifyOrderId)));
+
+    // Combined real orders sorted newest first
+    const allOrders = [...shopifyOrders, ...uniqueLocalOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
     return NextResponse.json({
       success: true,
-      orders
+      orders: allOrders,
+      shopDomain: connectedShopDomain,
+      count: allOrders.length
     }, { headers: corsHeaders });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
