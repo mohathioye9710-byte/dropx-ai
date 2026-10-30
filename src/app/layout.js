@@ -17,6 +17,31 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                if (typeof window !== 'undefined') {
+                  var origError = console.error;
+                  console.error = function() {
+                    var msg = arguments[0];
+                    if (typeof msg === 'string' && (
+                      msg.indexOf('hydration') !== -1 ||
+                      msg.indexOf('hydrated') !== -1 ||
+                      msg.indexOf('bis_skin_checked') !== -1 ||
+                      msg.indexOf('Hydration') !== -1
+                    )) {
+                      return;
+                    }
+                    origError.apply(console, arguments);
+                  };
+                }
+              })();
+            `
+          }}
+        />
+      </head>
       <body suppressHydrationWarning>
         <div className="dropmagic-grid"></div>
         <Providers>
