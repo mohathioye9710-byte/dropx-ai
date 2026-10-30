@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { ShoppingBag, ShieldCheck, Truck, ArrowLeft, Check, Zap, Loader2, LayoutTemplate, Palette, Image as ImageIcon, Settings, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingBag, ShieldCheck, Truck, ArrowLeft, Check, Zap, Loader2, LayoutTemplate, Palette, Image as ImageIcon, Settings, Eye, ChevronLeft, ChevronRight, Calculator, DollarSign, TrendingUp, Sparkles, Package, HelpCircle, Layers } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { normalizeLandingPage } from '@/lib/landing-page';
@@ -21,11 +21,11 @@ export default function StoreBuilder() {
   ];
 
   const [product, setProduct] = useState({
-    title: 'Déshumidificateur Électrique: Air Pur, Confort Optimal!',
-    description: "Découvrez notre produit révolutionnaire généré par l'IA. Un design parfait, une utilité prouvée, testé et approuvé par des milliers de clients satisfaits.",
+    title: 'Tapis de Massage Électrique : Soulagement Instantané du Stress!',
+    description: "Découvrez notre produit révolutionnaire. Un design parfait, une utilité prouvée, testé et approuvé par des milliers de clients satisfaits.",
     images: defaultImages,
-    price: 49.99,
-    compareAtPrice: 79.99
+    price: 13500,
+    compareAtPrice: 20000
   });
 
   const [bundle, setBundle] = useState(1);
@@ -37,64 +37,70 @@ export default function StoreBuilder() {
   const [formAddress, setFormAddress] = useState('');
   const [formPaymentMethod, setFormPaymentMethod] = useState('Espèces à la livraison');
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
-  const [orderModalData, setOrderModalData] = useState(null); // EUR, XOF, USD
+  const [orderModalData, setOrderModalData] = useState(null);
   
   // Builder state
-  const [activeTab, setActiveTab] = useState('content'); // content, theme, options
+  const [activeTab, setActiveTab] = useState('content'); // content, calc, theme
   const [themeColor, setThemeColor] = useState('#000000');
   const [buttonColor, setButtonColor] = useState('#10b981');
-  const [pushStatus, setPushStatus] = useState('idle'); // idle, pushing, success, error
+  const [pushStatus, setPushStatus] = useState('idle');
   const [pushMessage, setPushMessage] = useState('');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+
+  // Simulateur de Prix & Marge (Sénégal COD & Import Chine)
+  const [stockQty, setStockQty] = useState(20); // user: stock de 20 max
+  const [supplierUnitCost, setSupplierUnitCost] = useState(616); // prix d'achat usine Alibaba
+  const [forwarderUnitCost, setForwarderUnitCost] = useState(1800); // transitaire GP Chine ➔ Dakar (~200g à 8500-9000 F/kg)
+  const [localDeliveryCost, setLocalDeliveryCost] = useState(2000); // livreur Dakar
+  const [adCostPerOrder, setAdCostPerOrder] = useState(2000); // coût pub Meta Ads estimé par vente
+  const [waveFeePerOrder, setWaveFeePerOrder] = useState(150); // frais encaissement Wave
+  const [sellingPriceInput, setSellingPriceInput] = useState(13500);
+  const [calcSuccessMsg, setCalcSuccessMsg] = useState('');
 
   useEffect(() => {
     const saved = localStorage.getItem('dropx_preview_product');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        let originalCurrency = 'USD';
+        let originalCurrency = 'XOF';
         if (parsed.price) {
           const upperP = String(parsed.price).toUpperCase();
-          if (upperP.includes('XOF') || upperP.includes('CFA')) originalCurrency = 'XOF';
-          else if (upperP.includes('EUR') || upperP.includes('€')) originalCurrency = 'EUR';
+          if (upperP.includes('EUR') || upperP.includes('€')) originalCurrency = 'EUR';
+          else if (upperP.includes('USD') || upperP.includes('$')) originalCurrency = 'USD';
+          else originalCurrency = 'XOF';
         }
 
         const parseRobust = (p) => {
-          if (!p) return 49.99;
+          if (!p) return 13500;
           let s = String(p).replace(/[^0-9.,]/g, '');
           if (s.includes(',') && s.includes('.')) s = s.replace(/,/g, '');
           else if (s.includes(',')) {
             const pts = s.split(',');
             s = pts[pts.length-1].length === 3 ? s.replace(/,/g, '') : s.replace(/,/g, '.');
           }
-          return parseFloat(s) || 49.99;
+          return parseFloat(s) || 13500;
         };
         const basePriceOrig = parseRobust(parsed.price);
         
-        let targetCurrency = 'USD';
-        let finalPrice = basePriceOrig;
-        
-        if (originalCurrency !== targetCurrency) {
-          const rates = {
-            'EUR_XOF': 655.957, 'XOF_EUR': 1 / 655.957,
-            'EUR_USD': 1.08, 'USD_EUR': 1 / 1.08,
-            'USD_XOF': 605.0, 'XOF_USD': 1 / 605.0
-          };
-          const rate = rates[`${originalCurrency}_${targetCurrency}`] || 1;
-          finalPrice = basePriceOrig * rate;
+        let targetCurrency = 'XOF'; // Always Franc CFA by default
+        let finalPrice = 13500;
+        let comparePrice = 20000;
+
+        // If price extracted from supplier is wholesale (< 3000 FCFA, e.g. 616 FCFA)
+        if (originalCurrency === 'XOF' && basePriceOrig < 3000) {
+          setSupplierUnitCost(Math.round(basePriceOrig));
+          finalPrice = 13500;
+          comparePrice = 20000;
+        } else if (originalCurrency === 'XOF') {
+          finalPrice = Math.round(basePriceOrig);
+          comparePrice = parsed.compareAtPrice ? parseRobust(parsed.compareAtPrice) : Math.round(finalPrice * 1.5);
+        } else if (originalCurrency === 'USD') {
+          // If product had a USD price like 7.99, set the healthy Senegal retail price
+          finalPrice = 13500;
+          comparePrice = 20000;
         }
 
-        // Apply a x3 Profit Multiplier to guarantee profit
-        if (targetCurrency === 'XOF') {
-          // In XOF, round to the nearest 100
-          finalPrice = Math.ceil((finalPrice * 3) / 100) * 100;
-        } else {
-          // In EUR/USD, end in .99
-          finalPrice = Math.floor(finalPrice * 3) + 0.99;
-        }
-
-        // The values are read from browser storage only after the first client render.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSellingPriceInput(finalPrice);
         setCurrency(targetCurrency);
         setProduct({
           ...product,
@@ -102,7 +108,7 @@ export default function StoreBuilder() {
           description: parsed.description || product.description,
           images: parsed.images && parsed.images.length > 0 ? parsed.images : (parsed.image ? [parsed.image, ...defaultImages.slice(1)] : defaultImages),
           price: finalPrice,
-          compareAtPrice: targetCurrency === 'XOF' ? Math.round(finalPrice * 1.6) : Math.round(finalPrice * 1.6 * 100) / 100,
+          compareAtPrice: comparePrice,
           landingPage: parsed.landingPage || {},
         });
       } catch (e) {}
@@ -111,9 +117,10 @@ export default function StoreBuilder() {
 
   const formatPrice = (price) => {
     if (currency === 'XOF') {
-      return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', minimumFractionDigits: 0 }).format(price);
+      const rounded = Math.round(price || 0);
+      return rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' FCFA';
     }
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: currency }).format(price);
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: currency }).format(price || 0);
   };
 
   const handleCurrencyChange = (newCurrency) => {
@@ -134,6 +141,43 @@ export default function StoreBuilder() {
 
     setProduct({...product, price: newPrice, compareAtPrice: newCompare});
     setCurrency(newCurrency);
+  };
+
+  // Calculs Simulateur Prix & Marge
+  const totalUnitCost = Number(supplierUnitCost || 0) + Number(forwarderUnitCost || 0) + Number(localDeliveryCost || 0) + Number(adCostPerOrder || 0) + Number(waveFeePerOrder || 0);
+  const netProfitPerUnit = Number(sellingPriceInput || 0) - totalUnitCost;
+  const marginPct = sellingPriceInput > 0 ? Math.round((netProfitPerUnit / sellingPriceInput) * 100) : 0;
+  
+  const totalRevenue = Number(stockQty || 0) * Number(sellingPriceInput || 0);
+  const totalStockInvestment = Number(stockQty || 0) * (Number(supplierUnitCost || 0) + Number(forwarderUnitCost || 0));
+  const totalAdSpend = Number(stockQty || 0) * Number(adCostPerOrder || 0);
+  const totalDeliveryFees = Number(stockQty || 0) * Number(localDeliveryCost || 0);
+  const totalWaveFees = Number(stockQty || 0) * Number(waveFeePerOrder || 0);
+  const totalNetProfit = Number(stockQty || 0) * netProfitPerUnit;
+
+  const handleApplyCalculatedPrice = (customPrice) => {
+    const finalPrice = Math.round(Number(customPrice || sellingPriceInput) || 13500);
+    const comparePrice = Math.ceil((finalPrice * 1.5) / 1000) * 1000;
+    
+    setProduct(prev => ({
+      ...prev,
+      price: finalPrice,
+      compareAtPrice: comparePrice
+    }));
+    setCurrency('XOF');
+
+    try {
+      const saved = localStorage.getItem('dropx_preview_product');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        parsed.price = `${finalPrice} FCFA`;
+        parsed.compareAtPrice = `${comparePrice} FCFA`;
+        localStorage.setItem('dropx_preview_product', JSON.stringify(parsed));
+      }
+    } catch (e) {}
+
+    setCalcSuccessMsg(`Prix de ${finalPrice.toLocaleString('fr-FR')} FCFA appliqué avec succès !`);
+    setTimeout(() => setCalcSuccessMsg(''), 4000);
   };
 
   const generateSmartBundles = (basePrice, comparePrice, currentCurrency) => {
@@ -341,12 +385,18 @@ export default function StoreBuilder() {
             </button>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 16px 0 16px', gap: '16px' }}>
+            <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 12px 0 12px', gap: '8px' }}>
               <button 
                 onClick={() => setActiveTab('content')}
                 style={{ background: 'none', border: 'none', borderBottom: activeTab === 'content' ? '2px solid #fff' : '2px solid transparent', color: activeTab === 'content' ? '#fff' : '#a1a1aa', paddingBottom: '12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <LayoutTemplate size={14} /> Contenu
+              </button>
+              <button 
+                onClick={() => setActiveTab('calc')}
+                style={{ background: 'none', border: 'none', borderBottom: activeTab === 'calc' ? '2px solid #10b981' : '2px solid transparent', color: activeTab === 'calc' ? '#10b981' : '#a1a1aa', paddingBottom: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Calculator size={14} /> Simulateur Prix
               </button>
               <button 
                 onClick={() => setActiveTab('theme')}
@@ -360,6 +410,30 @@ export default function StoreBuilder() {
             <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
               {activeTab === 'content' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  
+                  {/* Quick Shortcut to Calculator */}
+                  <div 
+                    onClick={() => setActiveTab('calc')}
+                    style={{ 
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(59, 130, 246, 0.12) 100%)', 
+                      border: '1.5px solid #10b981', 
+                      borderRadius: '12px', 
+                      padding: '14px', 
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '800', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Calculator size={16} /> Simulateur Prix & Marge
+                      </span>
+                      <span style={{ fontSize: '10px', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>SÉNÉGAL</span>
+                    </div>
+                    <p style={{ fontSize: '12px', color: '#cbd5e1', margin: 0, lineHeight: 1.4 }}>
+                      Calcule automatiquement le transitaire, la pub Meta Ads, la livraison et ta marge nette sur ton stock de {stockQty} pièces.
+                    </p>
+                  </div>
+
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', fontWeight: '600', marginBottom: '8px', textTransform: 'uppercase' }}>Titre du Produit</label>
                     <textarea 
@@ -371,16 +445,20 @@ export default function StoreBuilder() {
                   
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', fontWeight: '600', marginBottom: '8px', textTransform: 'uppercase' }}>Prix Actuel</label>
+                      <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', fontWeight: '600', marginBottom: '8px', textTransform: 'uppercase' }}>Prix Actuel ({currency})</label>
                       <input 
                         type="number" 
                         value={product.price}
-                        onChange={(e) => setProduct({...product, price: parseFloat(e.target.value) || 0})}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value) || 0;
+                          setProduct({...product, price: val});
+                          setSellingPriceInput(val);
+                        }}
                         style={{ width: '100%', background: '#111', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '12px', borderRadius: '8px', fontSize: '14px' }}
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', fontWeight: '600', marginBottom: '8px', textTransform: 'uppercase' }}>Prix Barré</label>
+                      <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', fontWeight: '600', marginBottom: '8px', textTransform: 'uppercase' }}>Prix Barré ({currency})</label>
                       <input 
                         type="number" 
                         value={product.compareAtPrice}
@@ -397,9 +475,9 @@ export default function StoreBuilder() {
                       onChange={(e) => handleCurrencyChange(e.target.value)}
                       style={{ width: '100%', background: '#111', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '12px', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
                     >
+                      <option value="XOF">Franc CFA (FCFA) - Recommandé Sénégal</option>
                       <option value="EUR">Euro (€)</option>
                       <option value="USD">Dollar US ($)</option>
-                      <option value="XOF">Franc CFA (FCFA)</option>
                     </select>
                   </div>
 
@@ -423,6 +501,220 @@ export default function StoreBuilder() {
                       style={{ width: '100%', background: '#111', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '12px', borderRadius: '8px', fontSize: '14px', resize: 'vertical', minHeight: '120px' }}
                     />
                   </div>
+                </div>
+              )}
+
+              {/* SIMULATEUR DE PRIX & MARGE (SÉNÉGAL / AFRIQUE COD) */}
+              {activeTab === 'calc' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  
+                  {calcSuccessMsg && (
+                    <div style={{ background: '#064e3b', border: '1px solid #10b981', color: '#a7f3d0', padding: '10px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Check size={16} color="#10b981" /> {calcSuccessMsg}
+                    </div>
+                  )}
+
+                  <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                      <Package size={18} color="#10b981" />
+                      <span style={{ fontSize: '14px', fontWeight: '800', color: '#fff' }}>Paramètres de ton stock & coûts</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '600' }}>📦 Stock prévu à commander</label>
+                          <span style={{ fontSize: '12px', color: '#10b981', fontWeight: '800' }}>{stockQty} unités</span>
+                        </div>
+                        <input 
+                          type="number" 
+                          value={stockQty} 
+                          min="1" 
+                          max="1000"
+                          onChange={(e) => setStockQty(Math.max(1, parseInt(e.target.value) || 1))}
+                          style={{ width: '100%', background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '10px 12px', borderRadius: '8px', fontSize: '14px' }}
+                        />
+                      </div>
+
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '600' }}>🏭 Prix d'achat usine (Alibaba)</label>
+                          <span style={{ fontSize: '11px', color: '#94a3b8' }}>par unité</span>
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                          <input 
+                            type="number" 
+                            value={supplierUnitCost} 
+                            onChange={(e) => setSupplierUnitCost(parseFloat(e.target.value) || 0)}
+                            style={{ width: '100%', background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '10px 12px', paddingRight: '55px', borderRadius: '8px', fontSize: '14px' }}
+                          />
+                          <span style={{ position: 'absolute', right: '12px', top: '10px', fontSize: '12px', color: '#94a3b8', fontWeight: '700' }}>FCFA</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '600' }}>✈️ Fret Aérien GP (Chine ➔ Dakar)</label>
+                          <span style={{ fontSize: '11px', color: '#94a3b8' }}>~210g / unité</span>
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                          <input 
+                            type="number" 
+                            value={forwarderUnitCost} 
+                            onChange={(e) => setForwarderUnitCost(parseFloat(e.target.value) || 0)}
+                            style={{ width: '100%', background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '10px 12px', paddingRight: '55px', borderRadius: '8px', fontSize: '14px' }}
+                          />
+                          <span style={{ position: 'absolute', right: '12px', top: '10px', fontSize: '12px', color: '#94a3b8', fontWeight: '700' }}>FCFA</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '600' }}>🚚 Livraison locale client (Dakar)</label>
+                          <span style={{ fontSize: '11px', color: '#94a3b8' }}>par commande</span>
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                          <input 
+                            type="number" 
+                            value={localDeliveryCost} 
+                            onChange={(e) => setLocalDeliveryCost(parseFloat(e.target.value) || 0)}
+                            style={{ width: '100%', background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '10px 12px', paddingRight: '55px', borderRadius: '8px', fontSize: '14px' }}
+                          />
+                          <span style={{ position: 'absolute', right: '12px', top: '10px', fontSize: '12px', color: '#94a3b8', fontWeight: '700' }}>FCFA</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '600' }}>📢 Budget Meta Ads estimé / vente</label>
+                          <span style={{ fontSize: '11px', color: '#94a3b8' }}>CPA cible</span>
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                          <input 
+                            type="number" 
+                            value={adCostPerOrder} 
+                            onChange={(e) => setAdCostPerOrder(parseFloat(e.target.value) || 0)}
+                            style={{ width: '100%', background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '10px 12px', paddingRight: '55px', borderRadius: '8px', fontSize: '14px' }}
+                          />
+                          <span style={{ position: 'absolute', right: '12px', top: '10px', fontSize: '12px', color: '#94a3b8', fontWeight: '700' }}>FCFA</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '600' }}>📱 Frais Wave / Encaissement COD</label>
+                          <span style={{ fontSize: '11px', color: '#94a3b8' }}>1%</span>
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                          <input 
+                            type="number" 
+                            value={waveFeePerOrder} 
+                            onChange={(e) => setWaveFeePerOrder(parseFloat(e.target.value) || 0)}
+                            style={{ width: '100%', background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '10px 12px', paddingRight: '55px', borderRadius: '8px', fontSize: '14px' }}
+                          />
+                          <span style={{ position: 'absolute', right: '12px', top: '10px', fontSize: '12px', color: '#94a3b8', fontWeight: '700' }}>FCFA</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* COÛT DE REVIENT TOTAL & MARGE */}
+                  <div style={{ background: '#1e293b', border: '1.5px solid #3b82f6', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ fontSize: '12px', color: '#93c5fd', textTransform: 'uppercase', fontWeight: '700', marginBottom: '8px' }}>
+                      ⚡ Analyse de rentabilité unitaire
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                      <span style={{ color: '#cbd5e1' }}>Coût total de revient / vente :</span>
+                      <span style={{ fontWeight: '800', color: '#f87171' }}>{totalUnitCost.toLocaleString('fr-FR')} FCFA</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '13px' }}>
+                      <span style={{ color: '#cbd5e1' }}>Marge nette par produit vendu :</span>
+                      <span style={{ fontWeight: '800', color: '#4ade80' }}>+{netProfitPerUnit.toLocaleString('fr-FR')} FCFA ({marginPct}%)</span>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
+                      <label style={{ display: 'block', fontSize: '12px', color: '#fff', fontWeight: '800', marginBottom: '6px' }}>
+                        🎯 Prix de vente conseillé (1 Unité)
+                      </label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input 
+                          type="number" 
+                          value={sellingPriceInput}
+                          step="500"
+                          onChange={(e) => setSellingPriceInput(parseFloat(e.target.value) || 0)}
+                          style={{ flex: 1, background: '#0f172a', border: '2px solid #10b981', color: '#fff', padding: '12px', borderRadius: '8px', fontSize: '16px', fontWeight: '800' }}
+                        />
+                        <button 
+                          onClick={() => setSellingPriceInput(13500)}
+                          style={{ background: '#334155', color: '#fff', border: 'none', borderRadius: '8px', padding: '0 12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                          title="Réinitialiser à 13 500 FCFA"
+                        >
+                          13.5k
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* BILAN SUR LE STOCK COMPLET */}
+                  <div style={{ background: '#052e16', border: '1.5px solid #10b981', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '900', color: '#a7f3d0', textTransform: 'uppercase', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <TrendingUp size={16} color="#10b981" /> Bilan sur ton stock de {stockQty} pièces
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#dcfce7' }}>
+                        <span>💰 Chiffre d'Affaires total généré :</span>
+                        <b>{totalRevenue.toLocaleString('fr-FR')} FCFA</b>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fca5a5' }}>
+                        <span>📦 Achat Stock + Transitaire Chine :</span>
+                        <b>- {totalStockInvestment.toLocaleString('fr-FR')} FCFA</b>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fca5a5' }}>
+                        <span>📢 Dépenses Publicité Meta Ads :</span>
+                        <b>- {totalAdSpend.toLocaleString('fr-FR')} FCFA</b>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fca5a5' }}>
+                        <span>🚚 Frais Livreurs Dakar :</span>
+                        <b>- {totalDeliveryFees.toLocaleString('fr-FR')} FCFA</b>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fca5a5' }}>
+                        <span>📱 Frais Wave (1%) :</span>
+                        <b>- {totalWaveFees.toLocaleString('fr-FR')} FCFA</b>
+                      </div>
+
+                      <div style={{ borderTop: '1px dashed #10b981', paddingTop: '10px', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', color: '#fff', fontWeight: '900' }}>💵 BÉNÉFICE NET EN POCHE :</span>
+                        <span style={{ fontSize: '18px', fontWeight: '900', color: '#4ade80' }}>
+                          +{totalNetProfit.toLocaleString('fr-FR')} FCFA
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ACTION BUTTON TO APPLY TO STORE */}
+                  <button 
+                    onClick={() => handleApplyCalculatedPrice(sellingPriceInput)}
+                    style={{ 
+                      width: '100%', 
+                      background: '#10b981', 
+                      color: '#000', 
+                      padding: '16px', 
+                      borderRadius: '12px', 
+                      fontSize: '15px', 
+                      fontWeight: '900', 
+                      border: 'none', 
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)'
+                    }}
+                  >
+                    <Zap size={18} /> Appliquer ce prix ({sellingPriceInput.toLocaleString('fr-FR')} FCFA)
+                  </button>
+
                 </div>
               )}
 
