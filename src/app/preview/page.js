@@ -36,6 +36,7 @@ export default function StoreBuilder() {
   const [formCity, setFormCity] = useState('Dakar Centre (Plateau, Médina, Fann, Point E)');
   const [formAddress, setFormAddress] = useState('');
   const [formPaymentMethod, setFormPaymentMethod] = useState('Espèces à la livraison');
+  const [isFreeShipping, setIsFreeShipping] = useState(true); // Livraison gratuite par défaut
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [orderModalData, setOrderModalData] = useState(null);
   
@@ -226,8 +227,9 @@ export default function StoreBuilder() {
     setIsSubmittingOrder(true);
     const selectedBundleObj = smartBundles.find(b => b.id === bundle) || smartBundles[0];
     const rawProductPrice = normalizePriceFCFA(selectedBundleObj.price, currency);
-    const deliveryFee = getDeliveryFeeByZone(formCity);
-    const totalAmount = rawProductPrice + deliveryFee;
+    const baseZoneFee = getDeliveryFeeByZone(formCity);
+    const effectiveDeliveryFee = isFreeShipping ? 0 : baseZoneFee;
+    const totalAmount = rawProductPrice + effectiveDeliveryFee;
     const waveFee = getWaveFee(totalAmount);
     const fullPhone = '+221 ' + formPhone.replace(/^\+221/, '').trim();
 
@@ -245,7 +247,7 @@ export default function StoreBuilder() {
           bundleTitle: selectedBundleObj.title,
           quantity: bundle,
           unitPrice: rawProductPrice,
-          deliveryFee: deliveryFee,
+          deliveryFee: effectiveDeliveryFee,
           totalPrice: totalAmount,
           currency: 'XOF',
           merchantPhone: merchantPhone
@@ -255,19 +257,19 @@ export default function StoreBuilder() {
       setOrderModalData({
         productTitle: `${product.title} (${selectedBundleObj.title})`,
         totalPrice: formatFCFA(totalAmount),
-        deliveryFee: formatFCFA(deliveryFee),
+        deliveryFee: isFreeShipping ? '0 FCFA (Livraison Gratuite)' : formatFCFA(baseZoneFee),
         address: `${formAddress}, ${formCity}`,
         paymentMethod: formPaymentMethod,
-        whatsappUrl: data.whatsappUrl || `https://wa.me/${merchantPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Bonjour ShopX ! Je confirme ma commande : ' + product.title)}`
+        whatsappUrl: data.whatsappUrl || `https://wa.me/${merchantPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ShopX ! Je confirme ma commande : ${product.title} (${selectedBundleObj.title}) pour ${formatFCFA(totalAmount)} avec LIVRAISON GRATUITE à ${formAddress}, ${formCity}.`)}`
       });
     } catch (e) {
       setOrderModalData({
         productTitle: `${product.title} (${selectedBundleObj.title})`,
         totalPrice: formatFCFA(totalAmount),
-        deliveryFee: formatFCFA(deliveryFee),
+        deliveryFee: isFreeShipping ? '0 FCFA (Livraison Gratuite)' : formatFCFA(baseZoneFee),
         address: `${formAddress}, ${formCity}`,
         paymentMethod: formPaymentMethod,
-        whatsappUrl: `https://wa.me/${merchantPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ! Je confirme ma commande : ${product.title} (${selectedBundleObj.title}) pour ${formatFCFA(totalAmount)} à ${formAddress}, ${formCity}.`)}`
+        whatsappUrl: `https://wa.me/${merchantPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Bonjour ! Je confirme ma commande : ${product.title} (${selectedBundleObj.title}) pour ${formatFCFA(totalAmount)} avec LIVRAISON GRATUITE à ${formAddress}, ${formCity}.`)}`
       });
     } finally {
       setIsSubmittingOrder(false);
@@ -479,6 +481,34 @@ export default function StoreBuilder() {
                       <option value="EUR">Euro (€)</option>
                       <option value="USD">Dollar US ($)</option>
                     </select>
+                  </div>
+
+                  {/* TOGGLE LIVRAISON GRATUITE */}
+                  <div style={{ background: '#18181b', border: isFreeShipping ? '1.5px solid #10b981' : '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '800', color: '#fff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Truck size={16} color={isFreeShipping ? '#10b981' : '#94a3b8'} /> Livraison Gratuite (Offerte)
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+                        {isFreeShipping ? '0 FCFA affiché au client (Booste les ventes x3)' : 'Frais de livraison facturés en plus au client'}
+                      </div>
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={() => setIsFreeShipping(!isFreeShipping)}
+                      style={{
+                        background: isFreeShipping ? '#10b981' : '#334155',
+                        color: isFreeShipping ? '#000' : '#fff',
+                        border: 'none',
+                        borderRadius: '20px',
+                        padding: '6px 12px',
+                        fontSize: '11px',
+                        fontWeight: '800',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isFreeShipping ? 'GRATUIT ✅' : 'PAYANT'}
+                    </button>
                   </div>
 
                   <div>
@@ -770,8 +800,8 @@ export default function StoreBuilder() {
             {/* INJECTED STORE PREVIEW CONTENT */}
             <div style={{ minHeight: '100%', color: themeColor, fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif' }}>
               
-              <div style={{ background: themeColor, color: themeForeground, textAlign: 'center', padding: '8px', fontSize: '12px', fontWeight: '600', letterSpacing: '1px' }}>
-                Livraison rapide 🚚
+              <div style={{ background: themeColor, color: themeForeground, textAlign: 'center', padding: '9px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>
+                {isFreeShipping ? '🎉 LIVRAISON GRATUITE PARTOUT AU SÉNÉGAL 🚚🎁 (PAIEMENT À LA LIVRAISON)' : 'Livraison rapide 🚚'}
               </div>
 
               <div style={{ padding: '20px 5%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f0f0f0' }}>
@@ -803,7 +833,7 @@ export default function StoreBuilder() {
                     {product.title}
                   </h1>
                   
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
                     <div style={{ fontSize: '28px', fontWeight: '800', color: themeColor }}>
                       {formatPrice(product.price)}
                     </div>
@@ -814,6 +844,12 @@ export default function StoreBuilder() {
                       Économisez {Math.round((1 - product.price/product.compareAtPrice)*100) || 0}%
                     </span>
                   </div>
+
+                  {isFreeShipping && (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#ecfdf5', border: '1.5px solid #10b981', color: '#065f46', padding: '7px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '800', marginBottom: '20px', width: 'fit-content' }}>
+                      <span>🎁</span> LIVRAISON GRATUITE AU SÉNÉGAL (Dakar & Régions en 24h/48h)
+                    </div>
+                  )}
 
                   <p style={{ color: '#4b5563', fontSize: '15px', lineHeight: '1.6', marginBottom: '32px' }}>
                     {product.description}
@@ -946,7 +982,8 @@ export default function StoreBuilder() {
                       {(() => {
                         const selectedBundleObj = smartBundles.find(b => b.id === bundle) || smartBundles[0];
                         const rawProductPrice = normalizePriceFCFA(selectedBundleObj.price, currency);
-                        const deliveryFee = getDeliveryFeeByZone(formCity);
+                        const baseZoneFee = getDeliveryFeeByZone(formCity);
+                        const deliveryFee = isFreeShipping ? 0 : baseZoneFee;
                         const totalAmount = rawProductPrice + deliveryFee;
                         const waveFee = getWaveFee(totalAmount);
 
@@ -958,7 +995,14 @@ export default function StoreBuilder() {
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#4b5563' }}>
                               <span>Frais de livraison ({formCity.split('(')[0].trim()}) :</span>
-                              <span style={{ fontWeight: '700', color: '#10b981' }}>+ {formatFCFA(deliveryFee)}</span>
+                              {isFreeShipping ? (
+                                <span style={{ fontWeight: '800', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <s style={{ color: '#9ca3af', fontWeight: 'normal' }}>{formatFCFA(baseZoneFee)}</s>
+                                  <span>GRATUITE (0 FCFA) 🎉</span>
+                                </span>
+                              ) : (
+                                <span style={{ fontWeight: '700', color: '#10b981' }}>+ {formatFCFA(deliveryFee)}</span>
+                              )}
                             </div>
                             {formPaymentMethod === 'Wave / Orange Money' && (
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#1d4ed8', background: '#eff6ff', padding: '6px 10px', borderRadius: '6px' }}>
@@ -983,13 +1027,13 @@ export default function StoreBuilder() {
                         disabled={isSubmittingOrder}
                         style={{ width: '100%', background: buttonColor, color: buttonForeground, padding: '18px 20px', borderRadius: '12px', fontSize: '17px', fontWeight: '900', border: 'none', cursor: isSubmittingOrder ? 'not-allowed' : 'pointer', transition: 'transform 0.1s, box-shadow 0.2s', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', boxShadow: `0 8px 22px ${buttonColor}50` }}
                       >
-                        {isSubmittingOrder ? "Traitement de la commande..." : "COMMANDER MAINTENANT (PAIEMENT À LA LIVRAISON) 🚚"}
+                        {isSubmittingOrder ? "Traitement de la commande..." : (isFreeShipping ? `COMMANDER (${formatFCFA(normalizePriceFCFA((smartBundles.find(b => b.id === bundle) || smartBundles[0]).price, currency))} - LIVRAISON GRATUITE) 🚚` : "COMMANDER MAINTENANT (PAIEMENT À LA LIVRAISON) 🚚")}
                       </button>
 
                       {/* Senegal Trust Highlights */}
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '12px', fontSize: '11px', color: '#4b5563' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>📦</span> <b>Vérifiez avant de payer</b></div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>🚀</span> <b>Livraison 24h/48h Sénégal</b></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>🚚</span> <b>{isFreeShipping ? "Livraison Gratuite 24h/48h" : "Livraison 24h/48h Sénégal"}</b></div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>📞</span> <b>Confirmation WhatsApp</b></div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span>🔒</span> <b>Paiement 100% sécurisé</b></div>
                       </div>

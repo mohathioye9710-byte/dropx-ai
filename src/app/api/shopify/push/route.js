@@ -478,7 +478,7 @@ export async function POST(req) {
     // Build full DropX Layout
     const body_html = `
       <div id="dropx-full-page-container" data-base-price="${basePrice}" data-safe-compare="${safeCompare}" data-theme-color="${themeColor}" data-theme-foreground="${themeForeground}" data-button-color="${buttonColor}" data-button-foreground="${buttonForeground}" style="display: none; font-family: 'Trebuchet MS', 'Segoe UI', sans-serif; background: #fff; color: #111; min-height: 100vh; padding-bottom: 50px;">
-        <div style="background: ${themeColor}; color: ${themeForeground}; text-align: center; padding: 8px; font-size: 12px; font-weight: 600; letter-spacing: 1px;">Livraison rapide 🚚</div>
+        <div style="background: ${themeColor}; color: ${themeForeground}; text-align: center; padding: 9px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px;">🎉 OFFRE DU JOUR : LIVRAISON GRATUITE PARTOUT AU SÉNÉGAL 🚚🎁 (PAIEMENT À LA LIVRAISON)</div>
         <div style="padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0;">
           <a href="/" style="font-size: 24px; font-weight: 900; letter-spacing: -0.5px; margin: 0; color: ${themeColor}; text-decoration: none; cursor: pointer;">ShopX</a>
           <span style="font-size: 24px; color: ${themeColor};">🛍</span>
@@ -516,6 +516,9 @@ export async function POST(req) {
               </div>
               <span id="dropx-savings-display" style="background: #fef2f2; color: #ef4444; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 800;"></span>
             </div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; border: 1.5px solid #10b981; color: #065f46; padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 800; margin-bottom: 20px; width: fit-content;">
+              <span>🎁</span> LIVRAISON GRATUITE AU SÉNÉGAL (Dakar & Régions en 24h/48h)
+            </div>
 
             <div style="color: #555; font-size: 14px; line-height: 1.6; margin-bottom: 32px;">
               ${formattedDesc}
@@ -536,7 +539,7 @@ export async function POST(req) {
               </div>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 20px;">🚚</span>
-                <div style="font-size: 11px; color: #666; line-height: 1.2;"><b>Livraison Rapide</b><br/>Expédié en 24/48h</div>
+                <div style="font-size: 11px; color: #666; line-height: 1.2;"><b>Livraison Gratuite</b><br/>Expédié en 24/48h Sénégal</div>
               </div>
             </div>
           </div>
@@ -834,7 +837,7 @@ fbq('track', 'PageView');
       </div>
       <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; color: #4b5563;">
         <span>Frais de livraison (<span id="dropx-cod-zone-name">Dakar Centre</span>) :</span>
-        <span id="dropx-cod-delivery-display" style="font-weight: 700; color: #10b981;">+ 1 500 FCFA</span>
+        <span id="dropx-cod-delivery-display" style="font-weight: 800; color: #16a34a;"><s style="color: #9ca3af; font-weight: normal; margin-right: 4px;">2 000 FCFA</s> GRATUITE 🎉</span>
       </div>
       <div id="dropx-wave-badge-note" style="display: none; justify-content: space-between; width: 100%; font-size: 12px; color: #1d4ed8; background: #eff6ff; padding: 4px 8px; border-radius: 6px;">
         <span>📱 Paiement Wave direct :</span>
@@ -852,7 +855,7 @@ fbq('track', 'PageView');
 
     <div class="dropx-trust-grid">
       <div class="dropx-trust-item"><span>📦</span> <b>Vérifiez avant de payer</b></div>
-      <div class="dropx-trust-item"><span>🚀</span> <b>Livraison 24h/48h Sénégal</b></div>
+      <div class="dropx-trust-item"><span>🚚</span> <b>Livraison Gratuite 24h/48h</b></div>
       <div class="dropx-trust-item"><span>📞</span> <b>Confirmation WhatsApp</b></div>
       <div class="dropx-trust-item"><span>🔒</span> <b>Paiement 100% sécurisé</b></div>
     </div>
@@ -974,8 +977,9 @@ fbq('track', 'PageView');
 
     var citySelect = document.getElementById('dropx-cod-city');
     var selectedCity = citySelect ? citySelect.value : 'Dakar Centre';
-    var deliveryFee = getDeliveryFee(selectedCity);
-    var total = subtotal + deliveryFee;
+    var baseZoneFee = getDeliveryFee(selectedCity);
+    var deliveryFee = 0; // Livraison Gratuite
+    var total = subtotal;
 
     var packLabelEl = document.getElementById('dropx-cod-pack-label');
     var subtotalEl = document.getElementById('dropx-cod-subtotal-display');
@@ -989,14 +993,14 @@ fbq('track', 'PageView');
     if (packLabelEl) packLabelEl.innerText = "Articles" + qtyText + " :";
     if (subtotalEl) subtotalEl.innerText = formatFCFA(subtotal);
     if (zoneNameEl) zoneNameEl.innerText = selectedCity.split('-')[0].split('(')[0].trim();
-    if (deliveryEl) deliveryEl.innerText = "+ " + formatFCFA(deliveryFee);
+    if (deliveryEl) deliveryEl.innerHTML = '<s style="color:#9ca3af;font-weight:normal;margin-right:4px;">' + formatFCFA(baseZoneFee) + '</s> <span style="color:#16a34a;font-weight:800;">GRATUITE (0 FCFA) 🎉</span>';
     if (totalEl) totalEl.innerText = formatFCFA(total);
 
     var isWave = document.querySelector('input[name="dropx_pay_method"]:checked')?.value?.includes('Wave');
     if (waveBadge) waveBadge.style.display = isWave ? 'flex' : 'none';
 
     if (submitBtn) {
-      submitBtn.innerHTML = '<span>COMMANDER MAINTENANT (' + formatFCFA(total) + ') 🚚</span>';
+      submitBtn.innerHTML = '<span>COMMANDER (' + formatFCFA(total) + ' - LIVRAISON GRATUITE) 🚚</span>';
     }
   };
 
@@ -1062,7 +1066,8 @@ fbq('track', 'PageView');
 
     var waText = encodeURIComponent(
       "Bonjour ShopX ! Je viens de commander : " + productTitle + " (" + variantTitle + " x" + qty + ").\n" +
-      "Sous-total : " + formatFCFA(subtotal) + " + Livraison (" + city.split('(')[0].trim() + ") : " + formatFCFA(deliveryFee) + ".\n" +
+      "Sous-total : " + formatFCFA(subtotal) + "\n" +
+      "Frais de livraison : GRATUITE (Offerte)\n" +
       "Montant total à régler : " + totalFormatted + ".\n" +
       "Nom : " + name + "\n" +
       "Téléphone : " + fullPhone + "\n" +
