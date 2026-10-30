@@ -40,6 +40,26 @@ function saveLocalOrder(order) {
   }
 }
 
+// Helper for order overrides (custom Alibaba cost, status) for both Shopify and COD orders
+const OVERRIDES_FILE = path.join(DATA_DIR, 'order_overrides.json');
+
+function getOrderOverrides() {
+  if (!fs.existsSync(OVERRIDES_FILE)) return {};
+  try {
+    return JSON.parse(fs.readFileSync(OVERRIDES_FILE, 'utf8'));
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveOrderOverride(orderId, patchData) {
+  ensureDataFile();
+  const overrides = getOrderOverrides();
+  overrides[orderId] = { ...(overrides[orderId] || {}), ...patchData, updatedAt: new Date().toISOString() };
+  fs.writeFileSync(OVERRIDES_FILE, JSON.stringify(overrides, null, 2), 'utf8');
+  return overrides[orderId];
+}
+
 // CORS Headers helper
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -367,26 +387,6 @@ export async function GET(req) {
     const existingShopifyIds = new Set(shopifyOrders.map(o => String(o.shopifyOrderId)));
     const uniqueLocalOrders = localOrders.filter(o => !o.shopifyOrderId || !existingShopifyIds.has(String(o.shopifyOrderId)));
 
-// Helper for order overrides (custom Alibaba cost, status) for both Shopify and COD orders
-const OVERRIDES_FILE = path.join(DATA_DIR, 'order_overrides.json');
-
-function getOrderOverrides() {
-  if (!fs.existsSync(OVERRIDES_FILE)) return {};
-  try {
-    return JSON.parse(fs.readFileSync(OVERRIDES_FILE, 'utf8'));
-  } catch (e) {
-    return {};
-  }
-}
-
-function saveOrderOverride(orderId, patchData) {
-  ensureDataFile();
-  const overrides = getOrderOverrides();
-  overrides[orderId] = { ...(overrides[orderId] || {}), ...patchData, updatedAt: new Date().toISOString() };
-  fs.writeFileSync(OVERRIDES_FILE, JSON.stringify(overrides, null, 2), 'utf8');
-  return overrides[orderId];
-}
-
     // Combined real orders sorted newest first
     const allOrders = [...shopifyOrders, ...uniqueLocalOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -476,4 +476,138 @@ export async function PATCH(req) {
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
   }
 }
+
+// DELETE: Delete an order by orderId (from Shopify if connected, and from local files), or all orders
+export async function DELETE(req) {
+  try {
+    const url = new URL(req.url);
+    const queryId = url.searchParams.get('orderId');
+    let bodyId = null;
+    try {
+      const body = await req.json();
+      bodyId = body?.orderId;
+    } catch (e) {}
+
+    const orderId = bodyId || queryId;
+    if (!orderId) {
+      return NextResponse.json({ error: 'orderId requis' }, { status: 400, headers: corsHeaders });
+    }
+
+    // Get Shopify credentials
+    let integration = null;
+    try {
+      const integrations = await prisma.integration.findMany({
+        where: { platform: 'shopify', status: 'connected' }
+      });
+      if (integrations && integrations.length > 0) {
+        integration = integrations[0];
+      }
+    } catch (dbErr) {
+      console.warn("[Prisma DB Warning]:", dbErr.message);
+    }
+
+    let shopUrl = null;
+    let adminToken = null;
+    if (integration && integration.keyData) {
+      const creds = JSON.parse(integration.keyData);
+      shopUrl = (creds.domain || creds.shopUrl || '').trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+      adminToken = creds.token || creds.accessToken || creds.clientSecret || '';
+    }
+
+    // CASE 1: Wipe all orders
+    if (orderId === "ALL") {
+      if (shopUrl && adminToken) {
+        try {
+          const shopifyRes = await fetch(`https://${shopUrl}/admin/api/2024-04/orders.json?status=any&limit=100`, {
+            headers: { 'X-Shopify-Access-Token': adminToken, 'Content-Type': 'application/json' }
+          });
+          if (shopifyRes.ok) {
+            const data = await shopifyRes.json();
+            for (const so of data.orders || []) {
+              try {
+                if (!so.cancelled_at) {
+                  await fetch(`https://${shopUrl}/admin/api/2024-04/orders/${so.id}/cancel.json`, {
+                    method: 'POST',
+                    headers: { 'X-Shopify-Access-Token': adminToken, 'Content-Type': 'application/json' }
+                  });
+                }
+                await fetch(`https://${shopUrl}/admin/api/2024-04/orders/${so.id}.json`, {
+                  method: 'DELETE',
+                  headers: { 'X-Shopify-Access-Token': adminToken, 'Content-Type': 'application/json' }
+                });
+              } catch (delErr) {
+                console.warn("[Shopify Delete Warning]:", delErr.message);
+              }
+            }
+          }
+        } catch (sErr) {
+          console.warn("[Shopify Wipe Error]:", sErr.message);
+        }
+      }
+
+      ensureDataFile();
+      fs.writeFileSync(ORDERS_FILE, JSON.stringify([], null, 2), 'utf8');
+      fs.writeFileSync(OVERRIDES_FILE, JSON.stringify({}, null, 2), 'utf8');
+
+      return NextResponse.json({
+        success: true,
+        message: 'Toutes les commandes ont été supprimées avec succès'
+      }, { headers: corsHeaders });
+    }
+
+    // CASE 2: Delete specific order
+    let shopifyId = null;
+    if (String(orderId).startsWith('SHOPIFY-')) {
+      shopifyId = String(orderId).replace('SHOPIFY-', '');
+    } else if (!isNaN(Number(orderId)) && String(orderId).length > 8) {
+      shopifyId = String(orderId);
+    }
+
+    let shopifyDeleted = false;
+    if (shopifyId && shopUrl && adminToken) {
+      try {
+        await fetch(`https://${shopUrl}/admin/api/2024-04/orders/${shopifyId}/cancel.json`, {
+          method: 'POST',
+          headers: { 'X-Shopify-Access-Token': adminToken, 'Content-Type': 'application/json' }
+        });
+        const delRes = await fetch(`https://${shopUrl}/admin/api/2024-04/orders/${shopifyId}.json`, {
+          method: 'DELETE',
+          headers: { 'X-Shopify-Access-Token': adminToken, 'Content-Type': 'application/json' }
+        });
+        if (delRes.ok || delRes.status === 200 || delRes.status === 204) {
+          shopifyDeleted = true;
+        }
+      } catch (sErr) {
+        console.warn("[Shopify Delete Order Warn]:", sErr.message);
+      }
+    }
+
+    // Remove from local files
+    ensureDataFile();
+    const orders = getLocalOrders();
+    const filteredOrders = orders.filter(o => 
+      String(o.id) !== String(orderId) && 
+      (!shopifyId || String(o.shopifyOrderId) !== String(shopifyId))
+    );
+    fs.writeFileSync(ORDERS_FILE, JSON.stringify(filteredOrders, null, 2), 'utf8');
+
+    // Remove override
+    const overrides = getOrderOverrides();
+    delete overrides[orderId];
+    if (shopifyId) delete overrides[shopifyId];
+    fs.writeFileSync(OVERRIDES_FILE, JSON.stringify(overrides, null, 2), 'utf8');
+
+    return NextResponse.json({
+      success: true,
+      message: 'Commande supprimée avec succès',
+      orderId,
+      shopifyDeleted
+    }, { headers: corsHeaders });
+
+  } catch (error) {
+    console.error("[Delete Order Error]:", error);
+    return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
+  }
+}
+
 

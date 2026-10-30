@@ -22,7 +22,8 @@ import {
   TrendingUp,
   Edit2,
   Check,
-  X
+  X,
+  Trash2
 } from "lucide-react";
 import { formatFCFA } from "@/lib/senegalCod";
 
@@ -36,6 +37,7 @@ export default function CodOrdersPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [editingSupplierCostId, setEditingSupplierCostId] = useState(null);
   const [tempSupplierCost, setTempSupplierCost] = useState("");
+  const [deletingOrderId, setDeletingOrderId] = useState(null);
 
   const fetchOrders = async (showRefreshing = false) => {
     if (showRefreshing) setIsRefreshing(true);
@@ -100,6 +102,49 @@ export default function CodOrdersPage() {
     }
   };
 
+  const handleDeleteOrder = async (orderId, orderNumber) => {
+    const label = orderNumber || orderId;
+    if (!window.confirm(`Voulez-vous vraiment supprimer définitivement la commande ${label} ?\nElle sera également supprimée de votre boutique Shopify.`)) {
+      return;
+    }
+
+    setDeletingOrderId(orderId);
+    try {
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      await fetch("/api/orders/cod", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId })
+      });
+      fetchOrders(false);
+    } catch (err) {
+      console.error("Delete order error:", err);
+      fetchOrders(false);
+    } finally {
+      setDeletingOrderId(null);
+    }
+  };
+
+  const handleWipeAllOrders = async () => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer TOUTES les commandes ?\nCette action est irréversible et supprimera également les commandes sur Shopify.")) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      setOrders([]);
+      await fetch("/api/orders/cod", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: "ALL" })
+      });
+      fetchOrders(false);
+    } catch (e) {
+      console.error("Wipe all orders error:", e);
+      fetchOrders(false);
+    }
+  };
+
   const newOrdersCount = orders.filter(o => o.status === "NOUVEAU").length;
   const inDeliveryCount = orders.filter(o => o.status === "EN_LIVRAISON").length;
   const deliveredCount = orders.filter(o => o.status === "LIVRE").length;
@@ -152,6 +197,16 @@ export default function CodOrdersPage() {
         </div>
 
         <div className={styles.headerActions}>
+          {orders.length > 0 && (
+            <button 
+              className={`${styles.actionButton} ${styles.dangerButton}`}
+              onClick={handleWipeAllOrders}
+              title="Supprimer toutes les commandes"
+            >
+              <Trash2 size={16} />
+              Vider tout
+            </button>
+          )}
           <button 
             className={`${styles.actionButton} ${styles.primaryButton}`}
             onClick={() => fetchOrders(true)}
@@ -303,6 +358,7 @@ export default function CodOrdersPage() {
                 <th>Produit & Offre</th>
                 <th>Décomposition Financière (CA, Alibaba, Zone, Wave)</th>
                 <th>Statut</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -462,6 +518,31 @@ export default function CodOrdersPage() {
                         <option value="LIVRE">🟢 Livré & Encaissé</option>
                         <option value="ANNULE">🔴 Annulé</option>
                       </select>
+                    </td>
+
+                    {/* ACTIONS (WHATSAPP & SUPPRIMER) */}
+                    <td>
+                      <div className={styles.actionsCell}>
+                        {cleanPhone && (
+                          <a 
+                            href={waUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className={styles.waBtn} 
+                            title="Contacter le client sur WhatsApp"
+                          >
+                            <MessageCircle size={15} />
+                          </a>
+                        )}
+                        <button 
+                          className={styles.deleteBtn}
+                          onClick={() => handleDeleteOrder(order.id, order.shopifyOrderNumber)}
+                          disabled={deletingOrderId === order.id}
+                          title="Supprimer définitivement la commande"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
