@@ -14,7 +14,9 @@ export async function GET(req, { params }) {
   const url = new URL(req.url);
   const isVoice = url.searchParams.get('type') === 'voice';
   const download = url.searchParams.get('download') === '1';
-  const file = path.join(RENDERS_DIR, `${id}.${isVoice ? 'mp3' : 'mp4'}`);
+  const file1 = path.join(RENDERS_DIR, `${id}.${isVoice ? 'mp3' : 'mp4'}`);
+  const file2 = path.join(process.cwd(), 'public', 'renders', `${id}.${isVoice ? 'mp3' : 'mp4'}`);
+  const file = fs.existsSync(file1) ? file1 : file2;
 
   if (!fs.existsSync(file)) {
     return new Response('Fichier introuvable', { status: 404 });

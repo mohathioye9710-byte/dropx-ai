@@ -275,27 +275,29 @@ export function probeDuration(file, cwd) {
   });
 }
 
-export async function mixMusic({ workDir, volume = 0.14, startOffset = 0 }) {
+export async function mixMusic({ workDir, volume = 0.85, startOffset = 0 }) {
   // base.mp4 = vidéo avec voix seule, music.mp3 = piste choisie (relatifs au workDir)
   const dur = await probeDuration('base.mp4', workDir);
-  const vol = Math.min(1.5, Math.max(0.02, Number(volume) || 0.14));
+  const vol = Math.min(2.0, Math.max(0.05, Number(volume) || 0.85));
   const offset = Math.max(0, Number(startOffset) || 0);
   const fadeOutStart = Math.max(0, dur - 1.2).toFixed(2);
 
-  // Chaîne audio Hi-Fi Studio :
-  // 1. Voix égalisée + présence 3.2kHz + boost broadcast -14.0 LUFS (parfaitement intelligible)
-  // 2. Musique stéréo 48kHz dynamique et rythmée sans écraser la voix
-  // 3. Ducking sidechain calibré assurant l'intelligibilité de chaque mot
-  // 4. Muxing stéréo 48kHz AAC broadcast
+  // Chaîne audio High Energy TikTok Ads :
+  // 1. Voix égalisée + présence 3.2kHz + puissance d'accroche
+  // 2. Musique stéréo dynamique, basses percutantes et son puissant
+  // 3. Sidechain fluide qui préserve le rythme musical sans hacher le beat
+  // 4. Mastering final percutant à -10.8 LUFS (standard viral TikTok & Reels)
   const filter = [
-    '[0:a]aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,highpass=f=80,equalizer=f=3200:t=q:w=1.2:g=3.0,loudnorm=I=-14.0:TP=-1.0:LRA=6[voice_norm]',
+    '[0:a]aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,highpass=f=85,equalizer=f=3200:t=q:w=1.2:g=3.5,volume=1.25[voice_norm]',
     '[voice_norm]asplit=2[voice][sc]',
     `[1:a]aloop=loop=-1:size=2147483647,atrim=0:${dur.toFixed(2)},asetpts=N/SR/TB,` +
       'aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,' +
-      `afade=t=in:d=0.3,afade=t=out:st=${fadeOutStart}:d=1.2,` +
-      `equalizer=f=2500:t=q:w=1.5:g=-4.0,volume=${vol.toFixed(3)}[music_prep]`,
-    '[music_prep][sc]sidechaincompress=threshold=0.04:ratio=4.5:attack=15:release=220:makeup=1.0[ducked_music]',
-    '[voice][ducked_music]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.98[a]'
+      `afade=t=in:d=0.2,afade=t=out:st=${fadeOutStart}:d=1.2,` +
+      `volume=${vol.toFixed(3)}[music_prep]`,
+    '[music_prep][sc]sidechaincompress=threshold=0.12:ratio=1.6:attack=25:release=140:makeup=1.1[ducked_music]',
+    '[voice][ducked_music]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,' +
+      'loudnorm=I=-10.8:TP=-0.5:LRA=4.5,' +
+      'alimiter=limit=0.98[a]'
   ].join(';');
 
   await runFfmpeg(

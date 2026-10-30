@@ -132,7 +132,7 @@ export default function CreativeStudioPage() {
   // Background Music states
   const [musicTracks, setMusicTracks] = useState([]);
   const [selectedMusic, setSelectedMusic] = useState('papaoutai_afrosoul');
-  const [musicVolume, setMusicVolume] = useState(0.55);
+  const [musicVolume, setMusicVolume] = useState(0.85);
   const [previewingMusicId, setPreviewingMusicId] = useState(null);
   const [remixingMusic, setRemixingMusic] = useState(false);
   const [musicSearchQuery, setMusicSearchQuery] = useState('');
@@ -738,9 +738,9 @@ export default function CreativeStudioPage() {
 
               <input
                 type="range"
-                min="0.05"
-                max="0.60"
-                step="0.01"
+                min="0.10"
+                max="1.50"
+                step="0.05"
                 value={musicVolume}
                 disabled={selectedMusic === 'none'}
                 onChange={(e) => {

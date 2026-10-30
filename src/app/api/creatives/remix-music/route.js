@@ -9,7 +9,7 @@ const RENDERS_DIR = path.join(process.cwd(), 'data', 'renders');
 
 export async function POST(req) {
   try {
-    const { videoId, musicId = 'none', musicVolume = 0.45, startOffset } = await req.json();
+    const { videoId, musicId = 'none', musicVolume = 0.85, startOffset } = await req.json();
 
     if (!videoId || !/^[a-f0-9]{6,32}$/.test(videoId)) {
       return NextResponse.json({ error: 'Identifiant vidéo invalide' }, { status: 400 });
@@ -58,11 +58,18 @@ export async function POST(req) {
 
       const mixed = await mixMusic({
         workDir,
-        volume: Number(musicVolume) || 0.45,
+        volume: Number(musicVolume) || 0.85,
         startOffset: effectiveOffset
       });
 
       fs.copyFileSync(mixed, targetFile);
+
+      // Keep public/renders updated too
+      const publicTarget = path.join(process.cwd(), 'public', 'renders', `${videoId}.mp4`);
+      try {
+        fs.mkdirSync(path.dirname(publicTarget), { recursive: true });
+        fs.copyFileSync(mixed, publicTarget);
+      } catch (e) {}
 
       return NextResponse.json({
         success: true,
