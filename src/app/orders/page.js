@@ -56,8 +56,12 @@ export default function CodOrdersPage() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchOrders(false);
+    // Auto-refresh every 10 seconds to catch incoming COD orders in real-time
+    const interval = setInterval(() => {
+      fetchOrders(false);
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleStatusChange = async (orderId, newStatus) => {

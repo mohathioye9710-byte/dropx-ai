@@ -889,361 +889,289 @@ fbq('track', 'PageView');
 
 <script>
 (function() {
-  var productVariants = {{ product.variants | json }};
-  var productOptions = {{ product.options_with_values | json }};
   var productTitle = {{ product.title | json }};
   var shopDomain = window.location.hostname;
   var apiBaseUrl = "` + appApiUrl + `";
 
-  function attemptDropxOverride() {
-    try {
-      var dropxUI = document.getElementById('dropx-full-page-container');
-      if(!dropxUI) return false;
-      if(dropxUI.getAttribute('data-injected') === 'true') return true;
+  var variantPricesFCFA = {
+    "1 Unité": 46200,
+    "2 Achetés (-15%)": 78500,
+    "3 Achetés (-25%)": 103900
+  };
 
-      var mainContainer = document.querySelector('main') || document.querySelector('#MainContent') || document.querySelector('.main-content');
-      if(!mainContainer) return false;
-
-      var baseP = parseFloat(dropxUI.getAttribute('data-base-price')) || 0;
-      var safeC = parseFloat(dropxUI.getAttribute('data-safe-compare')) || 0;
-      var themeColor = dropxUI.getAttribute('data-theme-color') || '#000000';
-      var themeForeground = dropxUI.getAttribute('data-theme-foreground') || '#ffffff';
-      var buttonColor = dropxUI.getAttribute('data-button-color') || '#10b981';
-
-      var bundlesData = [
-        { title: "Pack Découverte (1 Unité)", tag: "", price: baseP, oldPrice: safeC },
-        { title: "2 Achetés (-15%)", tag: "Le plus populaire", price: Math.ceil(baseP * 2 * 0.85 / 100) * 100, oldPrice: safeC * 2 },
-        { title: "3 Achetés (-25%)", tag: "Meilleure vente", price: Math.ceil(baseP * 3 * 0.75 / 100) * 100, oldPrice: safeC * 3 }
-      ];
-
-      function formatPrice(price) {
-        if (price >= 500) {
-          return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(price) + ' FCFA';
-        }
-        var xofAmount = Math.round(price * 600 / 100) * 100;
-        return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(xofAmount) + ' FCFA';
-      }
-
-      var deliveryZoneFees = {
-        "Dakar Centre": 1500,
-        "Dakar Ouest": 2000,
-        "Dakar Nord": 2000,
-        "Dakar Banlieue": 2500,
-        "Rufisque": 3000,
-        "Thiès": 3500,
-        "Touba": 4000,
-        "Saint-Louis": 4500,
-        "Kaolack": 4500,
-        "Ziguinchor": 5000,
-        "Autre": 4000
-      };
-
-      function getDeliveryFee(cityName) {
-        var name = String(cityName || '');
-        for (var k in deliveryZoneFees) {
-          if (name.indexOf(k) !== -1) return deliveryZoneFees[k];
-        }
-        return 2000;
-      }
-
-      function updateCODAmounts() {
-        var activeBundle = bundlesData[selectedBundleIndex] || bundlesData[0];
-        var rawPrice = activeBundle.price >= 500 ? activeBundle.price : Math.round(activeBundle.price * 600 / 100) * 100;
-
-        var citySelect = document.getElementById('dropx-cod-city');
-        var selectedCity = citySelect ? citySelect.value : 'Dakar Centre';
-        var deliveryFee = getDeliveryFee(selectedCity);
-        var totalAmount = rawPrice + deliveryFee;
-        var waveFee = Math.round(totalAmount * 0.01);
-
-        var packLabelEl = document.getElementById('dropx-cod-pack-label');
-        var subtotalEl = document.getElementById('dropx-cod-subtotal-display');
-        var zoneNameEl = document.getElementById('dropx-cod-zone-name');
-        var deliveryEl = document.getElementById('dropx-cod-delivery-display');
-        var waveBadgeEl = document.getElementById('dropx-wave-badge-note');
-        var waveFeeEl = document.getElementById('dropx-cod-wave-fee');
-        var totalEl = document.getElementById('dropx-cod-total-display');
-
-        if (packLabelEl) packLabelEl.innerText = activeBundle.title + " :";
-        if (subtotalEl) subtotalEl.innerText = formatPrice(rawPrice);
-        if (zoneNameEl) zoneNameEl.innerText = selectedCity.split('(')[0].trim();
-        if (deliveryEl) deliveryEl.innerText = "+ " + formatPrice(deliveryFee);
-
-        var waveRadio = document.querySelector('input[name="dropx_pay_method"]:checked');
-        var isWave = waveRadio && waveRadio.value && waveRadio.value.indexOf('Wave') !== -1;
-        if (waveBadgeEl) waveBadgeEl.style.display = isWave ? 'flex' : 'none';
-        if (waveFeeEl) waveFeeEl.innerText = "1% sécurisé (" + formatPrice(waveFee) + ")";
-
-        if (totalEl) totalEl.innerText = formatPrice(totalAmount);
-
-        var priceEl = document.getElementById('dropx-price-display');
-        if(priceEl) priceEl.innerText = formatPrice(rawPrice);
-        var oldPriceEl = document.getElementById('dropx-oldprice-display');
-        if(oldPriceEl) oldPriceEl.innerText = formatPrice(activeBundle.oldPrice);
-        var savingsEl = document.getElementById('dropx-savings-display');
-        if(savingsEl) {
-           var savingPct = activeBundle.oldPrice > 0 ? Math.round((1 - activeBundle.price / activeBundle.oldPrice) * 100) : 0;
-           savingsEl.innerText = 'Économisez ' + (savingPct || 0) + '%';
-        }
-      }
-
-      mainContainer.innerHTML = '';
-      document.body.classList.add('dropx-product-active');
-      dropxUI.style.display = 'block';
-      dropxUI.setAttribute('data-injected', 'true');
-      mainContainer.appendChild(dropxUI);
-
-      var placeholder = document.getElementById('dropx-form-placeholder');
-      var liquidForm = document.getElementById('dropx-liquid-form-container');
-      if(placeholder && liquidForm) {
-         placeholder.appendChild(liquidForm);
-         liquidForm.style.display = 'block';
-      }
-
-      function renderBundles() {
-        var container = document.getElementById('dropx-bundles-container');
-        if(!container) return;
-        container.innerHTML = '';
-
-        bundlesData.forEach(function(b, index) {
-          var isSelected = (index === selectedBundleIndex);
-          var box = document.createElement('div');
-          box.style.border = isSelected ? '2px solid ' + themeColor : '1px solid #e5e7eb';
-          box.style.background = isSelected ? '#f8fafc' : '#fff';
-          box.style.borderRadius = '12px';
-          box.style.padding = '16px';
-          box.style.cursor = 'pointer';
-          box.style.position = 'relative';
-          box.style.display = 'flex';
-          box.style.alignItems = 'center';
-          box.style.gap = '12px';
-          box.style.transition = 'all 0.2s';
-
-          if(b.tag) {
-            var tag = document.createElement('div');
-            tag.innerText = b.tag;
-            tag.style.position = 'absolute';
-            tag.style.top = '-10px';
-            tag.style.right = '16px';
-            tag.style.background = themeColor;
-            tag.style.color = themeForeground;
-            tag.style.fontSize = '10px';
-            tag.style.fontWeight = 'bold';
-            tag.style.padding = '2px 8px';
-            tag.style.borderRadius = '10px';
-            box.appendChild(tag);
-          }
-
-          var radioContainer = document.createElement('div');
-          radioContainer.style.width = '18px';
-          radioContainer.style.height = '18px';
-          radioContainer.style.borderRadius = '50%';
-          radioContainer.style.border = isSelected ? '6px solid ' + themeColor : '2px solid #d1d5db';
-          box.appendChild(radioContainer);
-
-          var textDiv = document.createElement('div');
-          textDiv.style.flex = '1';
-          textDiv.style.display = 'flex';
-          textDiv.style.justifyContent = 'space-between';
-          textDiv.style.alignItems = 'center';
-
-          var t1 = document.createElement('div');
-          var titleTxt = document.createElement('div');
-          titleTxt.innerText = b.title;
-          titleTxt.style.fontWeight = '600';
-          titleTxt.style.fontSize = '15px';
-          titleTxt.style.color = themeColor;
-          var subtitleTxt = document.createElement('div');
-          subtitleTxt.style.fontSize = '12px';
-          subtitleTxt.style.color = '#666';
-          var saveP = b.oldPrice > 0 ? Math.round((1 - b.price / b.oldPrice) * 100) : 0;
-          subtitleTxt.innerText = 'ÉCONOMISEZ ' + saveP + '%';
-          t1.appendChild(titleTxt);
-          t1.appendChild(subtitleTxt);
-
-          var t2 = document.createElement('div');
-          t2.style.textAlign = 'right';
-          var p1 = document.createElement('div');
-          p1.innerText = formatPrice(b.price);
-          p1.style.fontWeight = '800';
-          p1.style.fontSize = '15px';
-          p1.style.color = themeColor;
-          var p2 = document.createElement('div');
-          p2.innerText = formatPrice(b.oldPrice);
-          p2.style.textDecoration = 'line-through';
-          p2.style.fontSize = '12px';
-          p2.style.color = '#999';
-          t2.appendChild(p1);
-          t2.appendChild(p2);
-
-          textDiv.appendChild(t1);
-          textDiv.appendChild(t2);
-          box.appendChild(textDiv);
-
-          box.onclick = function() {
-            selectedBundleIndex = index;
-            renderBundles();
-            updateCODAmounts();
-          };
-
-          container.appendChild(box);
-        });
-      }
-
-      renderBundles();
-      updateCODAmounts();
-
-      // Payment radio toggle style
-      var cashLbl = document.getElementById('dropx-pay-cash-lbl');
-      var waveLbl = document.getElementById('dropx-pay-wave-lbl');
-      var radios = document.getElementsByName('dropx_pay_method');
-      for (var r = 0; r < radios.length; r++) {
-        radios[r].onchange = function() {
-          if (this.value.includes('Espèces')) {
-            if(cashLbl) cashLbl.classList.add('active');
-            if(waveLbl) waveLbl.classList.remove('active');
-          } else {
-            if(waveLbl) waveLbl.classList.add('active');
-            if(cashLbl) cashLbl.classList.remove('active');
-          }
-          updateCODAmounts();
-        };
-      }
-
-      var citySelectEl = document.getElementById('dropx-cod-city');
-      if (citySelectEl) {
-        citySelectEl.onchange = updateCODAmounts;
-      }
-
-      // COD Form Submission
-      var submitBtn = document.getElementById('dropx-cod-submit-btn');
-      if (submitBtn) {
-        submitBtn.onclick = async function() {
-          var name = (document.getElementById('dropx-cod-name') || {}).value || '';
-          var phone = (document.getElementById('dropx-cod-phone') || {}).value || '';
-          var city = (document.getElementById('dropx-cod-city') || {}).value || 'Dakar';
-          var address = (document.getElementById('dropx-cod-address') || {}).value || '';
-
-          var methodEl = document.querySelector('input[name="dropx_pay_method"]:checked');
-          var paymentMethod = methodEl ? methodEl.value : 'Espèces à la livraison';
-
-          if (!name.trim()) {
-            alert('Veuillez entrer votre nom et prénom.');
-            var n = document.getElementById('dropx-cod-name'); if(n) n.focus();
-            return;
-          }
-          if (!phone.trim()) {
-            alert('Veuillez entrer votre numéro de téléphone.');
-            var p = document.getElementById('dropx-cod-phone'); if(p) p.focus();
-            return;
-          }
-          if (!address.trim()) {
-            alert('Veuillez entrer votre quartier ou adresse de livraison.');
-            var a = document.getElementById('dropx-cod-address'); if(a) a.focus();
-            return;
-          }
-
-          var activeBundle = bundlesData[selectedBundleIndex] || bundlesData[0];
-          var rawPrice = activeBundle.price >= 500 ? activeBundle.price : Math.round(activeBundle.price * 600 / 100) * 100;
-          var deliveryFee = getDeliveryFee(city);
-          var totalAmount = rawPrice + deliveryFee;
-
-          submitBtn.disabled = true;
-          submitBtn.innerHTML = '<span>Validation en cours... ⏳</span>';
-
-          var fullPhone = '+221 ' + phone.replace(/^\+221/, '').trim();
-
-          // Fire Meta Pixel Purchase event for ads tracking!
-          try {
-            if (typeof fbq === 'function') {
-              fbq('track', 'Purchase', {
-                value: totalAmount,
-                currency: 'XOF',
-                content_name: productTitle,
-                content_type: 'product',
-                num_items: selectedBundleIndex + 1
-              });
-            }
-          } catch(e) {}
-
-          // Prepare WhatsApp link
-          var waText = encodeURIComponent(
-            "Bonjour ShopX ! Je viens de commander : " + productTitle + " (" + activeBundle.title + ").\n" +
-            "Sous-total : " + formatPrice(rawPrice) + " + Livraison (" + city.split('(')[0].trim() + ") : " + formatPrice(deliveryFee) + ".\n" +
-            "Montant total à régler : " + formatPrice(totalAmount) + ".\n" +
-            "Nom : " + name + "\n" +
-            "Téléphone : " + fullPhone + "\n" +
-            "Ville / Quartier : " + city + " - " + address + "\n" +
-            "Paiement : " + paymentMethod + ".\n" +
-            "Merci de me confirmer la livraison !"
-          );
-          var waUrl = "https://wa.me/221775447866?text=" + waText;
-
-          // Send to DropX COD API
-          try {
-            var targetEndpoint = (apiBaseUrl ? apiBaseUrl : '') + '/api/orders/cod';
-            var response = await fetch(targetEndpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                shopDomain: shopDomain,
-                customerName: name,
-                customerPhone: fullPhone,
-                customerCity: city,
-                customerAddress: address,
-                paymentMethod: paymentMethod,
-                productTitle: productTitle,
-                bundleTitle: activeBundle.title,
-                quantity: selectedBundleIndex + 1,
-                unitPrice: rawPrice,
-                deliveryFee: deliveryFee,
-                totalPrice: totalAmount,
-                currency: 'XOF'
-              })
-            });
-            var data = await response.json();
-            if (data.whatsappUrl) {
-              waUrl = data.whatsappUrl;
-            }
-          } catch (apiErr) {
-            console.warn("DropX API sync fallback:", apiErr);
-          }
-
-          // Populate and show Confirmation Modal
-          var modalProd = document.getElementById('dropx-modal-product');
-          if (modalProd) modalProd.innerText = productTitle + " (" + activeBundle.title + ")";
-          var modalTot = document.getElementById('dropx-modal-total');
-          if (modalTot) modalTot.innerText = formatPrice(totalAmount);
-          var modalAddr = document.getElementById('dropx-modal-address');
-          if (modalAddr) modalAddr.innerText = address + ", " + city;
-          var modalPay = document.getElementById('dropx-modal-payment');
-          if (modalPay) modalPay.innerText = paymentMethod;
-
-          var waLink = document.getElementById('dropx-modal-wa-link');
-          if (waLink) waLink.href = waUrl;
-
-          var modal = document.getElementById('dropx-confirmation-modal');
-          if (modal) modal.style.display = 'flex';
-
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<span>COMMANDE VALIDÉE ! ✓</span>';
-        };
-      }
-
-      return true;
-    } catch(e) {
-      console.error("DropX UI Error:", e);
-      return false;
-    }
+  function formatFCFA(val) {
+    return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(Math.round(val)) + ' FCFA';
   }
 
-  var dropxAttempts = 0;
-  var dropxInterval = setInterval(function() {
-    if (attemptDropxOverride() || dropxAttempts > 30) {
-      clearInterval(dropxInterval);
+  var deliveryZoneFees = {
+    "Dakar Centre": 1500,
+    "Dakar Ouest": 2000,
+    "Dakar Nord": 2000,
+    "Dakar Banlieue": 2500,
+    "Rufisque": 3000,
+    "Thiès": 3500,
+    "Touba": 4000,
+    "Saint-Louis": 4500,
+    "Kaolack": 4500,
+    "Ziguinchor": 5000,
+    "Autre": 4000
+  };
+
+  function getDeliveryFee(cityName) {
+    var name = String(cityName || '');
+    for (var k in deliveryZoneFees) {
+      if (name.indexOf(k) !== -1) return deliveryZoneFees[k];
     }
-    dropxAttempts++;
+    return 2000;
+  }
+
+  function getThemeState() {
+    var selectedVariant = "1 Unité";
+    var checkedRadio = document.querySelector('input[type="radio"][name*="variant"]:checked') || document.querySelector('input[type="radio"][name*="Offres"]:checked');
+    if (checkedRadio && checkedRadio.value) {
+      selectedVariant = checkedRadio.value.trim();
+    } else {
+      var variantSelect = document.querySelector('select[name*="id"]') || document.querySelector('.product-form__input select');
+      if (variantSelect && variantSelect.options && variantSelect.selectedIndex >= 0) {
+        selectedVariant = variantSelect.options[variantSelect.selectedIndex].text.trim();
+      }
+    }
+
+    var qty = 1;
+    var qtyInput = document.querySelector('input[name="quantity"]') || document.querySelector('.quantity__input');
+    if (qtyInput) {
+      qty = parseInt(qtyInput.value, 10) || 1;
+    }
+
+    return { variant: selectedVariant, quantity: qty };
+  }
+
+  window.dropxSelectPayment = function(type) {
+    var cashLbl = document.getElementById('dropx-pay-cash-lbl');
+    var waveLbl = document.getElementById('dropx-pay-wave-lbl');
+    var cashInput = cashLbl ? cashLbl.querySelector('input') : null;
+    var waveInput = waveLbl ? waveLbl.querySelector('input') : null;
+
+    if (type === 'cash') {
+      if (cashLbl) cashLbl.classList.add('active');
+      if (waveLbl) waveLbl.classList.remove('active');
+      if (cashInput) cashInput.checked = true;
+    } else {
+      if (waveLbl) waveLbl.classList.add('active');
+      if (cashLbl) cashLbl.classList.remove('active');
+      if (waveInput) waveInput.checked = true;
+    }
+    window.dropxUpdateTotals();
+  };
+
+  window.dropxUpdateTotals = function() {
+    var state = getThemeState();
+    var variantTitle = state.variant;
+    var qty = state.quantity;
+
+    var baseVariantPrice = variantPricesFCFA[variantTitle] || 46200;
+    var subtotal = baseVariantPrice * qty;
+
+    var citySelect = document.getElementById('dropx-cod-city');
+    var selectedCity = citySelect ? citySelect.value : 'Dakar Centre';
+    var deliveryFee = getDeliveryFee(selectedCity);
+    var total = subtotal + deliveryFee;
+
+    var packLabelEl = document.getElementById('dropx-cod-pack-label');
+    var subtotalEl = document.getElementById('dropx-cod-subtotal-display');
+    var zoneNameEl = document.getElementById('dropx-cod-zone-name');
+    var deliveryEl = document.getElementById('dropx-cod-delivery-display');
+    var totalEl = document.getElementById('dropx-cod-total-display');
+    var submitBtn = document.getElementById('dropx-cod-submit-btn');
+    var waveBadge = document.getElementById('dropx-wave-badge-note');
+
+    var qtyText = qty > 1 ? " (" + qty + "x " + variantTitle + ")" : " (" + variantTitle + ")";
+    if (packLabelEl) packLabelEl.innerText = "Articles" + qtyText + " :";
+    if (subtotalEl) subtotalEl.innerText = formatFCFA(subtotal);
+    if (zoneNameEl) zoneNameEl.innerText = selectedCity.split('-')[0].split('(')[0].trim();
+    if (deliveryEl) deliveryEl.innerText = "+ " + formatFCFA(deliveryFee);
+    if (totalEl) totalEl.innerText = formatFCFA(total);
+
+    var isWave = document.querySelector('input[name="dropx_pay_method"]:checked')?.value?.includes('Wave');
+    if (waveBadge) waveBadge.style.display = isWave ? 'flex' : 'none';
+
+    if (submitBtn) {
+      submitBtn.innerHTML = '<span>COMMANDER MAINTENANT (' + formatFCFA(total) + ') 🚚</span>';
+    }
+  };
+
+  window.dropxSubmitOrder = async function() {
+    var nameEl = document.getElementById('dropx-cod-name');
+    var phoneEl = document.getElementById('dropx-cod-phone');
+    var cityEl = document.getElementById('dropx-cod-city');
+    var addrEl = document.getElementById('dropx-cod-address');
+    var submitBtn = document.getElementById('dropx-cod-submit-btn');
+
+    var name = (nameEl ? nameEl.value : '').trim();
+    var phone = (phoneEl ? phoneEl.value : '').trim();
+    var city = (cityEl ? cityEl.value : 'Dakar Centre').trim();
+    var address = (addrEl ? addrEl.value : '').trim();
+
+    var methodEl = document.querySelector('input[name="dropx_pay_method"]:checked');
+    var paymentMethod = methodEl ? methodEl.value : 'Espèces à la livraison';
+
+    if (!name) {
+      alert('Veuillez entrer votre prénom et nom.');
+      if (nameEl) nameEl.focus();
+      return;
+    }
+    var cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length < 8) {
+      alert('Veuillez entrer un numéro de téléphone valide (ex: 77 123 45 67).');
+      if (phoneEl) phoneEl.focus();
+      return;
+    }
+    if (!address) {
+      alert('Veuillez indiquer votre quartier ou adresse de livraison.');
+      if (addrEl) addrEl.focus();
+      return;
+    }
+
+    var fullPhone = '+221 ' + (cleanPhone.startsWith('221') ? cleanPhone.slice(3) : cleanPhone);
+
+    var state = getThemeState();
+    var variantTitle = state.variant;
+    var qty = state.quantity;
+    var baseVariantPrice = variantPricesFCFA[variantTitle] || 46200;
+    var subtotal = baseVariantPrice * qty;
+    var deliveryFee = getDeliveryFee(city);
+    var totalAmount = subtotal + deliveryFee;
+    var totalFormatted = formatFCFA(totalAmount);
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Validation en cours... ⏳</span>';
+    }
+
+    try {
+      if (typeof fbq === 'function') {
+        fbq('track', 'Purchase', {
+          value: totalAmount,
+          currency: 'XOF',
+          content_name: productTitle,
+          content_type: 'product',
+          num_items: qty
+        });
+      }
+    } catch(e) {}
+
+    var waText = encodeURIComponent(
+      "Bonjour ShopX ! Je viens de commander : " + productTitle + " (" + variantTitle + " x" + qty + ").\n" +
+      "Sous-total : " + formatFCFA(subtotal) + " + Livraison (" + city.split('(')[0].trim() + ") : " + formatFCFA(deliveryFee) + ".\n" +
+      "Montant total à régler : " + totalFormatted + ".\n" +
+      "Nom : " + name + "\n" +
+      "Téléphone : " + fullPhone + "\n" +
+      "Ville / Quartier : " + city + " - " + address + "\n" +
+      "Paiement : " + paymentMethod + ".\n" +
+      "Merci de me confirmer la livraison !"
+    );
+    var waUrl = "https://wa.me/221775447866?text=" + waText;
+
+    try {
+      var postData = {
+        shopDomain: shopDomain,
+        customerName: name,
+        customerPhone: fullPhone,
+        customerCity: city,
+        customerAddress: address,
+        paymentMethod: paymentMethod,
+        productTitle: productTitle,
+        bundleTitle: variantTitle + (qty > 1 ? " x" + qty : ""),
+        quantity: qty,
+        unitPrice: baseVariantPrice,
+        deliveryFee: deliveryFee,
+        totalPrice: totalAmount,
+        currency: 'XOF'
+      };
+
+      var response = await fetch(apiBaseUrl + '/api/orders/cod', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postData)
+      });
+      var data = await response.json();
+      if (data && data.whatsappUrl) {
+        waUrl = data.whatsappUrl;
+      }
+    } catch(err) {
+      console.warn("DropX API order sync error:", err);
+    }
+
+    var modalProd = document.getElementById('dropx-modal-product');
+    if (modalProd) modalProd.innerText = productTitle + " (" + variantTitle + " x" + qty + ")";
+    var modalTot = document.getElementById('dropx-modal-total');
+    if (modalTot) modalTot.innerText = totalFormatted;
+    var modalAddr = document.getElementById('dropx-modal-address');
+    if (modalAddr) modalAddr.innerText = address + ", " + city;
+    var modalPay = document.getElementById('dropx-modal-payment');
+    if (modalPay) modalPay.innerText = paymentMethod;
+
+    var waLink = document.getElementById('dropx-modal-wa-link');
+    if (waLink) waLink.href = waUrl;
+
+    var modal = document.getElementById('dropx-confirmation-modal');
+    if (modal) modal.style.display = 'flex';
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>COMMANDE VALIDÉE ! ✓</span>';
+    }
+  };
+
+  function mountCodForm() {
+    var liquidForm = document.getElementById('dropx-liquid-form-container');
+    if (!liquidForm) return false;
+
+    var target = document.querySelector('form[action*="/cart/add"]') || document.querySelector('.product-form') || document.querySelector('.product__info-container');
+    if (!target) return false;
+
+    if (liquidForm.parentNode !== target && liquidForm.parentNode !== target.parentNode) {
+      target.parentNode.insertBefore(liquidForm, target.nextSibling);
+    }
+    liquidForm.style.display = 'block';
+
+    var radios = document.querySelectorAll('input[type="radio"][name*="variant"], input[type="radio"][name*="Offres"]');
+    radios.forEach(function(r) {
+      r.removeEventListener('change', window.dropxUpdateTotals);
+      r.addEventListener('change', window.dropxUpdateTotals);
+    });
+
+    var qtyInput = document.querySelector('input[name="quantity"]') || document.querySelector('.quantity__input');
+    if (qtyInput) {
+      qtyInput.removeEventListener('input', window.dropxUpdateTotals);
+      qtyInput.addEventListener('input', window.dropxUpdateTotals);
+      qtyInput.removeEventListener('change', window.dropxUpdateTotals);
+      qtyInput.addEventListener('change', window.dropxUpdateTotals);
+    }
+
+    var qtyBtns = document.querySelectorAll('quantity-input button, .quantity__button');
+    qtyBtns.forEach(function(b) {
+      b.removeEventListener('click', function() { setTimeout(window.dropxUpdateTotals, 100); });
+      b.addEventListener('click', function() { setTimeout(window.dropxUpdateTotals, 100); });
+    });
+
+    window.dropxUpdateTotals();
+    return true;
+  }
+
+  var mAttempts = 0;
+  var mInterval = setInterval(function() {
+    if (mountCodForm() || mAttempts > 20) {
+      clearInterval(mInterval);
+    }
+    mAttempts++;
   }, 100);
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    mountCodForm();
+  } else {
+    document.addEventListener('DOMContentLoaded', mountCodForm);
+  }
 })();
 </script>
 {% endif %}
