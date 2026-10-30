@@ -166,11 +166,19 @@ export default function StoreBuilder() {
   const marginPct = sellingPriceInput > 0 ? Math.round((netProfitPerUnit / sellingPriceInput) * 100) : 0;
   
   const totalRevenue = Number(stockQty || 0) * Number(sellingPriceInput || 0);
-  const totalStockInvestment = Number(stockQty || 0) * (Number(supplierUnitCost || 0) + Number(forwarderUnitCost || 0));
+  const initialStockCost = Number(stockQty || 0) * Number(supplierUnitCost || 0);
+  const initialForwarderCost = Number(stockQty || 0) * Number(forwarderUnitCost || 0);
+  const upfrontCapital = initialStockCost + initialForwarderCost;
+  const totalStockInvestment = upfrontCapital;
   const totalAdSpend = Number(stockQty || 0) * Number(adCostPerOrder || 0);
   const totalDeliveryFees = Number(stockQty || 0) * Number(localDeliveryCost || 0);
   const totalWaveFees = Number(stockQty || 0) * Number(waveFeePerOrder || 0);
   const totalNetProfit = Number(stockQty || 0) * netProfitPerUnit;
+
+  // Budget d'investissement à prévoir
+  const initialAdBuffer = Math.min(totalAdSpend, 20000); // 15 000 à 20 000 FCFA pour tester les 3 à 4 premiers jours
+  const recommendedStartBudget = upfrontCapital + initialAdBuffer;
+  const maxSafetyBudget = upfrontCapital + totalAdSpend + 5000;
 
   const handleApplyCalculatedPrice = (customPrice) => {
     const finalPrice = Math.round(Number(customPrice || sellingPriceInput) || 13500);
@@ -445,11 +453,14 @@ export default function StoreBuilder() {
                       <span style={{ fontSize: '13px', fontWeight: '800', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Calculator size={16} /> Simulateur Prix & Marge
                       </span>
-                      <span style={{ fontSize: '10px', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>SÉNÉGAL</span>
+                      <span style={{ fontSize: '10px', background: '#10b981', color: '#000', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>SÉNÉGAL</span>
                     </div>
-                    <p style={{ fontSize: '12px', color: '#cbd5e1', margin: 0, lineHeight: 1.4 }}>
-                      Calcule automatiquement le transitaire, la pub Meta Ads, la livraison et ta marge nette sur ton stock de {stockQty} pièces.
-                    </p>
+                    <div style={{ fontSize: '12px', color: '#cbd5e1', margin: '0 0 6px', lineHeight: 1.4 }}>
+                      Stock prévu : <b>{stockQty} pcs</b> • À investir pour démarrer : <b style={{ color: '#fbbf24' }}>~{recommendedStartBudget.toLocaleString('fr-FR')} FCFA</b>
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#4ade80', fontWeight: '800' }}>
+                      👉 Bénéfice net estimé : +{totalNetProfit.toLocaleString('fr-FR')} FCFA
+                    </div>
                   </div>
 
                   <div>
@@ -707,6 +718,62 @@ export default function StoreBuilder() {
                         >
                           13.5k
                         </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* COMBIEN TU DOIS PRÉVOIR / INVESTIR */}
+                  <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)', border: '2px solid #818cf8', borderRadius: '12px', padding: '16px', boxShadow: '0 8px 24px rgba(129, 140, 248, 0.15)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '13px', fontWeight: '900', color: '#c7d2fe', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <DollarSign size={16} color="#818cf8" /> Budget à prévoir / investir
+                      </div>
+                      <span style={{ fontSize: '10px', background: '#4f46e5', color: '#fff', padding: '2px 8px', borderRadius: '10px', fontWeight: '800' }}>
+                        STOCK DE {stockQty} PCS
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
+                      {/* 1. Capital immédiat (Jour 1) */}
+                      <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: '700', marginBottom: '4px' }}>
+                          <span>📦 1. Capital d'achat (Jour 1) :</span>
+                          <span style={{ color: '#fbbf24', fontSize: '13px', fontWeight: '800' }}>{upfrontCapital.toLocaleString('fr-FR')} FCFA</span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#cbd5e1', lineHeight: '1.4' }}>
+                          • Achat des {stockQty} pièces chez le fournisseur : <b>{initialStockCost.toLocaleString('fr-FR')} FCFA</b><br/>
+                          • Fret GP Chine ➔ Dakar : <b>{initialForwarderCost.toLocaleString('fr-FR')} FCFA</b>
+                        </div>
+                      </div>
+
+                      {/* 2. Budget Pubs de test */}
+                      <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: '700', marginBottom: '4px' }}>
+                          <span>📢 2. Budget Pubs Meta Ads (Carte / Wave) :</span>
+                          <span style={{ color: '#60a5fa', fontSize: '13px', fontWeight: '800' }}>{initialAdBuffer.toLocaleString('fr-FR')} FCFA</span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#cbd5e1', lineHeight: '1.4' }}>
+                          Budget pour tester et lancer les premières ventes (5 000 F/jour sur 3-4 jours). Dès les premières livraisons, l'argent des clients finance les pubs suivantes !
+                        </div>
+                      </div>
+
+                      {/* 3. Note rassurante Livreurs */}
+                      <div style={{ fontSize: '11px', color: '#a7f3d0', background: 'rgba(16, 185, 129, 0.1)', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.2)', lineHeight: '1.4' }}>
+                        💡 <b>Livreurs (0 F à avancer) :</b> Le livreur encaisse 13 500 F en espèces chez le client, prélève ses 2 000 F et te verse le reste net par Wave.
+                      </div>
+
+                      {/* Résumé Grand Total */}
+                      <div style={{ borderTop: '1.5px solid #818cf8', paddingTop: '10px', marginTop: '4px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '12px', color: '#e0e7ff', fontWeight: '800' }}>🚀 TOTAL À PRÉVOIR POUR DÉMARRER :</span>
+                          <span style={{ fontSize: '17px', fontWeight: '900', color: '#a5b4fc' }}>
+                            ~{recommendedStartBudget.toLocaleString('fr-FR')} FCFA
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#94a3b8' }}>
+                          <span>🛡️ Plafond Sécurité Max (pire des cas) :</span>
+                          <span style={{ fontWeight: '700', color: '#fca5a5' }}>{maxSafetyBudget.toLocaleString('fr-FR')} FCFA</span>
+                        </div>
                       </div>
                     </div>
                   </div>
