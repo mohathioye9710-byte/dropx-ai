@@ -576,17 +576,55 @@ export async function POST(req) {
         const snippetContent = `
 <style>
   body, button, input, select, textarea { font-family: 'Trebuchet MS', 'Segoe UI', sans-serif !important; }
-  .product-card, .card-wrapper, .card, .collection .card-wrapper, .product-grid .card-wrapper, li.grid__item .card-wrapper {
-    border: 1.5px solid rgba(82, 115, 104, 0.42) !important;
+  product-card, .product-card, .card-wrapper, .card, .collection .card-wrapper, .product-grid .card-wrapper, li.grid__item .card-wrapper {
+    border: 1.5px solid rgba(82, 115, 104, 0.25) !important;
     border-radius: 18px !important;
     overflow: hidden !important;
     background: #fff !important;
-    box-shadow: 0 5px 18px rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07) !important;
     box-sizing: border-box !important;
   }
-  .card__inner, .card__media, .card__media .media, .card__media img { border-radius: 16px 16px 0 0 !important; overflow: hidden !important; }
-  .card__information, .card-information, .card__content { padding: 16px 18px 18px !important; }
-  .card__heading, .card-information__text, .price { margin-left: 0 !important; margin-right: 0 !important; line-height: 1.45 !important; }
+  .product-card-gallery, .product-card__gallery, .card__inner, .card__media, .card__media .media, .card__media img, product-card slideshow-component, product-card [class*="gallery"], product-card [class*="media"] {
+    border-radius: 16px 16px 0 0 !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  product-card a[ref="productTitleLink"], product-card a[ref="productTitleLink"] .text-block, product-card product-price, product-card .text-block:not([class*="gallery"]):not([class*="media"]):not([class*="image"]), product-card .product-grid-view-zoom-out--details, product-card [role="heading"], .product-card a[ref="productTitleLink"], .product-card a[ref="productTitleLink"] .text-block, .product-card product-price, .product-card .text-block:not([class*="gallery"]):not([class*="media"]):not([class*="image"]), .product-card [role="heading"], .card__information, .card-information, .card__content > *:not(.card__inner):not(.card__media):not([class*="media"]):not([class*="gallery"]) {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    box-sizing: border-box !important;
+    --padding-inline-start: 18px !important;
+    --padding-inline-end: 18px !important;
+  }
+  product-card a[ref="productTitleLink"], .product-card a[ref="productTitleLink"], product-card a[ref="productTitleLink"] .text-block, .product-card [role="heading"], .card__heading {
+    margin-top: 14px !important;
+    margin-bottom: 6px !important;
+    padding-top: 2px !important;
+    line-height: 1.45 !important;
+    font-size: 0.98rem !important;
+    font-weight: 600 !important;
+    color: #111111 !important;
+  }
+  product-card product-price, .product-card product-price, .card__information .price, .card-information .price, .card-information__text {
+    margin-top: 4px !important;
+    margin-bottom: 18px !important;
+    padding-bottom: 6px !important;
+    line-height: 1.4 !important;
+    box-sizing: border-box !important;
+  }
+  product-card product-price .price, product-card product-price .price-item, .product-card .price {
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    color: #111111 !important;
+  }
+  product-card product-price .compare-at-price, .product-card .compare-at-price {
+    font-size: 0.92rem !important;
+    font-weight: 500 !important;
+    color: #9ca3af !important;
+    text-decoration: line-through !important;
+    margin-left: 8px !important;
+  }
 </style>
 {% if template contains 'product' %}
 <!-- Meta Pixel Base Code (DropX Senegal) -->

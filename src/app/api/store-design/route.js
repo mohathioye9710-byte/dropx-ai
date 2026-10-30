@@ -404,18 +404,50 @@ ${themeRules}
                   font-family: 'Trebuchet MS', 'Segoe UI', sans-serif !important;
                 }
 
-                /* Product cards: rounded image top and breathing room around the copy. */
-                .card__inner, .card__media, .card__media .media, .card__media img {
-                  border-radius: 15px 15px 0 0 !important;
-                  overflow: hidden;
+                /* Product cards: rounded image top and generous breathing room (Horizon & Dawn) */
+                .product-card-gallery, .product-card__gallery,
+                .card__inner, .card__media, .card__media .media, .card__media img,
+                product-card slideshow-component, product-card [class*="gallery"], product-card [class*="media"] {
+                  border-radius: 16px 16px 0 0 !important;
+                  overflow: hidden !important;
+                  width: 100% !important;
+                  margin: 0 !important;
                 }
-                .card__information, .card-information, .card__content {
-                  padding: 16px 18px 18px !important;
+                product-card a[ref="productTitleLink"],
+                product-card a[ref="productTitleLink"] .text-block,
+                product-card product-price,
+                product-card .text-block:not([class*="gallery"]):not([class*="media"]):not([class*="image"]),
+                product-card .product-grid-view-zoom-out--details,
+                product-card [role="heading"],
+                .product-card a[ref="productTitleLink"],
+                .product-card a[ref="productTitleLink"] .text-block,
+                .product-card product-price,
+                .product-card .text-block:not([class*="gallery"]):not([class*="media"]):not([class*="image"]),
+                .product-card [role="heading"],
+                .card__information, .card-information,
+                .card__content > *:not(.card__inner):not(.card__media):not([class*="media"]):not([class*="gallery"]) {
+                  padding-left: 18px !important;
+                  padding-right: 18px !important;
+                  box-sizing: border-box !important;
+                  --padding-inline-start: 18px !important;
+                  --padding-inline-end: 18px !important;
                 }
-                .card__heading, .card-information__text, .price {
-                  margin-left: 0 !important;
-                  margin-right: 0 !important;
+                product-card a[ref="productTitleLink"], .product-card a[ref="productTitleLink"],
+                product-card a[ref="productTitleLink"] .text-block, .product-card [role="heading"], .card__heading {
+                  margin-top: 14px !important;
+                  margin-bottom: 6px !important;
+                  padding-top: 2px !important;
                   line-height: 1.45 !important;
+                  font-size: 0.98rem !important;
+                  font-weight: 600 !important;
+                }
+                product-card product-price, .product-card product-price,
+                .card__information .price, .card-information .price, .card-information__text {
+                  margin-top: 4px !important;
+                  margin-bottom: 18px !important;
+                  padding-bottom: 6px !important;
+                  line-height: 1.4 !important;
+                  box-sizing: border-box !important;
                 }
 
                 /* === FORCE ALL TEXT READABLE === */
@@ -578,6 +610,28 @@ ${themeRules}
               newOrder.push(customAboutId);
               indexJson.order = newOrder;
             }
+
+            function adjustCardPadding(obj) {
+              if (!obj || typeof obj !== 'object') return;
+              for (const [k, v] of Object.entries(obj)) {
+                if (v && typeof v === 'object') {
+                  if (v.type === 'product-title' && v.settings) {
+                    v.settings['padding-inline-start'] = 18;
+                    v.settings['padding-inline-end'] = 18;
+                    v.settings['padding-block-start'] = 12;
+                    v.settings['padding-block-end'] = 4;
+                  }
+                  if (v.type === 'price' && v.settings) {
+                    v.settings['padding-inline-start'] = 18;
+                    v.settings['padding-inline-end'] = 18;
+                    v.settings['padding-block-start'] = 4;
+                    v.settings['padding-block-end'] = 18;
+                  }
+                  adjustCardPadding(v);
+                }
+              }
+            }
+            adjustCardPadding(indexJson);
 
             await fetch(`https://${shopUrl}/admin/api/2024-04/themes/${themeId}/assets.json`, {
               method: 'PUT',
