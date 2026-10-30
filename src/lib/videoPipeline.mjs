@@ -275,29 +275,29 @@ export function probeDuration(file, cwd) {
   });
 }
 
-export async function mixMusic({ workDir, volume = 0.85, startOffset = 0 }) {
+export async function mixMusic({ workDir, volume = 0.35, startOffset = 0 }) {
   // base.mp4 = vidéo avec voix seule, music.mp3 = piste choisie (relatifs au workDir)
   const dur = await probeDuration('base.mp4', workDir);
-  const vol = Math.min(2.0, Math.max(0.05, Number(volume) || 0.85));
+  const vol = Math.min(1.5, Math.max(0.05, Number(volume) || 0.35));
   const offset = Math.max(0, Number(startOffset) || 0);
   const fadeOutStart = Math.max(0, dur - 1.2).toFixed(2);
 
-  // Chaîne audio High Energy TikTok Ads :
-  // 1. Voix égalisée + présence 3.2kHz + puissance d'accroche
-  // 2. Musique stéréo dynamique, basses percutantes et son puissant
-  // 3. Sidechain fluide qui préserve le rythme musical sans hacher le beat
-  // 4. Mastering final percutant à -10.8 LUFS (standard viral TikTok & Reels)
+  // Chaîne audio équilibrée & confortable :
+  // 1. Voix claire, douce et parfaitement audible
+  // 2. Musique en fond sonore mélodique et rythmé à volume modéré (35%)
+  // 3. Sidechain ducking propre
+  // 4. Mastering standard confortable à -14.3 LUFS
   const filter = [
-    '[0:a]aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,highpass=f=85,equalizer=f=3200:t=q:w=1.2:g=3.5,volume=1.25[voice_norm]',
+    '[0:a]aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,highpass=f=80,equalizer=f=3200:t=q:w=1.2:g=1.5,volume=1.0[voice_norm]',
     '[voice_norm]asplit=2[voice][sc]',
     `[1:a]aloop=loop=-1:size=2147483647,atrim=0:${dur.toFixed(2)},asetpts=N/SR/TB,` +
       'aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,' +
-      `afade=t=in:d=0.2,afade=t=out:st=${fadeOutStart}:d=1.2,` +
+      `afade=t=in:d=0.3,afade=t=out:st=${fadeOutStart}:d=1.2,` +
       `volume=${vol.toFixed(3)}[music_prep]`,
-    '[music_prep][sc]sidechaincompress=threshold=0.12:ratio=1.6:attack=25:release=140:makeup=1.1[ducked_music]',
+    '[music_prep][sc]sidechaincompress=threshold=0.08:ratio=2.5:attack=20:release=180:makeup=1.0[ducked_music]',
     '[voice][ducked_music]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,' +
-      'loudnorm=I=-10.8:TP=-0.5:LRA=4.5,' +
-      'alimiter=limit=0.98[a]'
+      'loudnorm=I=-14.3:TP=-1.0:LRA=5.5,' +
+      'alimiter=limit=0.95[a]'
   ].join(';');
 
   await runFfmpeg(

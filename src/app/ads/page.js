@@ -136,7 +136,7 @@ export default function CreativeStudioPage() {
   // Background Music states
   const [musicTracks, setMusicTracks] = useState([]);
   const [selectedMusic, setSelectedMusic] = useState('papaoutai_afrosoul');
-  const [musicVolume, setMusicVolume] = useState(0.85);
+  const [musicVolume, setMusicVolume] = useState(0.35);
   const [previewingMusicId, setPreviewingMusicId] = useState(null);
   const [remixingMusic, setRemixingMusic] = useState(false);
   const [musicSearchQuery, setMusicSearchQuery] = useState('');
