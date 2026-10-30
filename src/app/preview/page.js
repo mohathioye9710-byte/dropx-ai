@@ -39,6 +39,8 @@ export default function StoreBuilder() {
   const [isFreeShipping, setIsFreeShipping] = useState(true); // Livraison gratuite par défaut
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [orderModalData, setOrderModalData] = useState(null);
+  const [storeLogoUrl, setStoreLogoUrl] = useState('/logo.png');
+  const [storeName, setStoreName] = useState('ShopX');
   
   // Builder state
   const [activeTab, setActiveTab] = useState('content'); // content, calc, theme
@@ -538,6 +540,27 @@ export default function StoreBuilder() {
                     </button>
                   </div>
 
+                  <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', color: '#10b981', fontWeight: '800', marginBottom: '8px', textTransform: 'uppercase' }}>
+                      Logo de la boutique (Header & Factures)
+                    </label>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                      <div style={{ width: '46px', height: '46px', borderRadius: '8px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.2)', flexShrink: 0 }}>
+                        <img src={storeLogoUrl || '/logo.png'} alt="Logo Preview" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <input 
+                          type="text" 
+                          value={storeLogoUrl} 
+                          onChange={(e) => setStoreLogoUrl(e.target.value)} 
+                          placeholder="URL ou chemin du logo (ex: /logo.png)"
+                          style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
+                        />
+                        <span style={{ fontSize: '11px', color: '#71717a' }}>Par défaut : votre logo DropX officiel (`/logo.png`). Vous pouvez coller le lien de n'importe quelle image.</span>
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', color: '#10b981', fontWeight: '700', marginBottom: '8px', textTransform: 'uppercase' }}>Numéro WhatsApp Vendeur (Sénégal)</label>
                     <input 
@@ -898,7 +921,13 @@ export default function StoreBuilder() {
               </div>
 
               <div style={{ padding: '20px 5%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f0f0f0' }}>
-                <Link href="/stores" style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', margin: 0, color: themeColor, textDecoration: 'none', cursor: 'pointer' }}>ShopX</Link>
+                <Link href="/stores" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', cursor: 'pointer' }}>
+                  {storeLogoUrl ? (
+                    <img src={storeLogoUrl} alt={storeName} style={{ height: '36px', width: 'auto', objectFit: 'contain' }} />
+                  ) : (
+                    <span style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', margin: 0, color: themeColor }}>{storeName}</span>
+                  )}
+                </Link>
                 <ShoppingBag size={24} strokeWidth={1.5} color={themeColor} />
               </div>
 

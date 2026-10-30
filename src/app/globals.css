@@ -365,3 +365,15 @@ button {
     margin-left: 0;
   }
 }
+
+/* Masquer le badge / toolbar flottant Vercel */
+vercel-live-feedback,
+[data-vercel-toolbar],
+#__next-build-watcher,
+#vercel-toolbar {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+

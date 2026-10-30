@@ -10,6 +10,14 @@ import { LanguageProvider } from '@/context/LanguageContext';
 export const metadata = {
   title: 'DropX AI | Ultimate Dropshipping Platform',
   description: 'AI-powered dropshipping automation and analysis.',
+  icons: {
+    icon: [
+      { url: '/logo.png', sizes: 'any' },
+      { url: '/logo.png', type: 'image/png' }
+    ],
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  }
 };
 
 export default async function RootLayout({ children }) {
