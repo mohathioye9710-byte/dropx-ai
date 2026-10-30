@@ -576,28 +576,66 @@ export async function POST(req) {
         const snippetContent = `
 <style>
   body, button, input, select, textarea { font-family: 'Trebuchet MS', 'Segoe UI', sans-serif !important; }
-  product-card, .product-card, .card-wrapper, .card, .collection .card-wrapper, .product-grid .card-wrapper, li.grid__item .card-wrapper {
+
+  /* ==========================================================================
+     DROPX UNIVERSAL PRODUCT CARD SPACING & STYLING
+     ========================================================================== */
+  product-card,
+  .product-card,
+  .card-wrapper,
+  .card,
+  .collection .card-wrapper,
+  .product-grid .card-wrapper,
+  li.grid__item .card-wrapper {
     border: 1.5px solid rgba(82, 115, 104, 0.25) !important;
     border-radius: 18px !important;
     overflow: hidden !important;
-    background: #fff !important;
+    background: #ffffff !important;
     box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07) !important;
     box-sizing: border-box !important;
   }
-  .product-card-gallery, .product-card__gallery, .card__inner, .card__media, .card__media .media, .card__media img, product-card slideshow-component, product-card [class*="gallery"], product-card [class*="media"] {
+
+  .product-card-gallery,
+  .product-card__gallery,
+  .card__inner,
+  .card__media,
+  .card__media .media,
+  .card__media img,
+  product-card slideshow-component,
+  product-card [class*="gallery"],
+  product-card [class*="media"] {
     border-radius: 16px 16px 0 0 !important;
     overflow: hidden !important;
     width: 100% !important;
     margin: 0 !important;
   }
-  product-card a[ref="productTitleLink"], product-card a[ref="productTitleLink"] .text-block, product-card product-price, product-card .text-block:not([class*="gallery"]):not([class*="media"]):not([class*="image"]), product-card .product-grid-view-zoom-out--details, product-card [role="heading"], .product-card a[ref="productTitleLink"], .product-card a[ref="productTitleLink"] .text-block, .product-card product-price, .product-card .text-block:not([class*="gallery"]):not([class*="media"]):not([class*="image"]), .product-card [role="heading"], .card__information, .card-information, .card__content > *:not(.card__inner):not(.card__media):not([class*="media"]):not([class*="gallery"]) {
+
+  product-card a[ref="productTitleLink"],
+  product-card a[ref="productTitleLink"] .text-block,
+  product-card product-price,
+  product-card .text-block:not([class*="gallery"]):not([class*="media"]):not([class*="image"]),
+  product-card .product-grid-view-zoom-out--details,
+  product-card [role="heading"],
+  .product-card a[ref="productTitleLink"],
+  .product-card a[ref="productTitleLink"] .text-block,
+  .product-card product-price,
+  .product-card .text-block:not([class*="gallery"]):not([class*="media"]):not([class*="image"]),
+  .product-card [role="heading"],
+  .card__information,
+  .card-information,
+  .card__content > *:not(.card__inner):not(.card__media):not([class*="media"]):not([class*="gallery"]) {
     padding-left: 18px !important;
     padding-right: 18px !important;
     box-sizing: border-box !important;
     --padding-inline-start: 18px !important;
     --padding-inline-end: 18px !important;
   }
-  product-card a[ref="productTitleLink"], .product-card a[ref="productTitleLink"], product-card a[ref="productTitleLink"] .text-block, .product-card [role="heading"], .card__heading {
+
+  product-card a[ref="productTitleLink"],
+  .product-card a[ref="productTitleLink"],
+  product-card a[ref="productTitleLink"] .text-block,
+  .product-card [role="heading"],
+  .card__heading {
     margin-top: 14px !important;
     margin-bottom: 6px !important;
     padding-top: 2px !important;
@@ -606,26 +644,95 @@ export async function POST(req) {
     font-weight: 600 !important;
     color: #111111 !important;
   }
-  product-card product-price, .product-card product-price, .card__information .price, .card-information .price, .card-information__text {
+
+  product-card product-price,
+  .product-card product-price,
+  .card__information .price,
+  .card-information .price,
+  .card-information__text {
     margin-top: 4px !important;
     margin-bottom: 18px !important;
     padding-bottom: 6px !important;
     line-height: 1.4 !important;
     box-sizing: border-box !important;
   }
-  product-card product-price .price, product-card product-price .price-item, .product-card .price {
+
+  product-card product-price .price,
+  product-card product-price .price-item,
+  .product-card .price {
     font-size: 1.05rem !important;
     font-weight: 800 !important;
     color: #111111 !important;
   }
-  product-card product-price .compare-at-price, .product-card .compare-at-price {
+
+  product-card product-price .compare-at-price,
+  .product-card .compare-at-price {
     font-size: 0.92rem !important;
     font-weight: 500 !important;
     color: #9ca3af !important;
     text-decoration: line-through !important;
     margin-left: 8px !important;
   }
+
+  /* Hide default Shopify dynamic checkout buttons */
+  .shopify-payment-button,
+  .shopify-payment-button__button,
+  [data-shopify="payment-button"],
+  iframe[name^="__privateStripeMetricsController"],
+  .paypal-buttons {
+    display: none !important;
+  }
 </style>
+
+<script>
+// ==========================================================================
+// GLOBAL CURRENCY AUTO-FORMATTER ($13,500.00 -> 13 500 FCFA)
+// ==========================================================================
+(function() {
+  function formatTextFCFA(text) {
+    if (!text || typeof text !== 'string') return text;
+    // Match $13,500.00 or $13500 or 13,500.00 USD
+    return text.replace(/\\$\\s*([0-9]{1,3}(?:[,\\s][0-9]{3})*(?:\\.[0-9]{2})?)/g, function(match, num) {
+      var clean = Math.round(parseFloat(num.replace(/[,\\s]/g, '')));
+      if (isNaN(clean) || clean <= 0) return match;
+      return new Intl.NumberFormat('fr-FR').format(clean) + ' FCFA';
+    }).replace(/([0-9]{1,3}(?:[,\\s][0-9]{3})*(?:\\.[0-9]{2})?)\\s*(?:USD|\\$)/g, function(match, num) {
+      var clean = Math.round(parseFloat(num.replace(/[,\\s]/g, '')));
+      if (isNaN(clean) || clean <= 0) return match;
+      return new Intl.NumberFormat('fr-FR').format(clean) + ' FCFA';
+    });
+  }
+
+  function cleanCurrenciesInNode(node) {
+    if (!node) return;
+    if (node.nodeType === 3) { // Text node
+      if (node.nodeValue && (node.nodeValue.includes('$') || node.nodeValue.includes('USD'))) {
+        node.nodeValue = formatTextFCFA(node.nodeValue);
+      }
+    } else if (node.nodeType === 1 && node.childNodes) {
+      // Don't format inside script/style
+      if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') return;
+      for (var i = 0; i < node.childNodes.length; i++) {
+        cleanCurrenciesInNode(node.childNodes[i]);
+      }
+    }
+  }
+
+  function runCurrencyFormat() {
+    var priceEls = document.querySelectorAll('.price, [class*="price"], .compare-at-price, product-price');
+    priceEls.forEach(function(el) { cleanCurrenciesInNode(el); });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runCurrencyFormat);
+  } else {
+    runCurrencyFormat();
+  }
+  setTimeout(runCurrencyFormat, 500);
+  setTimeout(runCurrencyFormat, 1500);
+})();
+</script>
+
 {% if template contains 'product' %}
 <!-- Meta Pixel Base Code (DropX Senegal) -->
 <script>
@@ -640,30 +747,12 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 fbq('init', '1112535538423893');
 fbq('track', 'PageView');
 </script>
+
 <style>
-  body.dropx-product-active > header,
-  body.dropx-product-active > footer,
-  body.dropx-product-active .shopify-section-group-header-group,
-  body.dropx-product-active .shopify-section-group-footer-group,
-  body.dropx-product-active #shopify-section-announcement-bar,
-  body.dropx-product-active .announcement-bar-section { display: none !important; }
-  body.dropx-product-active main { padding: 0 !important; margin: 0 !important; max-width: none !important; }
-
-  /* HIDE ALL DEFAULT PAYPAL / STRIPE / DYNAMIC CHECKOUT BUTTONS */
-  .shopify-payment-button,
-  .shopify-payment-button__button,
-  [data-shopify="payment-button"],
-  iframe[name^="__privateStripeMetricsController"],
-  .paypal-buttons,
-  .product-form__buttons,
-  .product-form__submit {
-    display: none !important;
-  }
-
-  /* EasySell COD Senegal Styles */
+  /* COD Form Styles */
   .dropx-cod-card {
     background: #ffffff;
-    border: 2px solid ${buttonColor};
+    border: 2px solid #10b981;
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
@@ -672,8 +761,8 @@ fbq('track', 'PageView');
     width: 100%;
   }
   .dropx-cod-badge {
-    background: ${buttonColor};
-    color: ${buttonForeground};
+    background: #10b981;
+    color: #111111;
     padding: 10px 14px;
     border-radius: 10px;
     text-align: center;
@@ -701,7 +790,7 @@ fbq('track', 'PageView');
     transition: border-color 0.2s, background 0.2s;
     font-family: inherit;
   }
-  .dropx-input:focus, .dropx-select:focus { border-color: ${buttonColor}; background: #fff; }
+  .dropx-input:focus, .dropx-select:focus { border-color: #10b981; background: #fff; }
   .dropx-phone-wrap { display: flex; gap: 8px; }
   .dropx-phone-prefix {
     display: flex;
@@ -737,21 +826,21 @@ fbq('track', 'PageView');
     padding: 14px;
     margin: 16px 0;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 8px;
   }
   .dropx-submit-btn {
-    background: ${buttonColor};
-    color: ${buttonForeground};
+    background: #10b981;
+    color: #111111;
     width: 100%;
     padding: 18px 20px;
     border-radius: 12px;
     font-weight: 900;
-    font-size: 17px;
+    font-size: 16px;
     border: none;
     cursor: pointer;
     transition: transform 0.1s, box-shadow 0.2s;
-    box-shadow: 0 8px 22px ${buttonColor}50;
+    box-shadow: 0 8px 22px rgba(16, 185, 129, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -766,6 +855,60 @@ fbq('track', 'PageView');
   }
   .dropx-trust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; font-size: 11px; color: #4b5563; }
   .dropx-trust-item { display: flex; align-items: center; gap: 6px; }
+
+  /* Bundles Cards */
+  .dropx-bundle-card {
+    border: 1.5px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+  }
+  .dropx-bundle-card:hover { border-color: #10b981; }
+  .dropx-bundle-card.active {
+    border: 2px solid #10b981;
+    background: #f0fdf4;
+  }
+  .dropx-bundle-badge {
+    position: absolute;
+    top: -10px;
+    right: 14px;
+    background: #000000;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .dropx-bundle-radio {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #d1d5db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .dropx-bundle-card.active .dropx-bundle-radio {
+    border-color: #10b981;
+  }
+  .dropx-bundle-card.active .dropx-bundle-radio::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+  }
+
+  /* Confirmation Modal */
   .dropx-modal-backdrop {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -806,8 +949,16 @@ fbq('track', 'PageView');
     transition: transform 0.2s;
   }
   .dropx-whatsapp-btn:hover { transform: scale(1.03); }
+
+  /* Gallery Thumbnails */
+  .dropx-thumb {
+    cursor: pointer;
+    transition: opacity 0.2s, border-color 0.2s;
+  }
+  .dropx-thumb:hover { opacity: 0.8; }
 </style>
 
+<!-- COD Form Container -->
 <div id="dropx-liquid-form-container" style="display:none; width: 100%;">
   <div class="dropx-cod-card">
     <div class="dropx-cod-badge">
@@ -857,21 +1008,21 @@ fbq('track', 'PageView');
     <div class="dropx-form-group">
       <label class="dropx-label">💵 Mode de Paiement à la réception</label>
       <div class="dropx-payment-options">
-        <label class="dropx-payment-label active" id="dropx-pay-cash-lbl">
+        <label class="dropx-payment-label active" id="dropx-pay-cash-lbl" onclick="window.dropxSelectPayment('cash')">
           <input type="radio" name="dropx_pay_method" value="Espèces à la livraison" checked style="accent-color: #10b981;" />
           <span>💵 Espèces</span>
         </label>
-        <label class="dropx-payment-label" id="dropx-pay-wave-lbl">
+        <label class="dropx-payment-label" id="dropx-pay-wave-lbl" onclick="window.dropxSelectPayment('wave')">
           <input type="radio" name="dropx_pay_method" value="Wave / Orange Money" style="accent-color: #1d4ed8;" />
           <span>📱 Wave / OM</span>
         </label>
       </div>
     </div>
 
-    <div class="dropx-summary-box" style="display: flex; flex-direction: column; gap: 8px;">
+    <div class="dropx-summary-box">
       <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; color: #4b5563;">
-        <span id="dropx-cod-pack-label">Pack (1 Unité) :</span>
-        <span id="dropx-cod-subtotal-display" style="font-weight: 700; color: #111;">-- FCFA</span>
+        <span id="dropx-cod-pack-label">Articles (1 Unité) :</span>
+        <span id="dropx-cod-subtotal-display" style="font-weight: 700; color: #111;">13 500 FCFA</span>
       </div>
       <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; color: #4b5563;">
         <span>Frais de livraison (<span id="dropx-cod-zone-name">Dakar Centre</span>) :</span>
@@ -883,12 +1034,12 @@ fbq('track', 'PageView');
       </div>
       <div style="border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-top: 4px; display: flex; justify-content: space-between; width: 100%; align-items: center;">
         <div style="font-size: 13px; color: #111; font-weight: 800;">TOTAL À RÉGLER :</div>
-        <div id="dropx-cod-total-display" style="font-size: 22px; font-weight: 900; color: ${buttonColor};">-- FCFA</div>
+        <div id="dropx-cod-total-display" style="font-size: 22px; font-weight: 900; color: #10b981;">13 500 FCFA</div>
       </div>
     </div>
 
-    <button type="button" id="dropx-cod-submit-btn" class="dropx-submit-btn">
-      <span>COMMANDER MAINTENANT (PAIEMENT À LA LIVRAISON) 🚚</span>
+    <button type="button" id="dropx-cod-submit-btn" onclick="window.dropxSubmitOrder()" class="dropx-submit-btn">
+      <span>COMMANDER (13 500 FCFA - LIVRAISON GRATUITE) 🚚</span>
     </button>
 
     <div class="dropx-trust-grid">
@@ -932,17 +1083,30 @@ fbq('track', 'PageView');
 (function() {
   var productTitle = {{ product.title | json }};
   var shopDomain = window.location.hostname;
-  var apiBaseUrl = "` + appApiUrl + `";
+  var apiBaseUrl = "https://dropx-ai.vercel.app";
 
-  var variantPricesFCFA = {
-    "1 Unité": 46200,
-    "2 Achetés (-15%)": 78500,
-    "3 Achetés (-25%)": 103900
-  };
+  var basePrice = 13500;
+  var comparePrice = 20000;
+
+  var containerEl = document.getElementById('dropx-full-page-container');
+  if (containerEl) {
+    var bp = parseFloat(containerEl.getAttribute('data-base-price'));
+    var cp = parseFloat(containerEl.getAttribute('data-safe-compare'));
+    if (!isNaN(bp) && bp > 0) basePrice = bp;
+    if (!isNaN(cp) && cp > 0) comparePrice = cp;
+  }
 
   function formatFCFA(val) {
     return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(Math.round(val)) + ' FCFA';
   }
+
+  var bundles = [
+    { title: "1 Unité", subtitle: "Idéal pour tester", tag: "", price: basePrice, oldPrice: comparePrice },
+    { title: "2 Achetés (-15%)", subtitle: "ÉCONOMISEZ 15% IMMÉDIATEMENT", tag: "Le plus populaire", price: Math.round(basePrice * 2 * 0.85 / 100) * 100, oldPrice: comparePrice * 2 },
+    { title: "3 Achetés (-25%)", subtitle: "MEILLEURE OFFRE - ÉCONOMISEZ 25%", tag: "Meilleure vente", price: Math.round(basePrice * 3 * 0.75 / 100) * 100, oldPrice: comparePrice * 3 }
+  ];
+
+  var selectedBundleIdx = 0;
 
   var deliveryZoneFees = {
     "Dakar Centre": 1500,
@@ -966,27 +1130,6 @@ fbq('track', 'PageView');
     return 2000;
   }
 
-  function getThemeState() {
-    var selectedVariant = "1 Unité";
-    var checkedRadio = document.querySelector('input[type="radio"][name*="variant"]:checked') || document.querySelector('input[type="radio"][name*="Offres"]:checked');
-    if (checkedRadio && checkedRadio.value) {
-      selectedVariant = checkedRadio.value.trim();
-    } else {
-      var variantSelect = document.querySelector('select[name*="id"]') || document.querySelector('.product-form__input select');
-      if (variantSelect && variantSelect.options && variantSelect.selectedIndex >= 0) {
-        selectedVariant = variantSelect.options[variantSelect.selectedIndex].text.trim();
-      }
-    }
-
-    var qty = 1;
-    var qtyInput = document.querySelector('input[name="quantity"]') || document.querySelector('.quantity__input');
-    if (qtyInput) {
-      qty = parseInt(qtyInput.value, 10) || 1;
-    }
-
-    return { variant: selectedVariant, quantity: qty };
-  }
-
   window.dropxSelectPayment = function(type) {
     var cashLbl = document.getElementById('dropx-pay-cash-lbl');
     var waveLbl = document.getElementById('dropx-pay-wave-lbl');
@@ -1005,19 +1148,40 @@ fbq('track', 'PageView');
     window.dropxUpdateTotals();
   };
 
-  window.dropxUpdateTotals = function() {
-    var state = getThemeState();
-    var variantTitle = state.variant;
-    var qty = state.quantity;
+  window.dropxSelectBundle = function(idx) {
+    selectedBundleIdx = idx;
+    var activeB = bundles[idx];
 
-    var baseVariantPrice = variantPricesFCFA[variantTitle] || 46200;
-    var subtotal = baseVariantPrice * qty;
+    // Update active class on bundle cards
+    document.querySelectorAll('.dropx-bundle-card').forEach(function(card, i) {
+      if (i === idx) card.classList.add('active');
+      else card.classList.remove('active');
+    });
+
+    // Update top price displays
+    var pEl = document.getElementById('dropx-price-display');
+    if (pEl) pEl.innerText = formatFCFA(activeB.price);
+
+    var opEl = document.getElementById('dropx-oldprice-display');
+    if (opEl) opEl.innerText = formatFCFA(activeB.oldPrice);
+
+    var savEl = document.getElementById('dropx-savings-display');
+    if (savEl && activeB.oldPrice > activeB.price) {
+      var pct = Math.round((1 - activeB.price / activeB.oldPrice) * 100);
+      savEl.innerText = 'Économisez ' + pct + '%';
+    }
+
+    window.dropxUpdateTotals();
+  };
+
+  window.dropxUpdateTotals = function() {
+    var activeB = bundles[selectedBundleIdx];
+    var subtotal = activeB.price;
 
     var citySelect = document.getElementById('dropx-cod-city');
     var selectedCity = citySelect ? citySelect.value : 'Dakar Centre';
     var baseZoneFee = getDeliveryFee(selectedCity);
-    var deliveryFee = 0; // Livraison Gratuite
-    var total = subtotal;
+    var total = subtotal; // Free shipping
 
     var packLabelEl = document.getElementById('dropx-cod-pack-label');
     var subtotalEl = document.getElementById('dropx-cod-subtotal-display');
@@ -1027,8 +1191,7 @@ fbq('track', 'PageView');
     var submitBtn = document.getElementById('dropx-cod-submit-btn');
     var waveBadge = document.getElementById('dropx-wave-badge-note');
 
-    var qtyText = qty > 1 ? " (" + qty + "x " + variantTitle + ")" : " (" + variantTitle + ")";
-    if (packLabelEl) packLabelEl.innerText = "Articles" + qtyText + " :";
+    if (packLabelEl) packLabelEl.innerText = "Articles (" + activeB.title + ") :";
     if (subtotalEl) subtotalEl.innerText = formatFCFA(subtotal);
     if (zoneNameEl) zoneNameEl.innerText = selectedCity.split('-')[0].split('(')[0].trim();
     if (deliveryEl) deliveryEl.innerHTML = '<s style="color:#9ca3af;font-weight:normal;margin-right:4px;">' + formatFCFA(baseZoneFee) + '</s> <span style="color:#16a34a;font-weight:800;">GRATUITE (0 FCFA) 🎉</span>';
@@ -1075,14 +1238,8 @@ fbq('track', 'PageView');
     }
 
     var fullPhone = '+221 ' + (cleanPhone.startsWith('221') ? cleanPhone.slice(3) : cleanPhone);
-
-    var state = getThemeState();
-    var variantTitle = state.variant;
-    var qty = state.quantity;
-    var baseVariantPrice = variantPricesFCFA[variantTitle] || 46200;
-    var subtotal = baseVariantPrice * qty;
-    var deliveryFee = getDeliveryFee(city);
-    var totalAmount = subtotal + deliveryFee;
+    var activeB = bundles[selectedBundleIdx];
+    var totalAmount = activeB.price;
     var totalFormatted = formatFCFA(totalAmount);
 
     if (submitBtn) {
@@ -1097,23 +1254,22 @@ fbq('track', 'PageView');
           currency: 'XOF',
           content_name: productTitle,
           content_type: 'product',
-          num_items: qty
+          num_items: 1
         });
       }
     } catch(e) {}
 
-    var waText = encodeURIComponent(
-      "Bonjour ShopX ! Je viens de commander : " + productTitle + " (" + variantTitle + " x" + qty + ").\n" +
-      "Sous-total : " + formatFCFA(subtotal) + "\n" +
-      "Frais de livraison : GRATUITE (Offerte)\n" +
-      "Montant total à régler : " + totalFormatted + ".\n" +
-      "Nom : " + name + "\n" +
-      "Téléphone : " + fullPhone + "\n" +
-      "Ville / Quartier : " + city + " - " + address + "\n" +
-      "Paiement : " + paymentMethod + ".\n" +
-      "Merci de me confirmer la livraison !"
-    );
-    var waUrl = "https://wa.me/221775447866?text=" + waText;
+    var waMsg = "Bonjour ShopX ! Je viens de commander : " + productTitle + " (" + activeB.title + ").\\n" +
+                "Sous-total : " + formatFCFA(activeB.price) + "\\n" +
+                "Frais de livraison : GRATUITE (Offerte)\\n" +
+                "Montant total à régler : " + totalFormatted + ".\\n" +
+                "Nom : " + name + "\\n" +
+                "Téléphone : " + fullPhone + "\\n" +
+                "Ville / Quartier : " + city + " - " + address + "\\n" +
+                "Paiement : " + paymentMethod + ".\\n" +
+                "Merci de me confirmer la livraison !";
+
+    var waUrl = "https://wa.me/221775447866?text=" + encodeURIComponent(waMsg);
 
     try {
       var postData = {
@@ -1124,10 +1280,10 @@ fbq('track', 'PageView');
         customerAddress: address,
         paymentMethod: paymentMethod,
         productTitle: productTitle,
-        bundleTitle: variantTitle + (qty > 1 ? " x" + qty : ""),
-        quantity: qty,
-        unitPrice: baseVariantPrice,
-        deliveryFee: deliveryFee,
+        bundleTitle: activeB.title,
+        quantity: 1,
+        unitPrice: activeB.price,
+        deliveryFee: 0,
         totalPrice: totalAmount,
         currency: 'XOF'
       };
@@ -1146,7 +1302,7 @@ fbq('track', 'PageView');
     }
 
     var modalProd = document.getElementById('dropx-modal-product');
-    if (modalProd) modalProd.innerText = productTitle + " (" + variantTitle + " x" + qty + ")";
+    if (modalProd) modalProd.innerText = productTitle + " (" + activeB.title + ")";
     var modalTot = document.getElementById('dropx-modal-total');
     if (modalTot) modalTot.innerText = totalFormatted;
     var modalAddr = document.getElementById('dropx-modal-address');
@@ -1166,54 +1322,100 @@ fbq('track', 'PageView');
     }
   };
 
-  function mountCodForm() {
-    var liquidForm = document.getElementById('dropx-liquid-form-container');
-    if (!liquidForm) return false;
+  // ==========================================================================
+  // DROPX LANDING PAGE TAKEOVER & MOUNTING
+  // ==========================================================================
+  function initDropxPage() {
+    var dropxContainer = document.getElementById('dropx-full-page-container');
+    if (!dropxContainer) return false;
+    if (dropxContainer.getAttribute('data-mounted') === 'true') return true;
 
-    var target = document.querySelector('form[action*="/cart/add"]') || document.querySelector('.product-form') || document.querySelector('.product__info-container');
-    if (!target) return false;
+    var mainEl = document.getElementById('MainContent') || document.querySelector('main');
+    if (!mainEl) return false;
 
-    if (liquidForm.parentNode !== target && liquidForm.parentNode !== target.parentNode) {
-      target.parentNode.insertBefore(liquidForm, target.nextSibling);
-    }
-    liquidForm.style.display = 'block';
-
-    var radios = document.querySelectorAll('input[type="radio"][name*="variant"], input[type="radio"][name*="Offres"]');
-    radios.forEach(function(r) {
-      r.removeEventListener('change', window.dropxUpdateTotals);
-      r.addEventListener('change', window.dropxUpdateTotals);
+    // 1. Hide default theme sections inside MainContent except dropxContainer
+    Array.from(mainEl.children).forEach(function(child) {
+      if (child !== dropxContainer && !child.contains(dropxContainer)) {
+        child.style.display = 'none';
+      }
     });
 
-    var qtyInput = document.querySelector('input[name="quantity"]') || document.querySelector('.quantity__input');
-    if (qtyInput) {
-      qtyInput.removeEventListener('input', window.dropxUpdateTotals);
-      qtyInput.addEventListener('input', window.dropxUpdateTotals);
-      qtyInput.removeEventListener('change', window.dropxUpdateTotals);
-      qtyInput.addEventListener('change', window.dropxUpdateTotals);
+    // 2. Unhide dropxContainer and move to top of mainEl
+    dropxContainer.style.display = 'block';
+    dropxContainer.setAttribute('data-mounted', 'true');
+    mainEl.insertBefore(dropxContainer, mainEl.firstChild);
+
+    // 3. Render Bundles in #dropx-bundles-container
+    var bundlesContainer = document.getElementById('dropx-bundles-container');
+    if (bundlesContainer) {
+      bundlesContainer.innerHTML = '';
+      bundles.forEach(function(b, idx) {
+        var card = document.createElement('div');
+        card.className = 'dropx-bundle-card' + (idx === selectedBundleIdx ? ' active' : '');
+        card.onclick = function() { window.dropxSelectBundle(idx); };
+
+        var badgeHtml = b.tag ? '<span class="dropx-bundle-badge">' + b.tag + '</span>' : '';
+        card.innerHTML = 
+          badgeHtml +
+          '<div class="dropx-bundle-radio"></div>' +
+          '<div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">' +
+            '<div>' +
+              '<div style="font-weight: 800; font-size: 15px; color: #111;">' + b.title + '</div>' +
+              '<div style="font-size: 12px; color: #6b7280; margin-top: 2px;">' + b.subtitle + '</div>' +
+            '</div>' +
+            '<div style="text-align: right;">' +
+              '<div style="font-weight: 800; font-size: 15px; color: #10b981;">' + formatFCFA(b.price) + '</div>' +
+              (b.oldPrice ? '<div style="font-size: 12px; color: #9ca3af; text-decoration: line-through;">' + formatFCFA(b.oldPrice) + '</div>' : '') +
+            '</div>' +
+          '</div>';
+
+        bundlesContainer.appendChild(card);
+      });
     }
 
-    var qtyBtns = document.querySelectorAll('quantity-input button, .quantity__button');
-    qtyBtns.forEach(function(b) {
-      b.removeEventListener('click', function() { setTimeout(window.dropxUpdateTotals, 100); });
-      b.addEventListener('click', function() { setTimeout(window.dropxUpdateTotals, 100); });
-    });
+    // 4. Mount COD Form into #dropx-form-placeholder
+    var formContainer = document.getElementById('dropx-liquid-form-container');
+    var formPlaceholder = document.getElementById('dropx-form-placeholder');
+    if (formContainer && formPlaceholder) {
+      formPlaceholder.appendChild(formContainer);
+      formContainer.style.display = 'block';
+    }
 
-    window.dropxUpdateTotals();
+    // 5. Interactive Gallery Click
+    var thumbs = dropxContainer.querySelectorAll('.dropmagic-custom-gallery img, [class*="gallery"] img');
+    var mainImg = dropxContainer.querySelector('[style*="aspect-ratio: 1/1"] img');
+    if (mainImg && thumbs.length > 0) {
+      thumbs.forEach(function(img) {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', function() {
+          mainImg.src = this.src;
+        });
+      });
+    }
+
+    // 6. City Select change listener
+    var citySelect = document.getElementById('dropx-cod-city');
+    if (citySelect) {
+      citySelect.addEventListener('change', window.dropxUpdateTotals);
+    }
+
+    // 7. Initial update
+    window.dropxSelectBundle(0);
     return true;
   }
 
-  var mAttempts = 0;
-  var mInterval = setInterval(function() {
-    if (mountCodForm() || mAttempts > 20) {
-      clearInterval(mInterval);
+  var attempts = 0;
+  var interval = setInterval(function() {
+    if (initDropxPage() || attempts > 25) {
+      clearInterval(interval);
     }
-    mAttempts++;
-  }, 100);
+    attempts++;
+  }, 80);
 
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    mountCodForm();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDropxPage);
   } else {
-    document.addEventListener('DOMContentLoaded', mountCodForm);
+    initDropxPage();
   }
 })();
 </script>
