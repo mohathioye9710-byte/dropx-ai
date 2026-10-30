@@ -682,6 +682,18 @@ export async function POST(req) {
   .paypal-buttons {
     display: none !important;
   }
+
+  /* When DropX landing page is active, hide old native theme sections and forms */
+  body.dropx-product-active [id*="__main"],
+  body.dropx-product-active [id*="email_signup"],
+  body.dropx-product-active .product-form,
+  body.dropx-product-active .shopify-product-form,
+  body.dropx-product-active .add-to-cart-button,
+  body.dropx-product-active .product-grid__card,
+  body.dropx-product-active .product-information,
+  body.dropx-product-active .email-signup__form, body.dropx-product-active [class*="email-signup"], body.dropx-product-active .shopify-section-group-footer-group {
+    display: none !important;
+  }
 </style>
 
 <script>
@@ -1333,17 +1345,21 @@ fbq('track', 'PageView');
     var mainEl = document.getElementById('MainContent') || document.querySelector('main');
     if (!mainEl) return false;
 
-    // 1. Hide default theme sections inside MainContent except dropxContainer
-    Array.from(mainEl.children).forEach(function(child) {
-      if (child !== dropxContainer && !child.contains(dropxContainer)) {
-        child.style.display = 'none';
-      }
-    });
-
-    // 2. Unhide dropxContainer and move to top of mainEl
+    // 1. Unhide dropxContainer and move to top of mainEl
     dropxContainer.style.display = 'block';
     dropxContainer.setAttribute('data-mounted', 'true');
     mainEl.insertBefore(dropxContainer, mainEl.firstChild);
+
+    // 2. Hide ALL other children of mainEl (eliminates default product section, Add to Cart, email signup, etc.)
+    Array.from(mainEl.children).forEach(function(child) {
+      if (child !== dropxContainer) {
+        child.style.display = 'none';
+        child.setAttribute('style', 'display: none !important;');
+      }
+    });
+
+    // 3. Mark body as dropx-product-active
+    document.body.classList.add('dropx-product-active');
 
     // 3. Render Bundles in #dropx-bundles-container
     var bundlesContainer = document.getElementById('dropx-bundles-container');
