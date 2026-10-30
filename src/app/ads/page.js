@@ -16,7 +16,10 @@ import {
   Loader2,
   Video,
   Music,
-  Upload
+  Upload,
+  Maximize2,
+  Film,
+  X
 } from 'lucide-react';
 import styles from './Ads.module.css';
 
@@ -122,12 +125,13 @@ export default function CreativeStudioPage() {
 
   // Avatar Video states
   const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0]);
-  const [avatarVideoUrl, setAvatarVideoUrl] = useState('/api/creatives/render/9b0e2a4598bd');
+  const [avatarVideoUrl, setAvatarVideoUrl] = useState('/renders/9b0e2a4598bd.mp4');
   const [generatingAvatarVideo, setGeneratingAvatarVideo] = useState(false);
   const [avatarProgressText, setAvatarProgressText] = useState('');
   const [avatarProgress, setAvatarProgress] = useState(0);
   const [avatarQuality, setAvatarQuality] = useState('std');
   const [displayMode, setDisplayMode] = useState('avatar');
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   // Background Music states
   const [musicTracks, setMusicTracks] = useState([]);
@@ -507,6 +511,81 @@ export default function CreativeStudioPage() {
         </p>
       </header>
 
+      {/* ================= SECTION: MES VIDÉOS GÉNÉRÉES ================= */}
+      <section className={styles.galleryCard}>
+        <div className={styles.galleryHeader}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className={styles.galleryIconPulse}>
+              <Film size={18} color="#10b981" />
+            </div>
+            <div>
+              <h2 className={styles.galleryTitle}>Mes Vidéos Publicitaires Générées</h2>
+              <p className={styles.gallerySubtitle}>Visionnez, téléchargez en 1080p ou remixez le son de vos créations</p>
+            </div>
+          </div>
+          <span className={styles.galleryBadge}>1 vidéo prête (35s)</span>
+        </div>
+
+        <div className={styles.galleryGrid}>
+          <div className={styles.videoItemCard}>
+            <div className={styles.videoItemThumb} onClick={() => setShowVideoModal(true)} title="Cliquer pour regarder en grand écran">
+              <img 
+                src="https://s.alicdn.com/@sc04/kf/H983ebf9446f24e95bf0a0d9f4857b2feV.jpg" 
+                alt="WLX Tapis de Massage" 
+              />
+              <div className={styles.videoItemPlayOverlay}>
+                <Play size={24} fill="#ffffff" color="#ffffff" />
+              </div>
+              <span className={styles.videoItemDuration}>00:35</span>
+              <span className={styles.videoItemBadge}>Full HD</span>
+            </div>
+
+            <div className={styles.videoItemContent}>
+              <div className={styles.videoItemTitle}>
+                WLX Tapis de Massage des Pieds EMS (35.4s)
+              </div>
+              <div className={styles.videoItemMeta}>
+                <span>👤 Aminata (Sénégal)</span>
+                <span>🎙️ Voix Charlotte (UGC)</span>
+                <span>🎵 Papaoutai Afro Soul (Volume Boosté)</span>
+                <span>⚡ 1080x1920 (9:16)</span>
+              </div>
+              <div className={styles.videoItemActions}>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setAvatarVideoUrl('/renders/9b0e2a4598bd.mp4');
+                    videoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (videoRef.current) {
+                      videoRef.current.play().catch(() => {});
+                    }
+                  }} 
+                  className={styles.btnWatchInPlayer}
+                >
+                  <Play size={13} fill="currentColor" /> Voir dans le lecteur
+                </button>
+
+                <button 
+                  type="button" 
+                  onClick={() => setShowVideoModal(true)} 
+                  className={styles.btnWatchModal}
+                >
+                  <Maximize2 size={13} /> Regarder en Grand Écran
+                </button>
+
+                <a 
+                  href="/renders/9b0e2a4598bd.mp4" 
+                  download="dropx-tapis-ems-35s.mp4" 
+                  className={styles.btnDownloadDirect}
+                >
+                  <Download size={13} /> Télécharger MP4 (39 Mo)
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Main Studio Workspace (2 Columns) */}
       <div className={styles.studioWorkspace}>
         {/* ================= LEFT COLUMN: CONTROLS & CONFIG ================= */}
@@ -869,7 +948,29 @@ export default function CreativeStudioPage() {
                 <Video size={16} />
                 <span>Aperçu Vidéo 9:16</span>
               </div>
-              <span className={styles.previewBadge}>Full HD 1080p</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowVideoModal(true)}
+                  style={{ 
+                    background: 'rgba(255,255,255,0.06)', 
+                    border: '1px solid rgba(255,255,255,0.12)', 
+                    color: '#10b981', 
+                    cursor: 'pointer', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px', 
+                    fontSize: '11px', 
+                    fontWeight: '700',
+                    padding: '3px 8px',
+                    borderRadius: '6px'
+                  }}
+                  title="Ouvrir en grand écran"
+                >
+                  <Maximize2 size={12} /> Agrandir
+                </button>
+                <span className={styles.previewBadge}>Full HD 1080p</span>
+              </div>
             </div>
 
             {/* 9:16 Screen Canvas */}
@@ -982,6 +1083,46 @@ export default function CreativeStudioPage() {
           src={audioUrl} 
           onEnded={() => setIsPlaying(false)} 
         />
+      )}
+
+      {/* Full-Screen Cinema Modal */}
+      {showVideoModal && (
+        <div className={styles.modalBackdrop} onClick={() => setShowVideoModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Film size={18} color="#10b981" />
+                <span style={{ fontWeight: '800', fontSize: '14px', color: '#fff' }}>
+                  WLX Tapis de Massage des Pieds EMS (35s)
+                </span>
+              </div>
+              <button onClick={() => setShowVideoModal(false)} className={styles.modalCloseBtn}>
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className={styles.modalVideoWrapper}>
+              <video 
+                src="/renders/9b0e2a4598bd.mp4" 
+                controls 
+                autoPlay 
+                playsInline 
+                loop 
+                className={styles.modalVideo} 
+              />
+            </div>
+
+            <div className={styles.modalFooter}>
+              <a 
+                href="/renders/9b0e2a4598bd.mp4" 
+                download="dropx-tapis-ems-35s.mp4" 
+                className={styles.modalDownloadBtn}
+              >
+                <Download size={16} /> Télécharger la vidéo MP4 (Full HD 1080p)
+              </a>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
