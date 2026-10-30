@@ -48,11 +48,17 @@ export default function Analyzer() {
   
   // AI thinking state
   const [isAiThinking, setIsAiThinking] = useState(null); // 'persona', 'angle'
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     document.body.classList.add('analyzer-fullscreen');
     return () => document.body.classList.remove('analyzer-fullscreen');
   }, []);
+
+  if (!mounted) {
+    return <div style={{ height: '100vh', width: '100vw', background: '#000000' }} />;
+  }
 
   // Layout linear progress
   const getProgressPercentage = () => {
