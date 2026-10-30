@@ -275,29 +275,29 @@ export function probeDuration(file, cwd) {
   });
 }
 
-export async function mixMusic({ workDir, volume = 0.35, startOffset = 0 }) {
+export async function mixMusic({ workDir, volume = 0.18, startOffset = 0 }) {
   // base.mp4 = vidéo avec voix seule, music.mp3 = piste choisie (relatifs au workDir)
   const dur = await probeDuration('base.mp4', workDir);
-  const vol = Math.min(1.5, Math.max(0.05, Number(volume) || 0.35));
+  const vol = Math.min(1.5, Math.max(0.05, Number(volume) || 0.18));
   const offset = Math.max(0, Number(startOffset) || 0);
   const fadeOutStart = Math.max(0, dur - 1.2).toFixed(2);
 
-  // Chaîne audio équilibrée & confortable :
-  // 1. Voix claire, douce et parfaitement audible
-  // 2. Musique en fond sonore mélodique et rythmé à volume modéré (35%)
-  // 3. Sidechain ducking propre
-  // 4. Mastering standard confortable à -14.3 LUFS
+  // Chaîne audio douce, calme et confortable :
+  // 1. Voix posée, douce et chaleureuse sans agressivité
+  // 2. Musique discrète en arrière-plan à 18%
+  // 3. Sidechain ducking naturel
+  // 4. Mastering doux à -18.5 LUFS (très confortable pour les oreilles)
   const filter = [
-    '[0:a]aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,highpass=f=80,equalizer=f=3200:t=q:w=1.2:g=1.5,volume=1.0[voice_norm]',
+    '[0:a]aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,highpass=f=80,equalizer=f=3200:t=q:w=1.2:g=0.0,volume=0.75[voice_norm]',
     '[voice_norm]asplit=2[voice][sc]',
     `[1:a]aloop=loop=-1:size=2147483647,atrim=0:${dur.toFixed(2)},asetpts=N/SR/TB,` +
       'aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,' +
-      `afade=t=in:d=0.3,afade=t=out:st=${fadeOutStart}:d=1.2,` +
+      `afade=t=in:d=0.4,afade=t=out:st=${fadeOutStart}:d=1.4,` +
       `volume=${vol.toFixed(3)}[music_prep]`,
-    '[music_prep][sc]sidechaincompress=threshold=0.08:ratio=2.5:attack=20:release=180:makeup=1.0[ducked_music]',
+    '[music_prep][sc]sidechaincompress=threshold=0.06:ratio=2.2:attack=25:release=200:makeup=1.0[ducked_music]',
     '[voice][ducked_music]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,' +
-      'loudnorm=I=-14.3:TP=-1.0:LRA=5.5,' +
-      'alimiter=limit=0.95[a]'
+      'loudnorm=I=-18.5:TP=-2.0:LRA=7,' +
+      'alimiter=limit=0.90[a]'
   ].join(';');
 
   await runFfmpeg(

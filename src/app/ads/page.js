@@ -136,7 +136,7 @@ export default function CreativeStudioPage() {
   // Background Music states
   const [musicTracks, setMusicTracks] = useState([]);
   const [selectedMusic, setSelectedMusic] = useState('papaoutai_afrosoul');
-  const [musicVolume, setMusicVolume] = useState(0.35);
+  const [musicVolume, setMusicVolume] = useState(0.18);
   const [previewingMusicId, setPreviewingMusicId] = useState(null);
   const [remixingMusic, setRemixingMusic] = useState(false);
   const [musicSearchQuery, setMusicSearchQuery] = useState('');
@@ -984,6 +984,7 @@ export default function CreativeStudioPage() {
                   autoPlay
                   loop
                   playsInline
+                  onLoadedMetadata={(e) => { e.currentTarget.volume = 0.55; }}
                   className={styles.videoElement}
                 />
               ) : (
@@ -1108,6 +1109,7 @@ export default function CreativeStudioPage() {
                 autoPlay 
                 playsInline 
                 loop 
+                onLoadedMetadata={(e) => { e.currentTarget.volume = 0.55; }}
                 className={styles.modalVideo} 
               />
             </div>

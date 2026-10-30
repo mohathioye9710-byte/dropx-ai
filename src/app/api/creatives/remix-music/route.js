@@ -9,7 +9,7 @@ const RENDERS_DIR = path.join(process.cwd(), 'data', 'renders');
 
 export async function POST(req) {
   try {
-    const { videoId, musicId = 'none', musicVolume = 0.35, startOffset } = await req.json();
+    const { videoId, musicId = 'none', musicVolume = 0.18, startOffset } = await req.json();
 
     if (!videoId || !/^[a-f0-9]{6,32}$/.test(videoId)) {
       return NextResponse.json({ error: 'Identifiant vidéo invalide' }, { status: 400 });
@@ -58,7 +58,7 @@ export async function POST(req) {
 
       const mixed = await mixMusic({
         workDir,
-        volume: Number(musicVolume) || 0.35,
+        volume: Number(musicVolume) || 0.18,
         startOffset: effectiveOffset
       });
 
