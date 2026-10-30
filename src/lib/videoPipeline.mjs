@@ -235,16 +235,16 @@ export async function burnSubtitles({ workDir, fontsSrcDir }) {
       '-i', 'avatar.mp4',
       '-i', 'voice.mp3',
       '-map', '0:v:0',
-      '-map', '1:a:0',
+      '-map', '0:a:0?',
       '-vf',
       'scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,crop=1080:1920,unsharp=5:5:0.7:5:5:0.0,ass=subs.ass:fontsdir=fonts',
       '-c:v', 'libx264',
-      '-preset', 'medium',
+      '-preset', 'veryfast',
       '-crf', '17',
       '-pix_fmt', 'yuv420p',
       '-r', '30',
       '-c:a', 'aac',
-      '-b:a', '192k',
+      '-b:a', '256k',
       '-shortest',
       '-movflags', '+faststart',
       'out.mp4'
@@ -283,20 +283,19 @@ export async function mixMusic({ workDir, volume = 0.14, startOffset = 0 }) {
   const fadeOutStart = Math.max(0, dur - 1.2).toFixed(2);
 
   // Chaîne audio Hi-Fi Studio :
-  // 1. Voix mono spatialisée en stéréo 48kHz centrée avec boost clair
+  // 1. Voix égalisée + présence 3.2kHz + boost broadcast -14.0 LUFS (parfaitement intelligible)
   // 2. Musique stéréo 48kHz dynamique et rythmée sans écraser la voix
-  // 3. Ducking sidechain équilibré (ratio 3.0) assurant l'intelligibilité de chaque mot
-  // 4. Muxing stéréo 48kHz AAC 320 kbps broadcast
+  // 3. Ducking sidechain calibré assurant l'intelligibilité de chaque mot
+  // 4. Muxing stéréo 48kHz AAC broadcast
   const filter = [
-    '[0:a]aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo[voice_raw]',
-    '[voice_raw]asplit=2[voice][sc]',
+    '[0:a]aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,highpass=f=80,equalizer=f=3200:t=q:w=1.2:g=3.0,loudnorm=I=-14.0:TP=-1.0:LRA=6[voice_norm]',
+    '[voice_norm]asplit=2[voice][sc]',
     `[1:a]aloop=loop=-1:size=2147483647,atrim=0:${dur.toFixed(2)},asetpts=N/SR/TB,` +
       'aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,' +
       `afade=t=in:d=0.3,afade=t=out:st=${fadeOutStart}:d=1.2,` +
-      `volume=${vol.toFixed(3)}[music_prep]`,
-    '[music_prep][sc]sidechaincompress=threshold=0.035:ratio=3.0:attack=15:release=280:makeup=1.0[ducked_music]',
-    '[voice]volume=1.08[v_boost]',
-    '[v_boost][ducked_music]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.95[a]'
+      `equalizer=f=2500:t=q:w=1.5:g=-4.0,volume=${vol.toFixed(3)}[music_prep]`,
+    '[music_prep][sc]sidechaincompress=threshold=0.04:ratio=4.5:attack=15:release=220:makeup=1.0[ducked_music]',
+    '[voice][ducked_music]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.98[a]'
   ].join(';');
 
   await runFfmpeg(

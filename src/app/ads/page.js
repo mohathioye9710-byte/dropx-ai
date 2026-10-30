@@ -33,8 +33,8 @@ const AVATARS = [
   {
     id: 'aminata_kitchen',
     name: 'Aminata',
-    role: 'Créatrice Cuisine & Maison (Sénégal)',
-    image: '/avatars/aminata.jpg',
+    role: 'Créatrice Bien-être & Maison (Sénégal)',
+    image: '/avatars/aminata_ems.jpg',
     defaultVoice: 'charlotte'
   },
   {
@@ -62,37 +62,37 @@ const AVATARS = [
 
 const DEFAULT_ANGLES = [
   {
-    angleTitle: 'Angle 1 • Problème / Solution',
+    angleTitle: 'Angle 1 • Problème / Solution (Version Complète 35s)',
+    viralityScore: 99,
+    hookLine: 'Si tu as les pieds douloureux ou les jambes lourdes après une longue journée, regarde absolument ça !',
+    fullVoiceover: "Si tu as les pieds douloureux ou les jambes lourdes après une longue journée, regarde absolument ça ! Ce tapis de massage électrique EMS diffuse des micro-impulsions relaxantes pour détendre les muscles et relancer la circulation. Tu poses simplement tes pieds dessus quinze minutes le soir : avec huit modes et dix-neuf intensités, toutes les tensions disparaissent ! En ce moment, il est en promo à seulement treize mille cinq cents Francs CFA avec livraison offerte au Sénégal. Tu ne payes rien d'avance : commande en un clic et règle en cash ou Wave à la livraison. Clique vite sur le bouton en bas pour recevoir le tien !",
+    scenes: [
+      { visualPrompt: 'Aminata présentant le tapis de massage EMS noir avec son boîtier digital', caption: 'Pieds douloureux le soir ?' },
+      { visualPrompt: 'Gros plan sur le tapis de massage EMS et les micro-impulsions de relaxation', caption: 'Technologie EMS relaxante 8 modes' },
+      { visualPrompt: 'Pieds posés confortablement sur le tapis devant la télévision', caption: 'Soulagement profond en 15 min' },
+      { visualPrompt: 'Bouton de commande avec badge Livraison Offerte et Paiement COD', caption: '13 500 FCFA • Paiement à la livraison' }
+    ]
+  },
+  {
+    angleTitle: 'Angle 2 • Témoignage UGC Client Dakar',
+    viralityScore: 96,
+    hookLine: 'Honnêtement, je ne pensais pas qu’un petit tapis pouvait faire autant de bien…',
+    fullVoiceover: "Honnêtement, après une journée complète debout à courir à Dakar, mes pieds étaient en feu. En posant mes pieds dessus 15 minutes devant la télé, toutes les tensions disparaissent. En plus j'ai payé au livreur quand il est arrivé !",
+    scenes: [
+      { visualPrompt: 'Selfie vidéo naturelle dans son salon en train de tester le tapis de massage', caption: 'Mon rituel du soir après le boulot' },
+      { visualPrompt: 'Démonstration des 8 modes de massage avec télécommande', caption: '8 modes de stimulation au choix' },
+      { visualPrompt: 'Sourire de soulagement et pieds détendus', caption: 'Adieu courbatures et jambes lourdes' }
+    ]
+  },
+  {
+    angleTitle: 'Angle 3 • Offre Flash & Livraison Gratuite COD',
     viralityScore: 97,
-    hookLine: 'Marre des cheveux abîmés par les fers à lisser classiques ?',
-    fullVoiceover: "Marre des cheveux abîmés par les fers classiques ? Découvre la brosse lissante sans fil DropX. Elle chauffe en 30 secondes et te garantit un lissage parfait sans frisottis, où que tu sois. Paiement à la livraison partout à Dakar !",
+    hookLine: 'Offre exclusive : 13 500 FCFA au lieu de 20 000 FCFA avec Livraison Gratuite !',
+    fullVoiceover: "Offre spéciale aujourd'hui : votre Tapis de Massage Électrique EMS à seulement 13 500 FCFA au lieu de 20 000 FCFA ! Livraison 100% gratuite à Dakar et régions. Vous ne payez rien d'avance, réglez en cash ou par Wave à la livraison !",
     scenes: [
-      { visualPrompt: 'Femme pressée tenant un fer traditionnel encombrant', caption: 'Marre des fers classiques ?' },
-      { visualPrompt: 'Gros plan sur la brosse lissante sans fil compacte', caption: 'Chauffe en 30 secondes chrono' },
-      { visualPrompt: 'Résultat immédiat : cheveux lisses et brillants', caption: 'Lissage parfait sans frisottis' },
-      { visualPrompt: 'Bouton de commande avec paiement cash à la livraison', caption: 'Paiement à la livraison 24h' }
-    ]
-  },
-  {
-    angleTitle: 'Angle 2 • Témoignage UGC Client',
-    viralityScore: 94,
-    hookLine: 'Honnêtement, je ne pensais pas qu\'une brosse sans fil serait aussi efficace...',
-    fullVoiceover: "Je l'emporte partout dans mon sac. En 3 minutes chrono avant une sortie, mes cheveux sont nickels. En plus, j'ai payé à la livraison après avoir vérifié le colis !",
-    scenes: [
-      { visualPrompt: 'Selfie vidéo UGC naturel face miroir', caption: 'Test en direct de la brosse' },
-      { visualPrompt: 'Démonstration du lissage d\'une mèche en 1 passage', caption: 'Un seul passage suffit' },
-      { visualPrompt: 'Colis reçu à domicile avec paiement cash à Dakar', caption: 'Reçu en 24h à domicile' }
-    ]
-  },
-  {
-    angleTitle: 'Angle 3 • Offre Flash & COD',
-    viralityScore: 95,
-    hookLine: 'Stock très limité : seulement 16.500 FCFA avec livraison express !',
-    fullVoiceover: "Profitez de notre vente flash exclusive ! La brosse chauffante nouvelle génération à seulement 16.500 FCFA. Commandez en 1 clic et réglez à la livraison en toute sécurité.",
-    scenes: [
-      { visualPrompt: 'Packaging haut de gamme avec accessoires et câble USB-C', caption: 'Offre exclusive du moment' },
-      { visualPrompt: 'Animation du prix 16.500 FCFA avec badge express', caption: '16.500 FCFA • Stock limité' },
-      { visualPrompt: 'Formulaire de commande express sans carte bancaire', caption: 'Commandez en 1 clic' }
+      { visualPrompt: 'Tapis déplié avec boîte d’origine et câble de recharge USB', caption: 'Pack complet Tapis EMS rechargeable' },
+      { visualPrompt: 'Animation de la promotion 13 500 FCFA avec badge Livraison Gratuite', caption: '13 500 FCFA (au lieu de 20 000 F)' },
+      { visualPrompt: 'Livreur souriant remettant le colis avec paiement à la livraison', caption: 'Paiement à la livraison 100% sécurisé' }
     ]
   }
 ];
@@ -101,12 +101,12 @@ export default function CreativeStudioPage() {
   // Input states
   const [url, setUrl] = useState('');
   const [scraping, setScraping] = useState(false);
-  const [productName, setProductName] = useState('Brosse Lissante Chauffante Sans Fil');
-  const [description, setDescription] = useState('Brosse lissante rechargeable USB, chauffe en 30s, lisse sans abîmer les cheveux. Format sac à main.');
-  const [price, setPrice] = useState('16.500 FCFA');
-  const [image, setImage] = useState('https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&auto=format&fit=crop&q=80');
+  const [productName, setProductName] = useState('WLX Tapis de Massage Électrique des Pieds EMS');
+  const [description, setDescription] = useState('Tapis de massage chauffant stimulateur musculaire pour pieds EMS. Soulage fatigue, courbatures et jambes lourdes en 15 minutes.');
+  const [price, setPrice] = useState('13 500 FCFA');
+  const [image, setImage] = useState('https://s.alicdn.com/@sc04/kf/H983ebf9446f24e95bf0a0d9f4857b2feV.jpg');
   const [targetMarket, setTargetMarket] = useState('senegal');
-  const [selectedVoice, setSelectedVoice] = useState('victoria');
+  const [selectedVoice, setSelectedVoice] = useState('charlotte');
 
   // Generator states
   const [generating, setGenerating] = useState(false);
@@ -122,7 +122,7 @@ export default function CreativeStudioPage() {
 
   // Avatar Video states
   const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0]);
-  const [avatarVideoUrl, setAvatarVideoUrl] = useState('/api/creatives/render/be44cbc2d146');
+  const [avatarVideoUrl, setAvatarVideoUrl] = useState('/api/creatives/render/9b0e2a4598bd');
   const [generatingAvatarVideo, setGeneratingAvatarVideo] = useState(false);
   const [avatarProgressText, setAvatarProgressText] = useState('');
   const [avatarProgress, setAvatarProgress] = useState(0);
@@ -132,7 +132,7 @@ export default function CreativeStudioPage() {
   // Background Music states
   const [musicTracks, setMusicTracks] = useState([]);
   const [selectedMusic, setSelectedMusic] = useState('papaoutai_afrosoul');
-  const [musicVolume, setMusicVolume] = useState(0.14);
+  const [musicVolume, setMusicVolume] = useState(0.55);
   const [previewingMusicId, setPreviewingMusicId] = useState(null);
   const [remixingMusic, setRemixingMusic] = useState(false);
   const [musicSearchQuery, setMusicSearchQuery] = useState('');
@@ -151,6 +151,20 @@ export default function CreativeStudioPage() {
         if (d?.tracks) setMusicTracks(d.tracks);
       })
       .catch((e) => console.error('Erreur chargement musiques:', e));
+
+    try {
+      const stored = localStorage.getItem('dropx_preview_product');
+      if (stored) {
+        const prod = JSON.parse(stored);
+        if (prod.title) setProductName(prod.title);
+        if (prod.description) setDescription(prod.description);
+        if (prod.price) setPrice(prod.price);
+        if (prod.images && prod.images[0]) setImage(prod.images[0]);
+        if (prod.url) setUrl(prod.url);
+      }
+    } catch (e) {
+      console.error('Erreur lecture produit stocké:', e);
+    }
   }, []);
 
   const handleToggleMusicPreview = (track) => {

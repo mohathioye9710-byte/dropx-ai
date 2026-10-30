@@ -20,9 +20,9 @@ const FONTS_DIR = path.join(process.cwd(), 'assets', 'fonts');
 const AVATARS_DIR = path.join(process.cwd(), 'public', 'avatars');
 
 const AVATAR_FILES = { 
-  aminata: 'aminata.jpg', 
+  aminata: 'aminata_ems.jpg', 
   moussa: 'moussa.jpg',
-  aminata_kitchen: 'aminata.jpg',
+  aminata_kitchen: 'aminata_ems.jpg',
   moussa_living: 'moussa.jpg'
 };
 
@@ -96,7 +96,7 @@ async function runJob(job, params) {
       if (current.status === 'failed' || current.status === 'canceled') {
         throw new Error(`Avatar : ${current.error || current.status}`);
       }
-      if (Date.now() - startedAt > 12 * 60 * 1000) throw new Error('Délai dépassé côté moteur d’avatar');
+      if (Date.now() - startedAt > 25 * 60 * 1000) throw new Error('Délai dépassé côté moteur d’avatar');
       await sleep(4000);
       current = await getPrediction({ id: prediction.id, token: replicateToken });
       // progression estimée (le moteur ne renvoie pas de pourcentage)
