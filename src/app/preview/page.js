@@ -83,28 +83,38 @@ export default function StoreBuilder() {
         };
         const basePriceOrig = parseRobust(parsed.price);
         
-        let targetCurrency = 'XOF'; // Always Franc CFA by default
-        let finalPrice = 13500;
-        let comparePrice = 20000;
-
-        // Détection du prix réel usine Alibaba (616 FCFA)
-        if (parsed.supplierCost) {
-          setSupplierUnitCost(parseRobust(parsed.supplierCost));
+        let targetCurrency = 'XOF'; // Toujours Franc CFA par défaut au Sénégal
+        
+        // 1. Détection automatique du coût fournisseur réel (Alibaba / AliExpress)
+        let extractedSupplierCost = 616;
+        if (parsed.supplierCost || parsed.supplierPrice) {
+          const rawSupplierStr = String(parsed.supplierCost || parsed.supplierPrice);
+          const isUSD = rawSupplierStr.includes('$') || rawSupplierStr.toUpperCase().includes('USD');
+          const isEUR = rawSupplierStr.includes('€') || rawSupplierStr.toUpperCase().includes('EUR');
+          const num = parseRobust(rawSupplierStr);
+          if (isUSD || isEUR || (num < 100 && num > 0)) {
+            extractedSupplierCost = Math.round(num * 605);
+          } else if (num > 0) {
+            extractedSupplierCost = Math.round(num);
+          }
         } else if (basePriceOrig === 616 || basePriceOrig < 1000) {
-          setSupplierUnitCost(Math.round(basePriceOrig));
-        } else {
-          setSupplierUnitCost(616); // Prix réel usine Alibaba extrait (1-498 pièces : 616 FCFA)
+          extractedSupplierCost = Math.round(basePriceOrig);
         }
+        setSupplierUnitCost(extractedSupplierCost);
 
-        if (originalCurrency === 'XOF' && basePriceOrig < 3000) {
-          finalPrice = 13500;
-          comparePrice = 20000;
-        } else if (originalCurrency === 'XOF') {
+        // 2. Détermination automatique du prix de vente optimal pour le Sénégal
+        // Coût total engagé = Fournisseur + Transitaire GP (1800) + Livreur (2000) + Meta Ads (2000) + Wave (150)
+        const totalEstimatedCost = extractedSupplierCost + 1800 + 2000 + 2000 + 150;
+        // On assure au moins 45-50% de marge nette ou le standard minimum de 13 500 FCFA
+        const optimalRetailPrice = Math.max(13500, Math.ceil((totalEstimatedCost * 1.8) / 500) * 500);
+        const optimalComparePrice = Math.ceil((optimalRetailPrice * 1.48) / 1000) * 1000;
+
+        let finalPrice = optimalRetailPrice;
+        let comparePrice = optimalComparePrice;
+
+        if (parsed.price && originalCurrency === 'XOF' && basePriceOrig >= 5000) {
           finalPrice = Math.round(basePriceOrig);
-          comparePrice = parsed.compareAtPrice ? parseRobust(parsed.compareAtPrice) : Math.round(finalPrice * 1.5);
-        } else if (originalCurrency === 'USD') {
-          finalPrice = 13500;
-          comparePrice = 20000;
+          comparePrice = parsed.compareAtPrice ? parseRobust(parsed.compareAtPrice) : optimalComparePrice;
         }
 
         setSellingPriceInput(finalPrice);

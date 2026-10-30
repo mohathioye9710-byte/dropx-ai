@@ -728,7 +728,9 @@ export async function POST(req) {
         images: generatedImages,
         originalImage: image,
         options: productOptions,
-        price: extractedPrice
+        price: extractedPrice,
+        supplierCost: extractedPrice,
+        supplierPrice: extractedPrice
       },
       analysis,
       landingPage: {
