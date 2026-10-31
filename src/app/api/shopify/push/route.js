@@ -1075,8 +1075,13 @@ fbq('track', 'PageView');
     </p>
 
     <div style="background: #f8fafc; border-radius: 12px; padding: 14px; text-align: left; font-size: 13px; color: #374151; margin-bottom: 20px;">
-      <div style="margin-bottom: 6px;"><b>📦 Produit :</b> <span id="dropx-modal-product">--</span></div>
-      <div style="margin-bottom: 6px;"><b>💰 Montant à payer :</b> <span id="dropx-modal-total" style="font-weight: 800; color: #10b981;">-- FCFA</span></div>
+      <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;">
+        <img id="dropx-modal-image" src="" alt="Produit" style="width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; display: none;" />
+        <div style="flex: 1;">
+          <div id="dropx-modal-product" style="font-weight: 800; font-size: 14px; color: #111;">--</div>
+          <div id="dropx-modal-total" style="font-weight: 800; color: #10b981; font-size: 14px; margin-top: 2px;">-- FCFA</div>
+        </div>
+      </div>
       <div style="margin-bottom: 6px;"><b>📍 Livraison à :</b> <span id="dropx-modal-address">--</span></div>
       <div><b>💵 Règlement :</b> <span id="dropx-modal-payment">--</span></div>
     </div>
@@ -1095,6 +1100,14 @@ fbq('track', 'PageView');
 (function() {
   var productTitle = {{ product.title | json }};
   var productVariants = {{ product.variants | json }} || [];
+  var productFeaturedImage = {{ product.featured_image | image_url: width: 800 | json }} || '';
+  if (productFeaturedImage && productFeaturedImage.startsWith('//')) {
+    productFeaturedImage = 'https:' + productFeaturedImage;
+  }
+  var productUrl = {{ shop.url | append: product.url | json }} || (window.location.origin + window.location.pathname);
+  if (productUrl && productUrl.startsWith('//')) {
+    productUrl = 'https:' + productUrl;
+  }
   var shopDomain = window.location.hostname;
   var apiBaseUrl = "https://dropshipping-ten-topaz.vercel.app";
 
@@ -1272,14 +1285,15 @@ fbq('track', 'PageView');
       }
     } catch(e) {}
 
-    var waMsg = "Bonjour ShopX ! Je viens de commander : " + productTitle + " (" + activeB.title + ").\\n" +
-                "Sous-total : " + formatFCFA(activeB.price) + "\\n" +
-                "Frais de livraison : GRATUITE (Offerte)\\n" +
-                "Montant total à régler : " + totalFormatted + ".\\n" +
-                "Nom : " + name + "\\n" +
-                "Téléphone : " + fullPhone + "\\n" +
-                "Ville / Quartier : " + city + " - " + address + "\\n" +
-                "Paiement : " + paymentMethod + ".\\n" +
+    var waMsg = "Bonjour ShopX ! Je viens de commander : " + productTitle + " (" + activeB.title + ").\\n\\n" +
+                (productUrl ? "🔗 Lien de l'article : " + productUrl + "\\n" : "") +
+                (productFeaturedImage ? "📸 Photo de l'article : " + productFeaturedImage + "\\n\\n" : "\\n") +
+                "💰 Montant total à régler : " + totalFormatted + "\\n" +
+                "🚚 Frais de livraison : GRATUITE (Offerte)\\n" +
+                "👤 Nom : " + name + "\\n" +
+                "📞 Téléphone : " + fullPhone + "\\n" +
+                "📍 Ville / Quartier : " + city + " - " + address + "\\n" +
+                "💵 Mode de paiement : " + paymentMethod + ".\\n\\n" +
                 "Merci de me confirmer la livraison !";
 
     var waUrl = "https://wa.me/221775447866?text=" + encodeURIComponent(waMsg);
@@ -1293,6 +1307,8 @@ fbq('track', 'PageView');
         customerAddress: address,
         paymentMethod: paymentMethod,
         productTitle: productTitle,
+        productUrl: productUrl,
+        productImageUrl: productFeaturedImage,
         bundleTitle: activeB.title,
         variantId: activeB.variantId,
         quantity: 1,
@@ -1315,6 +1331,11 @@ fbq('track', 'PageView');
       console.warn("DropX API order sync error:", err);
     }
 
+    var modalImg = document.getElementById('dropx-modal-image');
+    if (modalImg && productFeaturedImage) {
+      modalImg.src = productFeaturedImage;
+      modalImg.style.display = 'block';
+    }
     var modalProd = document.getElementById('dropx-modal-product');
     if (modalProd) modalProd.innerText = productTitle + " (" + activeB.title + ")";
     var modalTot = document.getElementById('dropx-modal-total');

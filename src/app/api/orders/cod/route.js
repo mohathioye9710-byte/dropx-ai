@@ -134,6 +134,8 @@ export async function POST(req) {
       paymentMethod = 'Espèces à la livraison',
       productTitle = 'Produit',
       bundleTitle = '1 Unité',
+      productUrl = '',
+      productImageUrl = '',
       variantId,
       quantity = 1,
       unitPrice = 0,
@@ -172,6 +174,8 @@ export async function POST(req) {
       paymentMethod: paymentMethod || 'Espèces à la livraison',
       productTitle,
       bundleTitle,
+      productUrl: productUrl || '',
+      productImageUrl: productImageUrl || '',
       variantId: variantId || null,
       quantity: Number(quantity) || 1,
       unitPrice: Number(unitPrice) || 0,
@@ -241,13 +245,15 @@ export async function POST(req) {
             phone: customerPhone,
             financial_status: 'pending',
             gateway: `Paiement à la livraison (${paymentMethod})`,
-            note: `[COMMANDE DROPX - PAIEMENT À LA LIVRAISON (COD)]\nClient : ${customerName}\nTéléphone WhatsApp : ${customerPhone}\nRégion/Ville : ${customerCity}\nQuartier/Adresse : ${customerAddress}\nOffre choisie : ${bundleTitle}\nMode de règlement : ${paymentMethod}\nFrais de livraison : Offerts (Gratuit)\nTotal à encaisser : ${rawPrice} FCFA`,
+            note: `[COMMANDE DROPX - PAIEMENT À LA LIVRAISON (COD)]\nClient : ${customerName}\nTéléphone WhatsApp : ${customerPhone}\nRégion/Ville : ${customerCity}\nQuartier/Adresse : ${customerAddress}\nOffre choisie : ${bundleTitle}\nMode de règlement : ${paymentMethod}\nFrais de livraison : Offerts (Gratuit)\nTotal à encaisser : ${rawPrice} FCFA` + (productUrl ? `\nLien Produit : ${productUrl}` : '') + (productImageUrl ? `\nPhoto Produit : ${productImageUrl}` : ''),
             note_attributes: [
               { name: "Mode de paiement", value: paymentMethod },
               { name: "Pack choisi", value: bundleTitle },
               { name: "Ville / Région", value: customerCity },
               { name: "Quartier / Adresse", value: customerAddress },
               { name: "Total FCFA", value: `${rawPrice} FCFA` },
+              { name: "Lien Produit", value: productUrl || "-" },
+              { name: "Photo Produit", value: productImageUrl || "-" },
               { name: "Source", value: "DropX Landing Page COD" }
             ],
             tags: 'COD, Senegal, Paiement-Livraison, DropX, 1-Clic'
@@ -283,14 +289,27 @@ export async function POST(req) {
     // Save to local storage for instant dashboard access
     saveLocalOrder(orderRecord);
 
-    // Build prefilled WhatsApp message for merchant
+    // Build prefilled WhatsApp message for merchant with article link and photo
+    let linkLines = '';
+    if (productUrl) {
+      linkLines += `🔗 Lien de l'article : ${productUrl}\n`;
+    }
+    if (productImageUrl) {
+      linkLines += `📸 Photo de l'article : ${productImageUrl}\n`;
+    }
+    if (linkLines) {
+      linkLines += '\n';
+    }
+
     const waText = encodeURIComponent(
-      `Bonjour ShopX ! Je viens de passer une commande pour : ${productTitle} (${bundleTitle}).\n` +
-      `Montant total : ${totalPrice} ${currency}.\n` +
-      `Nom : ${customerName}\n` +
-      `Téléphone : ${customerPhone}\n` +
-      `Ville / Quartier : ${customerCity} - ${customerAddress}\n` +
-      `Paiement : ${paymentMethod}.\n` +
+      `Bonjour ShopX ! Je viens de passer une commande pour : ${productTitle} (${bundleTitle}).\n\n` +
+      linkLines +
+      `💰 Montant total à régler : ${totalPrice} ${currency}\n` +
+      `🚚 Frais de livraison : GRATUITE (Offerte)\n` +
+      `👤 Nom : ${customerName}\n` +
+      `📞 Téléphone : ${customerPhone}\n` +
+      `📍 Ville / Quartier : ${customerCity} - ${customerAddress}\n` +
+      `💵 Mode de paiement : ${paymentMethod}.\n\n` +
       `Merci de confirmer la livraison !`
     );
 
