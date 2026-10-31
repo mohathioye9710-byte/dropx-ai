@@ -969,6 +969,279 @@ fbq('track', 'PageView');
     transition: opacity 0.2s, border-color 0.2s;
   }
   .dropx-thumb:hover { opacity: 0.8; }
+
+  /* ==========================================================================
+     DROPX ADVANCED MOBILE RESPONSIVENESS & TOUCH OPTIMIZATION (max-width: 768px)
+     ========================================================================== */
+  @media (max-width: 768px) {
+    /* Prevent iOS Safari from auto-zooming on inputs */
+    input, select, textarea, .dropx-input, .dropx-select {
+      font-size: 16px !important;
+      -webkit-appearance: none;
+    }
+
+    html, body {
+      overflow-x: hidden !important;
+      max-width: 100vw !important;
+    }
+
+    #dropx-full-page-container {
+      padding-bottom: 95px !important;
+      overflow-x: hidden !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Top Announcement Bar */
+    #dropx-full-page-container > div:first-child {
+      font-size: 11px !important;
+      padding: 8px 10px !important;
+      line-height: 1.35 !important;
+      letter-spacing: 0.2px !important;
+    }
+
+    /* Top Header Bar */
+    #dropx-full-page-container > div:nth-child(2) {
+      padding: 12px 14px !important;
+    }
+    #dropx-full-page-container > div:nth-child(2) a {
+      font-size: 20px !important;
+    }
+
+    /* Hero Section Spacing */
+    #dropx-full-page-container [style*="max-width: 1200px"] {
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+      padding-top: 14px !important;
+      padding-bottom: 24px !important;
+      gap: 16px !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    /* Hero Gallery */
+    #dropx-full-page-container [style*="flex: 1 1 500px"],
+    #dropx-full-page-container [style*="flex: 1 1 400px"],
+    #dropx-full-page-container [style*="flex: 1 1 45%"],
+    #dropx-full-page-container [style*="flex: 1 1 40%"],
+    #dropx-full-page-container [style*="flex: 1 1 50%"],
+    #dropx-full-page-container [style*="flex: 1 1 30%"],
+    #dropx-full-page-container [style*="flex: 1 1 20%"] {
+      flex: 1 1 100% !important;
+      min-width: 100% !important;
+      width: 100% !important;
+    }
+
+    /* Main Product Image Container */
+    #dropx-full-page-container [style*="aspect-ratio: 1/1"] {
+      border-radius: 14px !important;
+      background: #fafafa !important;
+    }
+    #dropx-full-page-container [style*="aspect-ratio: 1/1"] img {
+      padding: 8px !important;
+      max-height: 340px !important;
+      object-fit: contain !important;
+    }
+
+    /* Horizontal Thumbnail Swipe Bar */
+    #dropx-full-page-container [style*="grid-template-columns: 1fr 1fr"] {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      gap: 8px !important;
+      padding: 4px 2px 8px 2px !important;
+      scrollbar-width: none !important;
+    }
+    #dropx-full-page-container [style*="grid-template-columns: 1fr 1fr"]::-webkit-scrollbar {
+      display: none !important;
+    }
+    #dropx-full-page-container [style*="grid-template-columns: 1fr 1fr"] > div {
+      width: 68px !important;
+      height: 68px !important;
+      min-width: 68px !important;
+      max-width: 68px !important;
+      border-radius: 10px !important;
+      padding: 4px !important;
+      flex-shrink: 0 !important;
+    }
+
+    /* Product Title */
+    #dropx-full-page-container h1 {
+      font-size: 21px !important;
+      line-height: 1.25 !important;
+      margin-bottom: 12px !important;
+    }
+
+    /* Price Displays */
+    #dropx-price-display {
+      font-size: 24px !important;
+    }
+    #dropx-oldprice-display {
+      font-size: 17px !important;
+    }
+    #dropx-savings-display {
+      font-size: 11px !important;
+      padding: 4px 8px !important;
+    }
+
+    /* Bundles */
+    .dropx-bundle-card {
+      padding: 12px 14px !important;
+      border-radius: 12px !important;
+      gap: 10px !important;
+    }
+    .dropx-bundle-badge {
+      font-size: 9px !important;
+      padding: 2px 8px !important;
+      top: -8px !important;
+      right: 10px !important;
+    }
+
+    /* COD Form Card */
+    .dropx-cod-card {
+      padding: 16px 14px !important;
+      border-radius: 14px !important;
+      margin-top: 12px !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+    }
+    .dropx-cod-badge {
+      font-size: 12px !important;
+      padding: 9px 10px !important;
+      border-radius: 8px !important;
+      gap: 6px !important;
+    }
+    .dropx-form-group {
+      margin-bottom: 12px !important;
+    }
+    .dropx-label {
+      font-size: 13px !important;
+      margin-bottom: 5px !important;
+    }
+    .dropx-input, .dropx-select {
+      padding: 12px 12px !important;
+      border-radius: 8px !important;
+    }
+    .dropx-phone-prefix {
+      padding: 0 10px !important;
+      font-size: 13px !important;
+    }
+    .dropx-payment-options {
+      gap: 8px !important;
+    }
+    .dropx-payment-label {
+      padding: 10px 8px !important;
+      font-size: 12px !important;
+      justify-content: center !important;
+    }
+    .dropx-summary-box {
+      padding: 12px !important;
+      margin: 12px 0 !important;
+      border-radius: 10px !important;
+    }
+    .dropx-submit-btn {
+      padding: 16px 14px !important;
+      font-size: 15px !important;
+      border-radius: 10px !important;
+      letter-spacing: 0.3px !important;
+    }
+    .dropx-trust-grid {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px !important;
+      margin-top: 12px !important;
+    }
+    .dropx-trust-item {
+      font-size: 11px !important;
+    }
+
+    /* Sections */
+    #dropx-full-page-container h2 {
+      font-size: 20px !important;
+      line-height: 1.3 !important;
+      margin-bottom: 18px !important;
+      text-align: center !important;
+    }
+    #dropx-full-page-container p {
+      font-size: 13px !important;
+      line-height: 1.55 !important;
+    }
+
+    /* Confirmation Modal */
+    .dropx-modal-content {
+      padding: 22px 16px !important;
+      border-radius: 16px !important;
+      max-width: 92% !important;
+    }
+    .dropx-whatsapp-btn {
+      padding: 14px 18px !important;
+      font-size: 15px !important;
+    }
+  }
+
+  /* ==========================================================================
+     STICKY BOTTOM ORDER BAR (MOBILE ONLY)
+     ========================================================================== */
+  #dropx-sticky-mobile-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-top: 1.5px solid #10b981;
+    box-shadow: 0 -4px 22px rgba(0,0,0,0.14);
+    padding: 10px 14px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 99999;
+    box-sizing: border-box;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+  @media (min-width: 769px) {
+    #dropx-sticky-mobile-bar {
+      display: none !important;
+    }
+  }
+  .dropx-sticky-price-wrap {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+  .dropx-sticky-price {
+    font-size: 18px;
+    font-weight: 900;
+    color: #10b981;
+    white-space: nowrap;
+  }
+  .dropx-sticky-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: #15803d;
+    white-space: nowrap;
+  }
+  .dropx-sticky-cta-btn {
+    flex: 1;
+    background: #10b981;
+    color: #111111;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    animation: dropxPulse 2s infinite;
+  }
+  .dropx-sticky-cta-btn:active {
+    transform: scale(0.97);
+  }
 </style>
 
 <!-- COD Form Container -->
@@ -1097,6 +1370,17 @@ fbq('track', 'PageView');
   </div>
 </div>
 
+<!-- Sticky Bottom Order Bar for Mobile -->
+<div id="dropx-sticky-mobile-bar">
+  <div class="dropx-sticky-price-wrap">
+    <div class="dropx-sticky-price" id="dropx-sticky-price-text">13 500 FCFA</div>
+    <div class="dropx-sticky-badge">🚚 Livraison Gratuite</div>
+  </div>
+  <button type="button" class="dropx-sticky-cta-btn" onclick="window.dropxScrollToOrderForm()">
+    <span>COMMANDER EN 1 CLIC ⚡</span>
+  </button>
+</div>
+
 <script>
 (function() {
   var productTitle = {{ product.title | json }};
@@ -1196,6 +1480,12 @@ fbq('track', 'PageView');
     if (savEl && activeB.oldPrice > activeB.price) {
       var pct = Math.round((1 - activeB.price / activeB.oldPrice) * 100);
       savEl.innerText = 'Économisez ' + pct + '%';
+    }
+
+    // Update sticky mobile bar price
+    var stickyPriceEl = document.getElementById('dropx-sticky-price-text');
+    if (stickyPriceEl) {
+      stickyPriceEl.innerText = formatFCFA(activeB.price);
     }
 
     window.dropxUpdateTotals();
@@ -1420,14 +1710,29 @@ fbq('track', 'PageView');
       formContainer.style.display = 'block';
     }
 
-    // 5. Interactive Gallery Click
-    var thumbs = dropxContainer.querySelectorAll('.dropmagic-custom-gallery img, [class*="gallery"] img');
-    var mainImg = dropxContainer.querySelector('[style*="aspect-ratio: 1/1"] img');
-    if (mainImg && thumbs.length > 0) {
-      thumbs.forEach(function(img) {
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', function() {
-          mainImg.src = this.src;
+    // 5. Interactive Gallery Click & Thumbnail Row
+    var galleryCol = dropxContainer.querySelector('[style*="flex: 1 1 500px"]') || dropxContainer.querySelector('[style*="flex: 1 1 45%"]');
+    var mainImg = galleryCol ? galleryCol.querySelector('img') : dropxContainer.querySelector('img');
+    var thumbsGrid = galleryCol ? galleryCol.children[1] : dropxContainer.querySelector('[style*="grid-template-columns"]');
+
+    if (thumbsGrid) {
+      thumbsGrid.classList.add('dropx-thumbs-row');
+      var thumbDivs = Array.from(thumbsGrid.children);
+      thumbDivs.forEach(function(thumbDiv, idx) {
+        var tImg = thumbDiv.querySelector('img');
+        if (!tImg) return;
+        thumbDiv.style.cursor = 'pointer';
+        thumbDiv.classList.add('dropx-thumb-item');
+        if (idx === 0) thumbDiv.classList.add('active');
+
+        thumbDiv.addEventListener('click', function() {
+          if (mainImg) {
+            mainImg.style.opacity = '0.35';
+            mainImg.src = tImg.src;
+            setTimeout(function() { mainImg.style.opacity = '1'; }, 150);
+          }
+          thumbDivs.forEach(function(d) { d.classList.remove('active'); });
+          thumbDiv.classList.add('active');
         });
       });
     }
@@ -1438,7 +1743,47 @@ fbq('track', 'PageView');
       citySelect.addEventListener('change', window.dropxUpdateTotals);
     }
 
-    // 7. Initial update
+    // 7. Scroll to Order Form handler
+    window.dropxScrollToOrderForm = function() {
+      var formEl = document.getElementById('dropx-cod-name') || document.getElementById('dropx-liquid-form-container') || document.getElementById('dropx-form-placeholder');
+      if (formEl) {
+        formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function() {
+          var nameInput = document.getElementById('dropx-cod-name');
+          if (nameInput) nameInput.focus();
+        }, 500);
+      }
+    };
+
+    // 8. Sticky Mobile Bar Scroll Monitor
+    function initStickyBarMonitor() {
+      var bar = document.getElementById('dropx-sticky-mobile-bar');
+      var submitBtn = document.getElementById('dropx-cod-submit-btn');
+      if (!bar) return;
+
+      function checkVisibility() {
+        if (window.innerWidth > 768) {
+          bar.style.display = 'none';
+          return;
+        }
+        var scrollY = window.scrollY || window.pageYOffset;
+        var btnRect = submitBtn ? submitBtn.getBoundingClientRect() : null;
+        var isBtnVisible = btnRect && btnRect.top < (window.innerHeight - 30) && btnRect.bottom > 60;
+        
+        if (scrollY > 300 && !isBtnVisible) {
+          bar.style.display = 'flex';
+        } else {
+          bar.style.display = 'none';
+        }
+      }
+
+      window.addEventListener('scroll', checkVisibility, { passive: true });
+      window.addEventListener('resize', checkVisibility, { passive: true });
+      checkVisibility();
+    }
+    initStickyBarMonitor();
+
+    // 9. Initial update
     window.dropxSelectBundle(0);
     return true;
   }
