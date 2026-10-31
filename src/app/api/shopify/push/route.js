@@ -610,6 +610,7 @@ export async function POST(req) {
     margin: 0 !important;
   }
 
+  /* Card Content Padding */
   product-card a[ref="productTitleLink"],
   product-card a[ref="productTitleLink"] .text-block,
   product-card product-price,
@@ -624,25 +625,35 @@ export async function POST(req) {
   .card__information,
   .card-information,
   .card__content > *:not(.card__inner):not(.card__media):not([class*="media"]):not([class*="gallery"]) {
-    padding-left: 18px !important;
-    padding-right: 18px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
     box-sizing: border-box !important;
-    --padding-inline-start: 18px !important;
-    --padding-inline-end: 18px !important;
+    --padding-inline-start: 14px !important;
+    --padding-inline-end: 14px !important;
   }
 
+  /* Title Clamping: 2 lines max everywhere to prevent long vertical distortion */
   product-card a[ref="productTitleLink"],
   .product-card a[ref="productTitleLink"],
   product-card a[ref="productTitleLink"] .text-block,
   .product-card [role="heading"],
+  product-card [role="heading"],
   .card__heading {
-    margin-top: 14px !important;
-    margin-bottom: 6px !important;
-    padding-top: 2px !important;
-    line-height: 1.45 !important;
-    font-size: 0.98rem !important;
-    font-weight: 600 !important;
+    margin-top: 10px !important;
+    margin-bottom: 4px !important;
+    padding-top: 0 !important;
+    line-height: 1.35 !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
     color: #111111 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: normal !important;
+    text-align: left !important;
+    max-height: 2.7em !important;
   }
 
   product-card product-price,
@@ -650,28 +661,80 @@ export async function POST(req) {
   .card__information .price,
   .card-information .price,
   .card-information__text {
-    margin-top: 4px !important;
-    margin-bottom: 18px !important;
-    padding-bottom: 6px !important;
-    line-height: 1.4 !important;
+    margin-top: 2px !important;
+    margin-bottom: 14px !important;
+    padding-bottom: 4px !important;
+    line-height: 1.3 !important;
     box-sizing: border-box !important;
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 8px !important;
   }
 
   product-card product-price .price,
   product-card product-price .price-item,
   .product-card .price {
-    font-size: 1.05rem !important;
-    font-weight: 800 !important;
-    color: #111111 !important;
+    font-size: 1.15rem !important;
+    font-weight: 900 !important;
+    color: #10b981 !important;
   }
 
   product-card product-price .compare-at-price,
   .product-card .compare-at-price {
-    font-size: 0.92rem !important;
+    font-size: 0.88rem !important;
     font-weight: 500 !important;
     color: #9ca3af !important;
     text-decoration: line-through !important;
-    margin-left: 8px !important;
+    margin-left: 6px !important;
+  }
+
+  /* Mobile Catalog & Collection Responsive Layout */
+  @media (max-width: 768px) {
+    ul.product-grid,
+    .product-grid {
+      grid-template-columns: 1fr !important;
+      gap: 20px !important;
+      padding: 0 16px !important;
+      margin: 0 auto !important;
+      max-width: 440px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .product-grid > li,
+    .product-grid__item,
+    li.grid__item {
+      width: 100% !important;
+      max-width: 100% !important;
+      list-style: none !important;
+    }
+
+    product-card,
+    .product-card,
+    .card-wrapper {
+      width: 100% !important;
+      max-width: 100% !important;
+      border: 1.5px solid #e5e7eb !important;
+      border-radius: 18px !important;
+      overflow: hidden !important;
+      background: #ffffff !important;
+      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08) !important;
+      margin: 0 auto !important;
+    }
+
+    product-card slideshow-slide,
+    .product-card slideshow-slide {
+      --grid-template-rows: auto !important;
+      aspect-ratio: 1 / 1 !important;
+      max-height: 380px !important;
+      width: 100% !important;
+    }
+
+    product-card .product-media img,
+    .product-card .product-media img {
+      max-height: 380px !important;
+      object-fit: contain !important;
+    }
   }
 
   /* Hide default Shopify dynamic checkout buttons */
@@ -701,28 +764,34 @@ export async function POST(req) {
 // GLOBAL CURRENCY AUTO-FORMATTER ($13,500.00 -> 13 500 FCFA)
 // ==========================================================================
 (function() {
+  function cleanNumber(str) {
+    if (!str) return 0;
+    var s = String(str).trim().replace(/[,\.]00$/, '');
+    s = s.replace(/[^0-9]/g, '');
+    var n = parseInt(s, 10);
+    return isNaN(n) ? 0 : n;
+  }
+
   function formatTextFCFA(text) {
     if (!text || typeof text !== 'string') return text;
-    // Match $13,500.00 or $13500 or 13,500.00 USD
-    return text.replace(/\\$\\s*([0-9]{1,3}(?:[,\\s][0-9]{3})*(?:\\.[0-9]{2})?)/g, function(match, num) {
-      var clean = Math.round(parseFloat(num.replace(/[,\\s]/g, '')));
-      if (isNaN(clean) || clean <= 0) return match;
-      return new Intl.NumberFormat('fr-FR').format(clean) + ' FCFA';
-    }).replace(/([0-9]{1,3}(?:[,\\s][0-9]{3})*(?:\\.[0-9]{2})?)\\s*(?:USD|\\$)/g, function(match, num) {
-      var clean = Math.round(parseFloat(num.replace(/[,\\s]/g, '')));
-      if (isNaN(clean) || clean <= 0) return match;
-      return new Intl.NumberFormat('fr-FR').format(clean) + ' FCFA';
+    return text.replace(/\$\s*([0-9]+(?:[,\s\.][0-9]+)*)/g, function(match, num) {
+      var val = cleanNumber(num);
+      if (val <= 0) return match;
+      return new Intl.NumberFormat('fr-FR').format(val) + ' FCFA';
+    }).replace(/([0-9]+(?:[,\s\.][0-9]+)*)\s*(?:USD|\$)/g, function(match, num) {
+      var val = cleanNumber(num);
+      if (val <= 0) return match;
+      return new Intl.NumberFormat('fr-FR').format(val) + ' FCFA';
     });
   }
 
   function cleanCurrenciesInNode(node) {
     if (!node) return;
-    if (node.nodeType === 3) { // Text node
-      if (node.nodeValue && (node.nodeValue.includes('$') || node.nodeValue.includes('USD'))) {
+    if (node.nodeType === 3) {
+      if (node.nodeValue && (node.nodeValue.indexOf('$') !== -1 || node.nodeValue.indexOf('USD') !== -1)) {
         node.nodeValue = formatTextFCFA(node.nodeValue);
       }
     } else if (node.nodeType === 1 && node.childNodes) {
-      // Don't format inside script/style
       if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') return;
       for (var i = 0; i < node.childNodes.length; i++) {
         cleanCurrenciesInNode(node.childNodes[i]);
@@ -731,7 +800,7 @@ export async function POST(req) {
   }
 
   function runCurrencyFormat() {
-    var priceEls = document.querySelectorAll('.price, [class*="price"], .compare-at-price, product-price');
+    var priceEls = document.querySelectorAll('.price, [class*="price"], .compare-at-price, product-price, .price-item');
     priceEls.forEach(function(el) { cleanCurrenciesInNode(el); });
   }
 
@@ -740,8 +809,16 @@ export async function POST(req) {
   } else {
     runCurrencyFormat();
   }
-  setTimeout(runCurrencyFormat, 500);
+  setTimeout(runCurrencyFormat, 200);
+  setTimeout(runCurrencyFormat, 600);
   setTimeout(runCurrencyFormat, 1500);
+
+  try {
+    var observer = new MutationObserver(function() {
+      runCurrencyFormat();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 
