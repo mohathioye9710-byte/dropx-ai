@@ -1094,8 +1094,9 @@ fbq('track', 'PageView');
 <script>
 (function() {
   var productTitle = {{ product.title | json }};
+  var productVariants = {{ product.variants | json }} || [];
   var shopDomain = window.location.hostname;
-  var apiBaseUrl = "https://dropx-ai.vercel.app";
+  var apiBaseUrl = "https://dropshipping-ten-topaz.vercel.app";
 
   var basePrice = 13500;
   var comparePrice = 20000;
@@ -1113,9 +1114,9 @@ fbq('track', 'PageView');
   }
 
   var bundles = [
-    { title: "1 Unité", subtitle: "Idéal pour tester", tag: "", price: basePrice, oldPrice: comparePrice },
-    { title: "2 Achetés (-15%)", subtitle: "ÉCONOMISEZ 15% IMMÉDIATEMENT", tag: "Le plus populaire", price: Math.round(basePrice * 2 * 0.85 / 100) * 100, oldPrice: comparePrice * 2 },
-    { title: "3 Achetés (-25%)", subtitle: "MEILLEURE OFFRE - ÉCONOMISEZ 25%", tag: "Meilleure vente", price: Math.round(basePrice * 3 * 0.75 / 100) * 100, oldPrice: comparePrice * 3 }
+    { title: "1 Unité", subtitle: "Idéal pour tester", tag: "", price: basePrice, oldPrice: comparePrice, variantId: productVariants[0] ? productVariants[0].id : null },
+    { title: "2 Achetés (-15%)", subtitle: "ÉCONOMISEZ 15% IMMÉDIATEMENT", tag: "Le plus populaire", price: Math.round(basePrice * 2 * 0.85 / 100) * 100, oldPrice: comparePrice * 2, variantId: productVariants[1] ? productVariants[1].id : (productVariants[0] ? productVariants[0].id : null) },
+    { title: "3 Achetés (-25%)", subtitle: "MEILLEURE OFFRE - ÉCONOMISEZ 25%", tag: "Meilleure vente", price: Math.round(basePrice * 3 * 0.75 / 100) * 100, oldPrice: comparePrice * 3, variantId: productVariants[2] ? productVariants[2].id : (productVariants[0] ? productVariants[0].id : null) }
   ];
 
   var selectedBundleIdx = 0;
@@ -1293,6 +1294,7 @@ fbq('track', 'PageView');
         paymentMethod: paymentMethod,
         productTitle: productTitle,
         bundleTitle: activeB.title,
+        variantId: activeB.variantId,
         quantity: 1,
         unitPrice: activeB.price,
         deliveryFee: 0,

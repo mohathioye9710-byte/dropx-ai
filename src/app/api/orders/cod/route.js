@@ -7,15 +7,19 @@ import path from 'path';
 import { getDeliveryFeeByZone, getWaveFee, normalizePriceFCFA, calculateOrderFinances } from '@/lib/senegalCod';
 
 // Helper for local file persistence as a high-reliability fallback
-const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_DIR = process.env.VERCEL ? '/tmp/data' : path.join(process.cwd(), 'data');
 const ORDERS_FILE = path.join(DATA_DIR, 'cod_orders.json');
 
 function ensureDataFile() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(ORDERS_FILE)) {
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify([]), 'utf8');
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    if (!fs.existsSync(ORDERS_FILE)) {
+      fs.writeFileSync(ORDERS_FILE, JSON.stringify([]), 'utf8');
+    }
+  } catch (e) {
+    console.warn("[EnsureDataFile Warn]:", e.message);
   }
 }
 
@@ -72,6 +76,49 @@ export async function OPTIONS() {
     status: 204,
     headers: corsHeaders,
   });
+}
+
+// Reliable Shopify credentials resolver:
+// 1. Process Environment Variables (SHOPIFY_ACCESS_TOKEN, SHOPIFY_SHOP_URL)
+// 2. Prisma DB if connected
+async function resolveShopifyCredentials(requestedDomain) {
+  // 1. Check Environment Variables (Production Vercel & local .env)
+  const envToken = process.env.SHOPIFY_ACCESS_TOKEN;
+  const envShop = process.env.SHOPIFY_SHOP_URL || '98fny6-w1.myshopify.com';
+  if (envToken) {
+    return {
+      shopUrl: envShop.trim().replace(/^https?:\/\//, '').replace(/\/$/, ''),
+      adminToken: envToken.trim()
+    };
+  }
+
+  // 2. Try Prisma DB if available
+  try {
+    const integrations = await prisma.integration.findMany({
+      where: { platform: 'shopify', status: 'connected' }
+    });
+    if (integrations && integrations.length > 0) {
+      for (const integ of integrations) {
+        if (integ.keyData) {
+          try {
+            const creds = JSON.parse(integ.keyData);
+            const shopUrl = (creds.shopUrl || creds.domain || '').trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+            const adminToken = creds.accessToken || creds.clientSecret || creds.token || '';
+            if (shopUrl && adminToken) {
+              if (requestedDomain && (shopUrl.includes(requestedDomain) || requestedDomain.includes(shopUrl))) {
+                return { shopUrl, adminToken };
+              }
+              return { shopUrl, adminToken };
+            }
+          } catch (e) {}
+        }
+      }
+    }
+  } catch (dbErr) {
+    console.warn("[Prisma DB Warning in COD]:", dbErr.message);
+  }
+
+  return null;
 }
 
 // POST: Create a new COD Order (from Shopify storefront or preview)
@@ -144,100 +191,89 @@ export async function POST(req) {
       updatedAt: now
     };
 
-    // Attempt to push to Shopify if shopDomain or credentials exist
+    // Attempt to push to Shopify if credentials exist
     let shopifySuccess = false;
     try {
-      // Find shopify integration
-      let integration = null;
-      try {
-        const integrations = await prisma.integration.findMany({
-          where: { platform: 'shopify', status: 'connected' }
-        });
-        if (integrations && integrations.length > 0) {
-          integration = integrations[0];
+      const creds = await resolveShopifyCredentials(shopDomain);
+      if (creds && creds.shopUrl && creds.adminToken) {
+        const names = (customerName || 'Client').trim().split(' ');
+        const firstName = names[0] || 'Client';
+        const lastName = names.slice(1).join(' ') || 'Sénégal';
+
+        const rawPrice = Number(totalPrice) || Number(unitPrice) || 0;
+
+        const lineItem = {
+          quantity: Number(quantity) || 1,
+          price: rawPrice.toString(),
+          title: `${productTitle} - ${bundleTitle}`
+        };
+        if (variantId && !isNaN(Number(variantId))) {
+          lineItem.variant_id = Number(variantId);
         }
-      } catch (dbErr) {
-        console.warn("[Prisma DB Warning]:", dbErr.message);
-      }
 
-      if (integration && integration.keyData) {
-        const creds = JSON.parse(integration.keyData);
-        const shopUrl = (creds.shopUrl || creds.domain || '').trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
-        const adminToken = creds.accessToken || creds.clientSecret || creds.token || '';
-
-        if (shopUrl && adminToken) {
-          const names = (customerName || 'Client').trim().split(' ');
-          const firstName = names[0] || 'Client';
-          const lastName = names.slice(1).join(' ') || 'Sénégal';
-
-          const rawPrice = Number(totalPrice) || Number(unitPrice) || 0;
-          // If Shopify store is USD and price is in FCFA (> 500), convert for Shopify API so it is not $31,400
-          const shopifyItemPrice = rawPrice > 500 ? (rawPrice / 600).toFixed(2) : rawPrice.toString();
-
-          const lineItem = {
-            quantity: Number(quantity) || 1,
-            price: shopifyItemPrice,
-            title: `${productTitle} - ${bundleTitle}`
-          };
-          if (variantId && !isNaN(Number(variantId))) {
-            lineItem.variant_id = Number(variantId);
-          }
-
-          const shopifyPayload = {
-            order: {
-              line_items: [lineItem],
-              customer: {
-                first_name: firstName,
-                last_name: lastName,
-                note: `Mode de paiement: ${paymentMethod}`
-              },
-              shipping_address: {
-                first_name: firstName,
-                last_name: lastName,
-                phone: customerPhone,
-                address1: customerAddress || customerCity,
-                city: customerCity || 'Dakar',
-                country: 'Senegal',
-                country_code: 'SN'
-              },
-              billing_address: {
-                first_name: firstName,
-                last_name: lastName,
-                phone: customerPhone,
-                address1: customerAddress || customerCity,
-                city: customerCity || 'Dakar',
-                country: 'Senegal',
-                country_code: 'SN'
-              },
+        const shopifyPayload = {
+          order: {
+            line_items: [lineItem],
+            customer: {
+              first_name: firstName,
+              last_name: lastName,
               phone: customerPhone,
-              financial_status: 'pending',
-              gateway: `COD - ${paymentMethod}`,
-              note: `[EASYSELL DROPX - COMMANDE SÉNÉGAL]\nNom: ${customerName}\nTéléphone WhatsApp: ${customerPhone}\nRégion/Ville: ${customerCity}\nQuartier/Adresse: ${customerAddress}\nOffre: ${bundleTitle}\nMode: ${paymentMethod}\nLivraison: ${calculatedDeliveryFee} FCFA\nTotal: ${totalPrice} ${currency}`,
-              tags: 'COD, Senegal, EasySell, Paiement-Livraison, DropX'
-            }
-          };
-
-          const shopifyRes = await fetch(`https://${shopUrl}/admin/api/2024-04/orders.json`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Shopify-Access-Token': adminToken
+              note: `Client COD - Mode: ${paymentMethod}`
             },
-            body: JSON.stringify(shopifyPayload)
-          });
-
-          if (shopifyRes.ok) {
-            const shopifyData = await shopifyRes.json();
-            if (shopifyData && shopifyData.order) {
-              orderRecord.shopifyOrderId = shopifyData.order.id;
-              orderRecord.shopifyOrderNumber = shopifyData.order.order_number ? `#${shopifyData.order.order_number}` : (shopifyData.order.name || `#${shopifyData.order.id}`);
-              shopifySuccess = true;
-              console.log("[Shopify Order Created]:", orderRecord.shopifyOrderNumber);
-            }
-          } else {
-            const errBody = await shopifyRes.text();
-            console.warn("[Shopify Order Creation Warn]:", errBody);
+            shipping_address: {
+              first_name: firstName,
+              last_name: lastName,
+              phone: customerPhone,
+              address1: customerAddress || customerCity,
+              city: customerCity || 'Dakar',
+              country: 'Senegal',
+              country_code: 'SN'
+            },
+            billing_address: {
+              first_name: firstName,
+              last_name: lastName,
+              phone: customerPhone,
+              address1: customerAddress || customerCity,
+              city: customerCity || 'Dakar',
+              country: 'Senegal',
+              country_code: 'SN'
+            },
+            phone: customerPhone,
+            financial_status: 'pending',
+            gateway: `Paiement à la livraison (${paymentMethod})`,
+            note: `[COMMANDE DROPX - PAIEMENT À LA LIVRAISON (COD)]\nClient : ${customerName}\nTéléphone WhatsApp : ${customerPhone}\nRégion/Ville : ${customerCity}\nQuartier/Adresse : ${customerAddress}\nOffre choisie : ${bundleTitle}\nMode de règlement : ${paymentMethod}\nFrais de livraison : Offerts (Gratuit)\nTotal à encaisser : ${rawPrice} FCFA`,
+            note_attributes: [
+              { name: "Mode de paiement", value: paymentMethod },
+              { name: "Pack choisi", value: bundleTitle },
+              { name: "Ville / Région", value: customerCity },
+              { name: "Quartier / Adresse", value: customerAddress },
+              { name: "Total FCFA", value: `${rawPrice} FCFA` },
+              { name: "Source", value: "DropX Landing Page COD" }
+            ],
+            tags: 'COD, Senegal, Paiement-Livraison, DropX, 1-Clic'
           }
+        };
+
+        const shopifyRes = await fetch(`https://${creds.shopUrl}/admin/api/2024-04/orders.json`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Shopify-Access-Token': creds.adminToken
+          },
+          body: JSON.stringify(shopifyPayload)
+        });
+
+        if (shopifyRes.ok) {
+          const shopifyData = await shopifyRes.json();
+          if (shopifyData && shopifyData.order) {
+            orderRecord.shopifyOrderId = shopifyData.order.id;
+            orderRecord.shopifyOrderNumber = shopifyData.order.order_number ? `#${shopifyData.order.order_number}` : (shopifyData.order.name || `#${shopifyData.order.id}`);
+            shopifySuccess = true;
+            console.log("[Shopify Order Created Successfully]:", orderRecord.shopifyOrderNumber, "ID:", orderRecord.shopifyOrderId);
+          }
+        } else {
+          const errBody = await shopifyRes.text();
+          console.warn("[Shopify Order Creation Warn]:", errBody);
         }
       }
     } catch (shopifyErr) {
@@ -285,40 +321,20 @@ export async function GET(req) {
     let connectedShopDomain = null;
 
     try {
-      const session = await getServerSession(authOptions);
-      let integration = null;
-
-      if (session?.user?.id) {
-        integration = await prisma.integration.findFirst({
-          where: { userId: session.user.id, platform: 'shopify' }
+      const creds = await resolveShopifyCredentials();
+      if (creds && creds.shopUrl && creds.adminToken) {
+        connectedShopDomain = creds.shopUrl;
+        const shopifyRes = await fetch(`https://${creds.shopUrl}/admin/api/2024-04/orders.json?status=any&limit=50`, {
+          headers: {
+            'X-Shopify-Access-Token': creds.adminToken,
+            'Content-Type': 'application/json'
+          },
+          cache: 'no-store'
         });
-      }
-      if (!integration) {
-        integration = await prisma.integration.findFirst({
-          where: { platform: 'shopify', status: 'connected' }
-        }) || await prisma.integration.findFirst({
-          where: { platform: 'shopify' }
-        });
-      }
 
-      if (integration?.keyData) {
-        const creds = JSON.parse(integration.keyData);
-        const shopUrl = (creds.domain || creds.shopUrl || '').trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
-        const adminToken = creds.token || creds.accessToken || creds.clientSecret || '';
-
-        if (shopUrl && adminToken) {
-          connectedShopDomain = shopUrl;
-          const shopifyRes = await fetch(`https://${shopUrl}/admin/api/2024-04/orders.json?status=any&limit=50`, {
-            headers: {
-              'X-Shopify-Access-Token': adminToken,
-              'Content-Type': 'application/json'
-            },
-            cache: 'no-store'
-          });
-
-          if (shopifyRes.ok) {
-            const shopifyData = await shopifyRes.json();
-            const rawOrders = shopifyData.orders || [];
+        if (shopifyRes.ok) {
+          const shopifyData = await shopifyRes.json();
+          const rawOrders = shopifyData.orders || [];
 
             shopifyOrders = rawOrders.map(so => {
               let status = "NOUVEAU";
@@ -354,12 +370,12 @@ export async function GET(req) {
                 id: `SHOPIFY-${so.id}`,
                 shopifyOrderId: so.id,
                 shopifyOrderNumber: so.order_number ? `#${so.order_number}` : (so.name || `#${so.id}`),
-                shopDomain: shopUrl,
+                shopDomain: creds.shopUrl,
                 customerName,
                 customerPhone,
                 customerCity,
                 customerAddress,
-                paymentMethod: so.gateway || (so.payment_gateway_names && so.payment_gateway_names.join(', ')) || 'Paiement Shopify',
+                paymentMethod: so.gateway || (so.payment_gateway_names && so.payment_gateway_names.join(', ')) || 'Paiement à la livraison',
                 productTitle,
                 bundleTitle,
                 quantity: totalQty,
@@ -375,8 +391,7 @@ export async function GET(req) {
             });
           }
         }
-      }
-    } catch (shopifyErr) {
+      } catch (shopifyErr) {
       console.warn("[Orders API Shopify Fetch Warning]:", shopifyErr.message);
     }
 
