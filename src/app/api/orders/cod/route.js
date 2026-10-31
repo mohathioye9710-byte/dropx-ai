@@ -289,28 +289,20 @@ export async function POST(req) {
     // Save to local storage for instant dashboard access
     saveLocalOrder(orderRecord);
 
-    // Build prefilled WhatsApp message for merchant with article link and photo
-    let linkLines = '';
-    if (productUrl) {
-      linkLines += `🔗 Lien de l'article : ${productUrl}\n`;
-    }
-    if (productImageUrl) {
-      linkLines += `📸 Photo de l'article : ${productImageUrl}\n`;
-    }
-    if (linkLines) {
-      linkLines += '\n';
-    }
+    // Build prefilled WhatsApp message for merchant with clean text and article link (no emojis)
+    const formattedPrice = new Intl.NumberFormat('fr-FR').format(totalPrice) + ' FCFA';
+    const linkLine = productUrl ? `Lien de l'article : ${productUrl}\n\n` : '';
 
     const waText = encodeURIComponent(
       `Bonjour ShopX ! Je viens de passer une commande pour : ${productTitle} (${bundleTitle}).\n\n` +
-      linkLines +
-      `💰 Montant total à régler : ${totalPrice} ${currency}\n` +
-      `🚚 Frais de livraison : GRATUITE (Offerte)\n` +
-      `👤 Nom : ${customerName}\n` +
-      `📞 Téléphone : ${customerPhone}\n` +
-      `📍 Ville / Quartier : ${customerCity} - ${customerAddress}\n` +
-      `💵 Mode de paiement : ${paymentMethod}.\n\n` +
-      `Merci de confirmer la livraison !`
+      linkLine +
+      `Montant total à régler : ${formattedPrice}\n` +
+      `Frais de livraison : GRATUITE (Offerte)\n` +
+      `Nom : ${customerName}\n` +
+      `Téléphone : ${customerPhone}\n` +
+      `Ville / Quartier : ${customerCity} - ${customerAddress}\n` +
+      `Mode de paiement : ${paymentMethod}.\n\n` +
+      `Merci de me confirmer la livraison !`
     );
 
     const cleanMerchantPhone = (merchantPhone && !merchantPhone.includes('770000000') ? merchantPhone : '221775447866').replace(/[^0-9]/g, '');

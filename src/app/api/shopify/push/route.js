@@ -1285,15 +1285,14 @@ fbq('track', 'PageView');
       }
     } catch(e) {}
 
-    var waMsg = "Bonjour ShopX ! Je viens de commander : " + productTitle + " (" + activeB.title + ").\\n\\n" +
-                (productUrl ? "🔗 Lien de l'article : " + productUrl + "\\n" : "") +
-                (productFeaturedImage ? "📸 Photo de l'article : " + productFeaturedImage + "\\n\\n" : "\\n") +
-                "💰 Montant total à régler : " + totalFormatted + "\\n" +
-                "🚚 Frais de livraison : GRATUITE (Offerte)\\n" +
-                "👤 Nom : " + name + "\\n" +
-                "📞 Téléphone : " + fullPhone + "\\n" +
-                "📍 Ville / Quartier : " + city + " - " + address + "\\n" +
-                "💵 Mode de paiement : " + paymentMethod + ".\\n\\n" +
+    var waMsg = "Bonjour ShopX ! Je viens de passer une commande pour : " + productTitle + " (" + activeB.title + ").\\n\\n" +
+                (productUrl ? "Lien de l'article : " + productUrl + "\\n\\n" : "") +
+                "Montant total à régler : " + totalFormatted + "\\n" +
+                "Frais de livraison : GRATUITE (Offerte)\\n" +
+                "Nom : " + name + "\\n" +
+                "Téléphone : " + fullPhone + "\\n" +
+                "Ville / Quartier : " + city + " - " + address + "\\n" +
+                "Mode de paiement : " + paymentMethod + ".\\n\\n" +
                 "Merci de me confirmer la livraison !";
 
     var waUrl = "https://wa.me/221775447866?text=" + encodeURIComponent(waMsg);
