@@ -1198,7 +1198,7 @@ fbq('track', 'PageView');
     box-sizing: border-box;
     transition: transform 0.25s ease, opacity 0.25s ease;
   }
-  @media (min-width: 769px) {
+  @media (min-width: 992px) {
     #dropx-sticky-mobile-bar {
       display: none !important;
     }
@@ -1762,7 +1762,7 @@ fbq('track', 'PageView');
       if (!bar) return;
 
       function checkVisibility() {
-        if (window.innerWidth > 768) {
+        if (window.innerWidth > 991) {
           bar.style.display = 'none';
           return;
         }
