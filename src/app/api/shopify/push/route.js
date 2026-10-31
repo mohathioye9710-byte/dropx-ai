@@ -1761,29 +1761,36 @@ fbq('track', 'PageView');
 
   /* Floating WhatsApp Button (Bottom Right) */
   .dropx-floating-whatsapp {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 6px 22px rgba(37, 211, 102, 0.48), 0 2px 8px rgba(0, 0, 0, 0.18);
-    z-index: 99998;
-    text-decoration: none;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    width: 60px !important;
+    height: 60px !important;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 6px 22px rgba(37, 211, 102, 0.48), 0 2px 8px rgba(0, 0, 0, 0.18) !important;
+    z-index: 2147483647 !important;
+    text-decoration: none !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+  }
+  .dropx-floating-whatsapp * {
+    pointer-events: none !important;
   }
   .dropx-floating-whatsapp:hover {
-    transform: scale(1.08) translateY(-2px);
-    box-shadow: 0 10px 28px rgba(37, 211, 102, 0.6), 0 4px 12px rgba(0, 0, 0, 0.22);
+    transform: scale(1.08) translateY(-2px) !important;
+    box-shadow: 0 10px 28px rgba(37, 211, 102, 0.6), 0 4px 12px rgba(0, 0, 0, 0.22) !important;
   }
   .dropx-floating-whatsapp:active {
-    transform: scale(0.94);
+    transform: scale(0.94) !important;
   }
   .dropx-wa-pulse-ring {
     position: absolute;
@@ -1795,7 +1802,7 @@ fbq('track', 'PageView');
     border-radius: 50%;
     opacity: 0;
     animation: dropxWaPulse 2.8s infinite ease-out;
-    pointer-events: none;
+    pointer-events: none !important;
   }
   @keyframes dropxWaPulse {
     0% { transform: scale(0.95); opacity: 0.85; }
@@ -1812,6 +1819,7 @@ fbq('track', 'PageView');
     border: 2.5px solid #ffffff;
     border-radius: 50%;
     box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+    pointer-events: none !important;
   }
   .dropx-wa-tooltip {
     position: absolute;
@@ -1824,7 +1832,7 @@ fbq('track', 'PageView');
     font-weight: 800;
     white-space: nowrap;
     box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-    pointer-events: none;
+    pointer-events: none !important;
     opacity: 0;
     transform: translateX(8px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -1835,13 +1843,13 @@ fbq('track', 'PageView');
   }
   @media (max-width: 991px) {
     .dropx-floating-whatsapp {
-      bottom: 84px;
-      right: 16px;
-      width: 54px;
-      height: 54px;
+      bottom: 88px !important;
+      right: 18px !important;
+      width: 56px !important;
+      height: 56px !important;
     }
     .dropx-wa-tooltip {
-      display: none;
+      display: none !important;
     }
   }
 </style>
@@ -2006,7 +2014,13 @@ fbq('track', 'PageView');
 </div>
 
 <!-- Floating WhatsApp Button (Bottom Right) -->
-<a id="dropx-floating-whatsapp" href="https://wa.me/221775447866?text=Bonjour%20ShopX%20!%20J'ai%20une%20question%20concernant%20le%20Tapis%20de%20Massage%20%C3%89lectrique." target="_blank" rel="noopener noreferrer" aria-label="Discuter avec nous sur WhatsApp" class="dropx-floating-whatsapp">
+<a id="dropx-floating-whatsapp" 
+   href="https://api.whatsapp.com/send?phone=221775447866&text=Bonjour%20ShopX%20!%20J%27ai%20une%20question%20concernant%20le%20Tapis%20de%20Massage%20%C3%89lectrique." 
+   target="_blank" 
+   rel="noopener noreferrer" 
+   onclick="window.dropxOpenWhatsApp(event)"
+   aria-label="Discuter avec nous sur WhatsApp" 
+   class="dropx-floating-whatsapp">
   <div class="dropx-wa-pulse-ring"></div>
   <svg viewBox="0 0 32 32" width="34" height="34" fill="#ffffff" aria-hidden="true" style="display: block;">
     <path d="M16.01 3C8.83 3 3 8.83 3 16.01c0 2.57.75 4.97 2.05 6.99L3 29l6.23-2c1.96 1.14 4.23 1.8 6.78 1.8 7.18 0 13.01-5.83 13.01-13.01S23.19 3 16.01 3zm0 23.63c-2.26 0-4.36-.66-6.13-1.8l-.44-.28-3.7 1.19 1.2-3.59-.3-.46A10.63 10.63 0 015.37 16c0-5.87 4.77-10.64 10.64-10.64 5.87 0 10.64 4.77 10.64 10.64 0 5.87-4.77 10.63-10.64 10.63zm5.83-7.98c-.32-.16-1.89-.93-2.19-1.03-.29-.11-.51-.16-.72.16-.21.32-.82 1.03-1.01 1.24-.19.21-.37.24-.69.08-.32-.16-1.35-.5-2.58-1.59-.95-.85-1.6-1.89-1.78-2.21-.19-.32-.02-.49.14-.65.14-.14.32-.37.48-.56.16-.19.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.72-1.74-.99-2.38-.26-.63-.53-.54-.72-.55l-.62-.01c-.21 0-.56.08-.85.4-.29.32-1.12 1.09-1.12 2.66 0 1.57 1.14 3.09 1.3 3.3.16.21 2.25 3.44 5.46 4.82.76.33 1.36.53 1.82.68.77.24 1.46.21 2.02.13.62-.1 1.89-.77 2.16-1.52.26-.74.26-1.38.19-1.52-.08-.13-.29-.21-.61-.37z"/>
@@ -2016,6 +2030,22 @@ fbq('track', 'PageView');
 </a>
 
 <script>
+window.dropxOpenWhatsApp = function(e) {
+  if (e) {
+    try { e.preventDefault(); e.stopPropagation(); } catch(err) {}
+  }
+  var msg = "Bonjour ShopX ! J'ai une question concernant le Tapis de Massage Électrique.";
+  var phone = "221775447866";
+  var url = "https://api.whatsapp.com/send?phone=" + phone + "&text=" + encodeURIComponent(msg);
+  var isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth <= 991);
+  if (isMobile) {
+    window.location.href = url;
+  } else {
+    window.open(url, '_blank');
+  }
+  return false;
+};
+
 (function() {
   var productTitle = {{ product.title | json }};
   var productVariants = {{ product.variants | json }} || [];
@@ -2433,8 +2463,14 @@ fbq('track', 'PageView');
       document.body.appendChild(confirmModal);
     }
     var waFloat = document.getElementById('dropx-floating-whatsapp');
-    if (waFloat && waFloat.parentElement !== document.body) {
-      document.body.appendChild(waFloat);
+    if (waFloat) {
+      if (waFloat.parentElement !== document.body) {
+        document.body.appendChild(waFloat);
+      }
+      waFloat.onclick = window.dropxOpenWhatsApp;
+      waFloat.ontouchend = function(e) {
+        window.dropxOpenWhatsApp(e);
+      };
     }
 
     // 7. Interactive Gallery Click & Thumbnail Row
