@@ -1747,11 +1747,18 @@ fbq('track', 'PageView');
     window.dropxScrollToOrderForm = function() {
       var formEl = document.getElementById('dropx-cod-name') || document.getElementById('dropx-liquid-form-container') || document.getElementById('dropx-form-placeholder');
       if (formEl) {
-        formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var rect = formEl.getBoundingClientRect();
+        var targetY = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top - 80;
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+        try {
+          formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (e) {}
         setTimeout(function() {
           var nameInput = document.getElementById('dropx-cod-name');
-          if (nameInput) nameInput.focus();
-        }, 500);
+          if (nameInput) {
+            try { nameInput.focus(); } catch (e) {}
+          }
+        }, 400);
       }
     };
 
