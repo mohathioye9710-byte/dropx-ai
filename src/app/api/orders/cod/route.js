@@ -217,6 +217,7 @@ export async function POST(req) {
 
         const shopifyPayload = {
           order: {
+            currency: 'XOF',
             line_items: [lineItem],
             customer: {
               first_name: firstName,
