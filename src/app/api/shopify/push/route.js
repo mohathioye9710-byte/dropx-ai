@@ -1773,11 +1773,12 @@ fbq('track', 'PageView');
           bar.style.display = 'none';
           return;
         }
+        var formCard = document.querySelector('.dropx-cod-card');
+        var formRect = formCard ? formCard.getBoundingClientRect() : null;
         var scrollY = window.scrollY || window.pageYOffset;
-        var btnRect = submitBtn ? submitBtn.getBoundingClientRect() : null;
-        var isBtnVisible = btnRect && btnRect.top < (window.innerHeight - 30) && btnRect.bottom > 60;
+        var isFormOnScreen = formRect && (formRect.top < (window.innerHeight - 80) && formRect.bottom > 80);
         
-        if (scrollY > 300 && !isBtnVisible) {
+        if (scrollY > 280 && !isFormOnScreen) {
           bar.style.display = 'flex';
         } else {
           bar.style.display = 'none';
