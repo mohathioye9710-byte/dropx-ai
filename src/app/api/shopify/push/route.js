@@ -688,10 +688,16 @@ export async function POST(req) {
     margin-left: 6px !important;
   }
 
-  /* Mobile Catalog & Collection Responsive Layout */
+  /* Mobile Catalog, Collection & Homepage Responsive Layout */
   @media (max-width: 768px) {
     ul.product-grid,
-    .product-grid {
+    .product-grid,
+    .resource-list,
+    .resource-list--grid,
+    [data-testid="resource-list-grid"],
+    [class*="resource-list--grid"] {
+      --resource-list-columns-mobile: 1fr !important;
+      --column-count-mobile: 1 !important;
       grid-template-columns: 1fr !important;
       gap: 20px !important;
       padding: 0 16px !important;
@@ -699,14 +705,25 @@ export async function POST(req) {
       max-width: 440px !important;
       width: 100% !important;
       box-sizing: border-box !important;
+      justify-content: center !important;
+      justify-items: center !important;
+    }
+
+    .section-resource-list__content {
+      display: flex !important;
+      justify-content: center !important;
+      width: 100% !important;
     }
 
     .product-grid > li,
     .product-grid__item,
+    .resource-list__item,
+    [class*="resource-list__item"],
     li.grid__item {
       width: 100% !important;
       max-width: 100% !important;
       list-style: none !important;
+      margin: 0 auto !important;
     }
 
     product-card,
