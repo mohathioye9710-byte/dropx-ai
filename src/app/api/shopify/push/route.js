@@ -986,26 +986,41 @@ fbq('track', 'PageView');
     box-sizing: border-box;
   }
   .dropx-main-order-btn {
-    background: #10b981;
-    color: #111111;
-    border: none;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: 2.5px solid #f59e0b;
     border-radius: 14px;
     padding: 18px 24px;
     cursor: pointer;
-    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.45);
+    box-shadow: 0 0 0 1px #fef08a, 0 10px 28px rgba(16, 185, 129, 0.42), 0 0 20px rgba(245, 158, 11, 0.45);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
-    animation: dropxPulse 2.2s infinite;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, filter 0.2s ease;
+    animation: dropxLuxuryPulse 2.6s infinite ease-in-out;
     width: 100%;
     box-sizing: border-box;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  }
+  .dropx-main-order-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -130%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 20%, rgba(254, 240, 138, 0.75) 50%, rgba(255, 255, 255, 0.2) 80%, transparent 100%);
+    transform: skewX(-25deg);
+    animation: dropxShimmer 3.2s infinite ease-in-out;
+    pointer-events: none;
   }
   .dropx-main-order-btn:hover {
-    filter: brightness(1.05);
-    transform: translateY(-2px);
-    box-shadow: 0 14px 30px rgba(16, 185, 129, 0.55);
+    filter: brightness(1.08);
+    transform: translateY(-2px) scale(1.015);
+    box-shadow: 0 0 0 2px #fde047, 0 14px 34px rgba(16, 185, 129, 0.55), 0 0 28px rgba(245, 158, 11, 0.65);
   }
   .dropx-main-order-btn:active {
     transform: scale(0.98);
@@ -1013,18 +1028,25 @@ fbq('track', 'PageView');
   .dropx-main-btn-text {
     font-size: 16px;
     font-weight: 900;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.4px;
     display: flex;
     align-items: center;
     gap: 6px;
+    color: #ffffff;
+    z-index: 1;
   }
   .dropx-main-btn-price {
-    background: rgba(0, 0, 0, 0.14);
-    padding: 6px 12px;
-    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.32);
+    border: 1px solid rgba(254, 240, 138, 0.75);
+    color: #fef08a;
+    padding: 6px 14px;
+    border-radius: 999px;
     font-size: 14px;
     font-weight: 900;
     white-space: nowrap;
+    letter-spacing: 0.3px;
+    z-index: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   }
   .dropx-main-guarantee {
     display: flex;
@@ -1250,28 +1272,67 @@ fbq('track', 'PageView');
     gap: 8px;
   }
   .dropx-submit-btn {
-    background: #10b981;
-    color: #111111;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
     width: 100%;
     padding: 18px 20px;
     border-radius: 12px;
     font-weight: 900;
     font-size: 16px;
-    border: none;
+    border: 2.5px solid #f59e0b;
+    box-shadow: 0 0 0 1px #fef08a, 0 8px 25px rgba(16, 185, 129, 0.42), 0 0 18px rgba(245, 158, 11, 0.45);
     cursor: pointer;
-    transition: transform 0.1s, box-shadow 0.2s;
-    box-shadow: 0 8px 22px rgba(16, 185, 129, 0.4);
+    transition: transform 0.15s, box-shadow 0.2s, filter 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    animation: dropxPulse 2s infinite;
+    animation: dropxLuxuryPulse 2.6s infinite ease-in-out;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  .dropx-submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -130%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 20%, rgba(254, 240, 138, 0.75) 50%, rgba(255, 255, 255, 0.2) 80%, transparent 100%);
+    transform: skewX(-25deg);
+    animation: dropxShimmer 3.2s infinite ease-in-out;
+    pointer-events: none;
+  }
+  .dropx-submit-btn:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 0 0 2px #fde047, 0 12px 30px rgba(16, 185, 129, 0.55), 0 0 25px rgba(245, 158, 11, 0.65);
   }
   .dropx-submit-btn:active { transform: scale(0.98); }
+  @keyframes dropxLuxuryPulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 1.5px #f59e0b, 0 8px 24px rgba(16, 185, 129, 0.38), 0 0 14px rgba(245, 158, 11, 0.35);
+    }
+    50% {
+      transform: scale(1.025);
+      box-shadow: 0 0 0 2.5px #fde047, 0 12px 32px rgba(16, 185, 129, 0.55), 0 0 24px rgba(245, 158, 11, 0.65);
+    }
+  }
+  @keyframes dropxShimmer {
+    0% { left: -130%; }
+    22% { left: 160%; }
+    100% { left: 160%; }
+  }
   @keyframes dropxPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 1.5px #f59e0b, 0 8px 24px rgba(16, 185, 129, 0.38), 0 0 14px rgba(245, 158, 11, 0.35);
+    }
+    50% {
+      transform: scale(1.025);
+      box-shadow: 0 0 0 2.5px #fde047, 0 12px 32px rgba(16, 185, 129, 0.55), 0 0 24px rgba(245, 158, 11, 0.65);
+    }
   }
   .dropx-trust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; font-size: 11px; color: #4b5563; }
   .dropx-trust-item { display: flex; align-items: center; gap: 6px; }
@@ -1568,6 +1629,17 @@ fbq('track', 'PageView');
       margin: 12px 0 !important;
       border-radius: 10px !important;
     }
+    .dropx-main-order-btn {
+      padding: 15px 18px !important;
+      border-radius: 12px !important;
+    }
+    .dropx-main-btn-text {
+      font-size: 14.5px !important;
+    }
+    .dropx-main-btn-price {
+      font-size: 13px !important;
+      padding: 5px 12px !important;
+    }
     .dropx-submit-btn {
       padding: 16px 14px !important;
       font-size: 15px !important;
@@ -1650,23 +1722,38 @@ fbq('track', 'PageView');
     white-space: nowrap;
   }
   .dropx-sticky-cta-btn {
+    position: relative;
+    overflow: hidden;
     flex: 1;
-    background: #10b981;
-    color: #111111;
-    border: none;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: 2px solid #f59e0b;
     border-radius: 10px;
     padding: 13px 16px;
     font-size: 14px;
     font-weight: 900;
     cursor: pointer;
     text-align: center;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
+    box-shadow: 0 0 0 1px #fef08a, 0 4px 16px rgba(16, 185, 129, 0.45), 0 0 14px rgba(245, 158, 11, 0.4);
     white-space: nowrap;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    animation: dropxPulse 2s infinite;
+    animation: dropxLuxuryPulse 2.6s infinite ease-in-out;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  .dropx-sticky-cta-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -130%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 20%, rgba(254, 240, 138, 0.75) 50%, rgba(255, 255, 255, 0.2) 80%, transparent 100%);
+    transform: skewX(-25deg);
+    animation: dropxShimmer 3.2s infinite ease-in-out;
+    pointer-events: none;
   }
   .dropx-sticky-cta-btn:active {
     transform: scale(0.97);
