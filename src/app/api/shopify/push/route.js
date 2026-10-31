@@ -1745,6 +1745,9 @@ fbq('track', 'PageView');
 
     // 7. Scroll to Order Form handler
     window.dropxScrollToOrderForm = function() {
+      var bar = document.getElementById('dropx-sticky-mobile-bar');
+      if (bar) bar.style.display = 'none';
+
       var formEl = document.getElementById('dropx-cod-name') || document.getElementById('dropx-liquid-form-container') || document.getElementById('dropx-form-placeholder');
       if (formEl) {
         var rect = formEl.getBoundingClientRect();
@@ -1765,7 +1768,6 @@ fbq('track', 'PageView');
     // 8. Sticky Mobile Bar Scroll Monitor
     function initStickyBarMonitor() {
       var bar = document.getElementById('dropx-sticky-mobile-bar');
-      var submitBtn = document.getElementById('dropx-cod-submit-btn');
       if (!bar) return;
 
       function checkVisibility() {
@@ -1776,7 +1778,7 @@ fbq('track', 'PageView');
         var formCard = document.querySelector('.dropx-cod-card');
         var formRect = formCard ? formCard.getBoundingClientRect() : null;
         var scrollY = window.scrollY || window.pageYOffset;
-        var isFormOnScreen = formRect && (formRect.top < (window.innerHeight - 80) && formRect.bottom > 80);
+        var isFormOnScreen = formRect && (formRect.top < window.innerHeight && formRect.bottom > 40);
         
         if (scrollY > 280 && !isFormOnScreen) {
           bar.style.display = 'flex';
