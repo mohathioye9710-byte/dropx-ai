@@ -856,7 +856,202 @@ fbq('track', 'PageView');
 </script>
 
 <style>
-  /* COD Form Styles */
+  /* Buy Button Container (replaces the inline form on the page) */
+  .dropx-buy-btn-wrap {
+    margin-top: 16px;
+    margin-bottom: 24px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    box-sizing: border-box;
+  }
+  .dropx-main-order-btn {
+    background: #10b981;
+    color: #111111;
+    border: none;
+    border-radius: 14px;
+    padding: 18px 24px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    animation: dropxPulse 2.2s infinite;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .dropx-main-order-btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(16, 185, 129, 0.55);
+  }
+  .dropx-main-order-btn:active {
+    transform: scale(0.98);
+  }
+  .dropx-main-btn-text {
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dropx-main-btn-price {
+    background: rgba(0, 0, 0, 0.14);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+  .dropx-main-guarantee {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #15803d;
+    padding: 2px 0;
+  }
+
+  /* Stripe-Style Checkout Overlay & Modal */
+  .dropx-checkout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    box-sizing: border-box;
+  }
+  .dropx-checkout-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .dropx-checkout-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .dropx-checkout-drawer {
+    position: relative;
+    background: #ffffff;
+    width: 100%;
+    max-width: 520px;
+    border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 92vh;
+    transform: scale(0.96) translateY(20px);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1;
+    box-sizing: border-box;
+    margin: 16px;
+  }
+  .dropx-checkout-overlay.active .dropx-checkout-drawer {
+    transform: scale(1) translateY(0);
+  }
+  .dropx-stripe-sheet-handle {
+    display: none;
+  }
+  .dropx-stripe-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 14px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    background: #ffffff;
+    flex-shrink: 0;
+  }
+  .dropx-stripe-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .dropx-stripe-close {
+    border: none;
+    background: #f1f5f9;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .dropx-stripe-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+  .dropx-stripe-summary {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 14px 20px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .dropx-stripe-summary img {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: contain;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    flex-shrink: 0;
+  }
+  .dropx-stripe-summary .title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dropx-stripe-summary .pack {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+  .dropx-stripe-summary .price {
+    font-size: 15px;
+    font-weight: 900;
+    color: #10b981;
+    white-space: nowrap;
+  }
+  .dropx-stripe-body {
+    padding: 16px 20px 24px 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    box-sizing: border-box;
+  }
+
+  /* COD Form Card & Inputs */
   .dropx-cod-card {
     background: #ffffff;
     border: 2px solid #10b981;
@@ -1338,95 +1533,117 @@ fbq('track', 'PageView');
   }
 </style>
 
-<!-- COD Form Container -->
-<div id="dropx-liquid-form-container" style="display:none; width: 100%;">
-  <div class="dropx-cod-card">
-    <div class="dropx-cod-badge">
-      <span>⚡</span> COMMANDE RAPIDE EN 1 CLIC (PAIEMENT À LA LIVRAISON)
-    </div>
+<!-- Stripe-Style Checkout Drawer / Modal Overlay -->
+<div id="dropx-checkout-modal" class="dropx-checkout-overlay" style="display: none;">
+  <div class="dropx-checkout-backdrop" onclick="window.dropxCloseCheckoutModal()"></div>
+  <div class="dropx-checkout-drawer" role="dialog" aria-modal="true" aria-labelledby="dropx-checkout-modal-title">
+    <div class="dropx-stripe-sheet-handle"></div>
 
-    <p style="font-size: 13px; color: #4b5563; text-align: center; margin: 0 0 16px; line-height: 1.4;">
-      Pas besoin de carte bancaire ! Remplissez vos coordonnées ci-dessous, nous vous livrons chez vous et vous réglez à la réception.
-    </p>
-
-    <div class="dropx-form-group">
-      <label class="dropx-label">👤 Votre Prénom et Nom <span style="color: #ef4444;">*</span></label>
-      <input type="text" id="dropx-cod-name" class="dropx-input" placeholder="Ex: Mamadou Diallo" required />
-    </div>
-
-    <div class="dropx-form-group">
-      <label class="dropx-label">📞 Numéro WhatsApp / Téléphone <span style="color: #ef4444;">*</span></label>
-      <div class="dropx-phone-wrap">
-        <span class="dropx-phone-prefix">🇸🇳 +221</span>
-        <input type="tel" id="dropx-cod-phone" class="dropx-input" placeholder="77 123 45 67" required />
+    <!-- Stripe Header -->
+    <div class="dropx-stripe-header">
+      <div class="dropx-stripe-brand">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #10b981; color: #ffffff; border-radius: 9px; font-size: 16px; font-weight: 900; box-shadow: 0 2px 10px rgba(16,185,129,0.35);">⚡</span>
+        <div>
+          <div style="font-weight: 800; font-size: 14px; color: #111827; line-height: 1.2;">ShopX • Paiement Sécurisé</div>
+          <div style="font-size: 11px; color: #15803d; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+            <span>🔒</span> Paiement en espèces ou Wave à la réception
+          </div>
+        </div>
       </div>
-      <span style="font-size: 11px; color: #6b7280; margin-top: 4px; display: block;">Notre livreur vous appellera sur ce numéro avant de passer.</span>
+      <button type="button" class="dropx-stripe-close" onclick="window.dropxCloseCheckoutModal()" aria-label="Fermer">✕</button>
     </div>
 
-    <div class="dropx-form-group">
-      <label class="dropx-label">📍 Ville / Région <span style="color: #ef4444;">*</span></label>
-      <select id="dropx-cod-city" class="dropx-select">
-        <option value="Dakar Centre (Plateau, Médina, Fann, Point E)">Dakar Centre (Plateau, Médina, Fann, Point E)</option>
-        <option value="Dakar Ouest (Almadies, Ngor, Ouakam, Mermoz)">Dakar Ouest (Almadies, Ngor, Ouakam, Mermoz)</option>
-        <option value="Dakar Nord (Yoff, Ouest-Foire, Nord-Foire, Maristes)">Dakar Nord (Yoff, Ouest-Foire, Nord-Foire, Maristes)</option>
-        <option value="Dakar Banlieue (Pikine, Guédiawaye, Parcelles Assainies)">Dakar Banlieue (Pikine, Guédiawaye, Parcelles Assainies)</option>
-        <option value="Rufisque / Keur Massar / Diamniadio">Rufisque / Keur Massar / Diamniadio</option>
-        <option value="Thiès / Mbour / Saly">Thiès / Mbour / Saly</option>
-        <option value="Touba / Mbacké / Diourbel">Touba / Mbacké / Diourbel</option>
-        <option value="Saint-Louis">Saint-Louis</option>
-        <option value="Kaolack">Kaolack</option>
-        <option value="Ziguinchor">Ziguinchor</option>
-        <option value="Autre région du Sénégal">Autre région du Sénégal</option>
-      </select>
+    <!-- Stripe Product Summary Row -->
+    <div class="dropx-stripe-summary">
+      <img id="dropx-checkout-modal-img" src="" alt="Produit" />
+      <div style="flex: 1; min-width: 0;">
+        <div id="dropx-checkout-modal-title" class="title">Produit</div>
+        <div id="dropx-checkout-modal-pack" class="pack">1 Unité • Livraison Gratuite</div>
+      </div>
+      <div id="dropx-checkout-modal-price" class="price">13 500 FCFA</div>
     </div>
 
-    <div class="dropx-form-group">
-      <label class="dropx-label">🏠 Quartier / Adresse de livraison <span style="color: #ef4444;">*</span></label>
-      <input type="text" id="dropx-cod-address" class="dropx-input" placeholder="Ex: Sacré-Cœur 3, près de la boulangerie..." required />
-    </div>
+    <!-- Scrollable Form Body -->
+    <div class="dropx-stripe-body" id="dropx-liquid-form-container">
+      <div class="dropx-form-group">
+        <label class="dropx-label">👤 Votre Prénom et Nom <span style="color: #ef4444;">*</span></label>
+        <input type="text" id="dropx-cod-name" class="dropx-input" placeholder="Ex: Mamadou Diallo" required autocomplete="name" />
+      </div>
 
-    <div class="dropx-form-group">
-      <label class="dropx-label">💵 Mode de Paiement à la réception</label>
-      <div class="dropx-payment-options">
-        <label class="dropx-payment-label active" id="dropx-pay-cash-lbl" onclick="window.dropxSelectPayment('cash')">
-          <input type="radio" name="dropx_pay_method" value="Espèces à la livraison" checked style="accent-color: #10b981;" />
-          <span>💵 Espèces</span>
-        </label>
-        <label class="dropx-payment-label" id="dropx-pay-wave-lbl" onclick="window.dropxSelectPayment('wave')">
-          <input type="radio" name="dropx_pay_method" value="Wave / Orange Money" style="accent-color: #1d4ed8;" />
-          <span>📱 Wave / OM</span>
-        </label>
+      <div class="dropx-form-group">
+        <label class="dropx-label">📞 Numéro WhatsApp / Téléphone <span style="color: #ef4444;">*</span></label>
+        <div class="dropx-phone-wrap">
+          <span class="dropx-phone-prefix">🇸🇳 +221</span>
+          <input type="tel" id="dropx-cod-phone" class="dropx-input" placeholder="77 123 45 67" required autocomplete="tel" />
+        </div>
+        <span style="font-size: 11px; color: #6b7280; margin-top: 4px; display: block;">Notre livreur vous appellera sur ce numéro avant de passer.</span>
       </div>
-    </div>
 
-    <div class="dropx-summary-box">
-      <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; color: #4b5563;">
-        <span id="dropx-cod-pack-label">Articles (1 Unité) :</span>
-        <span id="dropx-cod-subtotal-display" style="font-weight: 700; color: #111;">13 500 FCFA</span>
+      <div class="dropx-form-group">
+        <label class="dropx-label">📍 Ville / Région <span style="color: #ef4444;">*</span></label>
+        <select id="dropx-cod-city" class="dropx-select">
+          <option value="Dakar Centre (Plateau, Médina, Fann, Point E)">Dakar Centre (Plateau, Médina, Fann, Point E)</option>
+          <option value="Dakar Ouest (Almadies, Ngor, Ouakam, Mermoz)">Dakar Ouest (Almadies, Ngor, Ouakam, Mermoz)</option>
+          <option value="Dakar Nord (Yoff, Ouest-Foire, Nord-Foire, Maristes)">Dakar Nord (Yoff, Ouest-Foire, Nord-Foire, Maristes)</option>
+          <option value="Dakar Banlieue (Pikine, Guédiawaye, Parcelles Assainies)">Dakar Banlieue (Pikine, Guédiawaye, Parcelles Assainies)</option>
+          <option value="Rufisque / Keur Massar / Diamniadio">Rufisque / Keur Massar / Diamniadio</option>
+          <option value="Thiès / Mbour / Saly">Thiès / Mbour / Saly</option>
+          <option value="Touba / Mbacké / Diourbel">Touba / Mbacké / Diourbel</option>
+          <option value="Saint-Louis">Saint-Louis</option>
+          <option value="Kaolack">Kaolack</option>
+          <option value="Ziguinchor">Ziguinchor</option>
+          <option value="Autre région du Sénégal">Autre région du Sénégal</option>
+        </select>
       </div>
-      <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; color: #4b5563;">
-        <span>Frais de livraison (<span id="dropx-cod-zone-name">Dakar Centre</span>) :</span>
-        <span id="dropx-cod-delivery-display" style="font-weight: 800; color: #16a34a;"><s style="color: #9ca3af; font-weight: normal; margin-right: 4px;">2 000 FCFA</s> GRATUITE 🎉</span>
-      </div>
-      <div id="dropx-wave-badge-note" style="display: none; justify-content: space-between; width: 100%; font-size: 12px; color: #1d4ed8; background: #eff6ff; padding: 4px 8px; border-radius: 6px;">
-        <span>📱 Paiement Wave direct :</span>
-        <span id="dropx-cod-wave-fee">1% sécurisé (0 FCFA)</span>
-      </div>
-      <div style="border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-top: 4px; display: flex; justify-content: space-between; width: 100%; align-items: center;">
-        <div style="font-size: 13px; color: #111; font-weight: 800;">TOTAL À RÉGLER :</div>
-        <div id="dropx-cod-total-display" style="font-size: 22px; font-weight: 900; color: #10b981;">13 500 FCFA</div>
-      </div>
-    </div>
 
-    <button type="button" id="dropx-cod-submit-btn" onclick="window.dropxSubmitOrder()" class="dropx-submit-btn">
-      <span>COMMANDER (13 500 FCFA - LIVRAISON GRATUITE) 🚚</span>
-    </button>
+      <div class="dropx-form-group">
+        <label class="dropx-label">🏠 Quartier / Adresse de livraison <span style="color: #ef4444;">*</span></label>
+        <input type="text" id="dropx-cod-address" class="dropx-input" placeholder="Ex: Sacré-Cœur 3, près de la boulangerie..." required autocomplete="street-address" />
+      </div>
 
-    <div class="dropx-trust-grid">
-      <div class="dropx-trust-item"><span>📦</span> <b>Vérifiez avant de payer</b></div>
-      <div class="dropx-trust-item"><span>🚚</span> <b>Livraison Gratuite 24h/48h</b></div>
-      <div class="dropx-trust-item"><span>📞</span> <b>Confirmation WhatsApp</b></div>
-      <div class="dropx-trust-item"><span>🔒</span> <b>Paiement 100% sécurisé</b></div>
+      <div class="dropx-form-group">
+        <label class="dropx-label">💵 Mode de Paiement à la réception</label>
+        <div class="dropx-payment-options">
+          <label class="dropx-payment-label active" id="dropx-pay-cash-lbl" onclick="window.dropxSelectPayment('cash')">
+            <input type="radio" name="dropx_pay_method" value="Espèces à la livraison" checked style="accent-color: #10b981;" />
+            <span>💵 Espèces</span>
+          </label>
+          <label class="dropx-payment-label" id="dropx-pay-wave-lbl" onclick="window.dropxSelectPayment('wave')">
+            <input type="radio" name="dropx_pay_method" value="Wave / Orange Money" style="accent-color: #1d4ed8;" />
+            <span>📱 Wave / OM</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="dropx-summary-box">
+        <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; color: #4b5563;">
+          <span id="dropx-cod-pack-label">Articles (1 Unité) :</span>
+          <span id="dropx-cod-subtotal-display" style="font-weight: 700; color: #111;">13 500 FCFA</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; color: #4b5563;">
+          <span>Frais de livraison (<span id="dropx-cod-zone-name">Dakar Centre</span>) :</span>
+          <span id="dropx-cod-delivery-display" style="font-weight: 800; color: #16a34a;"><s style="color: #9ca3af; font-weight: normal; margin-right: 4px;">2 000 FCFA</s> GRATUITE 🎉</span>
+        </div>
+        <div id="dropx-wave-badge-note" style="display: none; justify-content: space-between; width: 100%; font-size: 12px; color: #1d4ed8; background: #eff6ff; padding: 4px 8px; border-radius: 6px;">
+          <span>📱 Paiement Wave direct :</span>
+          <span id="dropx-cod-wave-fee">1% sécurisé (0 FCFA)</span>
+        </div>
+        <div style="border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-top: 4px; display: flex; justify-content: space-between; width: 100%; align-items: center;">
+          <div style="font-size: 13px; color: #111; font-weight: 800;">TOTAL À RÉGLER :</div>
+          <div id="dropx-cod-total-display" style="font-size: 22px; font-weight: 900; color: #10b981;">13 500 FCFA</div>
+        </div>
+      </div>
+
+      <button type="button" id="dropx-cod-submit-btn" onclick="window.dropxSubmitOrder()" class="dropx-submit-btn">
+        <span>COMMANDER (13 500 FCFA - LIVRAISON GRATUITE) 🚚</span>
+      </button>
+
+      <div class="dropx-trust-grid">
+        <div class="dropx-trust-item"><span>📦</span> <b>Vérifiez avant de payer</b></div>
+        <div class="dropx-trust-item"><span>🚚</span> <b>Livraison Gratuite 24h/48h</b></div>
+        <div class="dropx-trust-item"><span>📞</span> <b>Confirmation WhatsApp</b></div>
+        <div class="dropx-trust-item"><span>🔒</span> <b>Paiement 100% sécurisé</b></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1576,10 +1793,26 @@ fbq('track', 'PageView');
       savEl.innerText = 'Économisez ' + pct + '%';
     }
 
+    // Update main order button price
+    var mainBtnPrice = document.getElementById('dropx-main-btn-price');
+    if (mainBtnPrice) {
+      mainBtnPrice.innerText = formatFCFA(activeB.price);
+    }
+
     // Update sticky mobile bar price
     var stickyPriceEl = document.getElementById('dropx-sticky-price-text');
     if (stickyPriceEl) {
       stickyPriceEl.innerText = formatFCFA(activeB.price);
+    }
+
+    // Update modal elements if open
+    var modalPack = document.getElementById('dropx-checkout-modal-pack');
+    if (modalPack) {
+      modalPack.innerText = activeB.title + " • Livraison Gratuite";
+    }
+    var modalPrice = document.getElementById('dropx-checkout-modal-price');
+    if (modalPrice) {
+      modalPrice.innerText = formatFCFA(activeB.price);
     }
 
     window.dropxUpdateTotals();
@@ -1742,6 +1975,60 @@ fbq('track', 'PageView');
   };
 
   // ==========================================================================
+  // STRIPE-STYLE CHECKOUT MODAL OPEN / CLOSE
+  // ==========================================================================
+  window.dropxOpenCheckoutModal = function() {
+    var modal = document.getElementById('dropx-checkout-modal');
+    if (!modal) return;
+
+    var activeB = bundles[selectedBundleIdx];
+
+    var imgEl = document.getElementById('dropx-checkout-modal-img');
+    if (imgEl && productFeaturedImage) {
+      imgEl.src = productFeaturedImage;
+    }
+    var titleEl = document.getElementById('dropx-checkout-modal-title');
+    if (titleEl) {
+      titleEl.innerText = productTitle;
+    }
+    var packEl = document.getElementById('dropx-checkout-modal-pack');
+    if (packEl) {
+      packEl.innerText = activeB.title + " • Livraison Gratuite";
+    }
+    var priceEl = document.getElementById('dropx-checkout-modal-price');
+    if (priceEl) {
+      priceEl.innerText = formatFCFA(activeB.price);
+    }
+
+    window.dropxUpdateTotals();
+
+    modal.style.display = 'flex';
+    void modal.offsetWidth; // Force CSS reflow for transition
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    var bar = document.getElementById('dropx-sticky-mobile-bar');
+    if (bar) bar.style.display = 'none';
+
+    setTimeout(function() {
+      var nameInput = document.getElementById('dropx-cod-name');
+      if (nameInput) {
+        try { nameInput.focus(); } catch (e) {}
+      }
+    }, 250);
+  };
+
+  window.dropxCloseCheckoutModal = function() {
+    var modal = document.getElementById('dropx-checkout-modal');
+    if (!modal) return;
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(function() {
+      modal.style.display = 'none';
+    }, 280);
+  };
+
+  // ==========================================================================
   // DROPX LANDING PAGE TAKEOVER & MOUNTING
   // ==========================================================================
   function initDropxPage() {
@@ -1768,7 +2055,7 @@ fbq('track', 'PageView');
     // 3. Mark body as dropx-product-active
     document.body.classList.add('dropx-product-active');
 
-    // 3. Render Bundles in #dropx-bundles-container
+    // 4. Render Bundles in #dropx-bundles-container
     var bundlesContainer = document.getElementById('dropx-bundles-container');
     if (bundlesContainer) {
       bundlesContainer.innerHTML = '';
@@ -1796,15 +2083,34 @@ fbq('track', 'PageView');
       });
     }
 
-    // 4. Mount COD Form into #dropx-form-placeholder
-    var formContainer = document.getElementById('dropx-liquid-form-container');
+    // 5. Mount Buy Button into #dropx-form-placeholder (replaces long form on page)
     var formPlaceholder = document.getElementById('dropx-form-placeholder');
-    if (formContainer && formPlaceholder) {
-      formPlaceholder.appendChild(formContainer);
-      formContainer.style.display = 'block';
+    if (formPlaceholder) {
+      formPlaceholder.innerHTML = 
+        '<div class="dropx-buy-btn-wrap">' +
+          '<button type="button" id="dropx-main-buy-btn" onclick="window.dropxOpenCheckoutModal()" class="dropx-main-order-btn">' +
+            '<span class="dropx-main-btn-text">COMMANDER MAINTENANT ⚡</span>' +
+            '<span class="dropx-main-btn-price" id="dropx-main-btn-price">' + formatFCFA(bundles[selectedBundleIdx].price) + '</span>' +
+          '</button>' +
+          '<div class="dropx-main-guarantee">' +
+            '<span>🚚 Livraison Gratuite 24h/48h</span>' +
+            '<span>•</span>' +
+            '<span>💵 Paiement à la réception</span>' +
+          '</div>' +
+        '</div>';
     }
 
-    // 5. Interactive Gallery Click & Thumbnail Row
+    // 6. Ensure Modals are directly in document.body for global overlay placement
+    var checkoutModal = document.getElementById('dropx-checkout-modal');
+    if (checkoutModal && checkoutModal.parentElement !== document.body) {
+      document.body.appendChild(checkoutModal);
+    }
+    var confirmModal = document.getElementById('dropx-confirmation-modal');
+    if (confirmModal && confirmModal.parentElement !== document.body) {
+      document.body.appendChild(confirmModal);
+    }
+
+    // 7. Interactive Gallery Click & Thumbnail Row
     var galleryCol = dropxContainer.querySelector('[style*="flex: 1 1 500px"]') || dropxContainer.querySelector('[style*="flex: 1 1 45%"]');
     var mainImg = galleryCol ? galleryCol.querySelector('img') : dropxContainer.querySelector('img');
     var thumbsGrid = galleryCol ? galleryCol.children[1] : dropxContainer.querySelector('[style*="grid-template-columns"]');
@@ -1831,35 +2137,33 @@ fbq('track', 'PageView');
       });
     }
 
-    // 6. City Select change listener
+    // 8. City Select change listener
     var citySelect = document.getElementById('dropx-cod-city');
     if (citySelect) {
       citySelect.addEventListener('change', window.dropxUpdateTotals);
     }
 
-    // 7. Scroll to Order Form handler
+    // 9. Scroll / Click to Order Form triggers Stripe Checkout Modal
     window.dropxScrollToOrderForm = function() {
-      var bar = document.getElementById('dropx-sticky-mobile-bar');
-      if (bar) bar.style.display = 'none';
-
-      var formEl = document.getElementById('dropx-cod-name') || document.getElementById('dropx-liquid-form-container') || document.getElementById('dropx-form-placeholder');
-      if (formEl) {
-        var rect = formEl.getBoundingClientRect();
-        var targetY = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top - 80;
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
-        try {
-          formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } catch (e) {}
-        setTimeout(function() {
-          var nameInput = document.getElementById('dropx-cod-name');
-          if (nameInput) {
-            try { nameInput.focus(); } catch (e) {}
-          }
-        }, 400);
-      }
+      window.dropxOpenCheckoutModal();
     };
 
-    // 8. Sticky Mobile Bar Scroll Monitor
+    // 10. Intercept any in-page anchor links pointing to buy / order form
+    document.querySelectorAll('a[href="#dropx-form-placeholder"], a[href="#buy"]').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.dropxOpenCheckoutModal();
+      });
+    });
+
+    // 11. Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        window.dropxCloseCheckoutModal();
+      }
+    });
+
+    // 12. Sticky Mobile Bar Scroll Monitor
     function initStickyBarMonitor() {
       var bar = document.getElementById('dropx-sticky-mobile-bar');
       if (!bar) return;
@@ -1869,12 +2173,11 @@ fbq('track', 'PageView');
           bar.style.display = 'none';
           return;
         }
-        var formCard = document.querySelector('.dropx-cod-card');
-        var formRect = formCard ? formCard.getBoundingClientRect() : null;
+        var modal = document.getElementById('dropx-checkout-modal');
+        var isModalOpen = modal && modal.classList.contains('active');
         var scrollY = window.scrollY || window.pageYOffset;
-        var isFormOnScreen = formRect && (formRect.top < window.innerHeight && formRect.bottom > 40);
         
-        if (scrollY > 280 && !isFormOnScreen) {
+        if (scrollY > 300 && !isModalOpen) {
           bar.style.display = 'flex';
         } else {
           bar.style.display = 'none';
@@ -1887,7 +2190,7 @@ fbq('track', 'PageView');
     }
     initStickyBarMonitor();
 
-    // 9. Initial update
+    // 13. Initial bundle selection
     window.dropxSelectBundle(0);
     return true;
   }
