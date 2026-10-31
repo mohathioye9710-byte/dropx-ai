@@ -610,21 +610,13 @@ export async function POST(req) {
     margin: 0 !important;
   }
 
-  /* Card Content Padding */
-  product-card a[ref="productTitleLink"],
+  /* Card Content Padding (applied once, on the wrapper blocks only) */
   product-card a[ref="productTitleLink"] .text-block,
   product-card product-price,
-  product-card .text-block:not([class*="gallery"]):not([class*="media"]):not([class*="image"]),
-  product-card .product-grid-view-zoom-out--details,
-  product-card [role="heading"],
-  .product-card a[ref="productTitleLink"],
   .product-card a[ref="productTitleLink"] .text-block,
   .product-card product-price,
-  .product-card .text-block:not([class*="gallery"]):not([class*="media"]):not([class*="image"]),
-  .product-card [role="heading"],
   .card__information,
-  .card-information,
-  .card__content > *:not(.card__inner):not(.card__media):not([class*="media"]):not([class*="gallery"]) {
+  .card-information {
     padding-left: 14px !important;
     padding-right: 14px !important;
     box-sizing: border-box !important;
@@ -632,16 +624,23 @@ export async function POST(req) {
     --padding-inline-end: 14px !important;
   }
 
-  /* Title Clamping: 2 lines max everywhere to prevent long vertical distortion */
-  product-card a[ref="productTitleLink"],
-  .product-card a[ref="productTitleLink"],
+  /* Title wrapper: plain block, the theme's link stays display:contents */
   product-card a[ref="productTitleLink"] .text-block,
-  .product-card [role="heading"],
+  .product-card a[ref="productTitleLink"] .text-block {
+    display: block !important;
+    padding-top: 10px !important;
+    padding-bottom: 2px !important;
+    margin: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Title Clamping: 2 lines max, applied ONLY to the text element */
   product-card [role="heading"],
+  .product-card [role="heading"],
   .card__heading {
-    margin-top: 10px !important;
-    margin-bottom: 4px !important;
-    padding-top: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     line-height: 1.35 !important;
     font-size: 0.95rem !important;
     font-weight: 700 !important;
@@ -653,7 +652,26 @@ export async function POST(req) {
     text-overflow: ellipsis !important;
     word-break: normal !important;
     text-align: left !important;
-    max-height: 2.7em !important;
+  }
+
+  /* Image fills the card edge-to-edge (no slideshow gutters) */
+  product-card slideshow-slides,
+  product-card slideshow-container,
+  product-card slideshow-component,
+  product-card .card-gallery {
+    padding: 0 !important;
+    margin: 0 !important;
+    --gutter-slide-width: 0px !important;
+    scroll-padding: 0 !important;
+  }
+  product-card slideshow-slide {
+    flex: 0 0 100% !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+  product-card .product-media {
+    width: 100% !important;
+    height: 100% !important;
   }
 
   product-card product-price,
@@ -688,69 +706,169 @@ export async function POST(req) {
     margin-left: 6px !important;
   }
 
-  /* Mobile Catalog, Collection & Homepage Responsive Layout */
-  @media (max-width: 768px) {
+  /* ==========================================================================
+     RESPONSIVE PRODUCT GRID (Catalog, Collection & Homepage)
+     Mobile: 2 per row • Tablet: 3 per row • Desktop: 4 per row
+     ========================================================================== */
+  ul.product-grid,
+  .product-grid,
+  .resource-list.resource-list--grid,
+  [data-testid="resource-list-grid"] {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    --resource-list-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+    max-width: 1200px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .product-grid > li,
+  .product-grid__item,
+  .resource-list__item,
+  li.grid__item {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    list-style: none !important;
+  }
+
+  product-card,
+  .product-card,
+  .card-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+  product-card:hover,
+  .product-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
+  }
+
+  /* Square, cropped product image — never oversized */
+  product-card slideshow-slide,
+  .product-card slideshow-slide {
+    --grid-template-rows: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+  product-card .product-media,
+  .product-card .product-media {
+    aspect-ratio: 1 / 1 !important;
+  }
+  product-card .product-media img,
+  .product-card .product-media img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  product-card product-price,
+  .product-card product-price {
+    flex-wrap: wrap !important;
+    row-gap: 2px !important;
+  }
+
+  /* A single product shouldn't stretch across the whole row */
+  ul.product-grid:has(> :only-child),
+  .resource-list.resource-list--grid:has(> :only-child) {
+    grid-template-columns: minmax(0, 280px) !important;
+    justify-content: center !important;
+  }
+
+  /* Tablet: 3 per row */
+  @media (max-width: 989px) {
     ul.product-grid,
     .product-grid,
-    .resource-list,
-    .resource-list--grid,
-    [data-testid="resource-list-grid"],
-    [class*="resource-list--grid"] {
-      --resource-list-columns-mobile: 1fr !important;
-      --column-count-mobile: 1 !important;
-      grid-template-columns: 1fr !important;
-      gap: 20px !important;
-      padding: 0 16px !important;
-      margin: 0 auto !important;
-      max-width: 440px !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-      justify-content: center !important;
-      justify-items: center !important;
+    .resource-list.resource-list--grid,
+    [data-testid="resource-list-grid"] {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      --resource-list-columns: repeat(3, minmax(0, 1fr)) !important;
+      --resource-list-columns-mobile: repeat(3, minmax(0, 1fr)) !important;
+      gap: 14px !important;
+    }
+  }
+
+  /* Mobile: 2 per row, compact cards */
+  @media (max-width: 749px) {
+    ul.product-grid,
+    .product-grid,
+    .resource-list.resource-list--grid,
+    [data-testid="resource-list-grid"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      --resource-list-columns-mobile: repeat(2, minmax(0, 1fr)) !important;
+      --column-count-mobile: 2 !important;
+      gap: 10px !important;
+    }
+    ul.product-grid,
+    .product-grid {
+      padding-left: 12px !important;
+      padding-right: 12px !important;
     }
 
-    .section-resource-list__content {
-      display: flex !important;
+    ul.product-grid:has(> :only-child),
+    .resource-list.resource-list--grid:has(> :only-child) {
+      grid-template-columns: minmax(0, 62%) !important;
       justify-content: center !important;
-      width: 100% !important;
-    }
-
-    .product-grid > li,
-    .product-grid__item,
-    .resource-list__item,
-    [class*="resource-list__item"],
-    li.grid__item {
-      width: 100% !important;
-      max-width: 100% !important;
-      list-style: none !important;
-      margin: 0 auto !important;
     }
 
     product-card,
     .product-card,
     .card-wrapper {
-      width: 100% !important;
-      max-width: 100% !important;
-      border: 1.5px solid #e5e7eb !important;
-      border-radius: 18px !important;
-      overflow: hidden !important;
-      background: #ffffff !important;
-      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08) !important;
-      margin: 0 auto !important;
+      border-radius: 12px !important;
     }
 
-    product-card slideshow-slide,
-    .product-card slideshow-slide {
-      --grid-template-rows: auto !important;
-      aspect-ratio: 1 / 1 !important;
-      max-height: 380px !important;
-      width: 100% !important;
+    product-card a[ref="productTitleLink"] .text-block,
+    product-card product-price,
+    .product-card a[ref="productTitleLink"] .text-block,
+    .product-card product-price {
+      padding-left: 10px !important;
+      padding-right: 10px !important;
+      --padding-inline-start: 10px !important;
+      --padding-inline-end: 10px !important;
+    }
+    product-card a[ref="productTitleLink"] .text-block,
+    .product-card a[ref="productTitleLink"] .text-block {
+      padding-top: 8px !important;
     }
 
-    product-card .product-media img,
-    .product-card .product-media img {
-      max-height: 380px !important;
-      object-fit: contain !important;
+    product-card [role="heading"],
+    .product-card [role="heading"],
+    .card__heading {
+      font-size: 0.8rem !important;
+      line-height: 1.3 !important;
+    }
+
+    product-card product-price,
+    .product-card product-price {
+      margin-bottom: 10px !important;
+      gap: 4px !important;
+    }
+    product-card product-price .price,
+    product-card product-price .price-item,
+    .product-card .price {
+      font-size: 0.95rem !important;
+    }
+    product-card product-price .compare-at-price,
+    .product-card .compare-at-price {
+      font-size: 0.72rem !important;
+      margin-left: 0 !important;
+    }
+
+    product-card .badge,
+    .product-card .badge,
+    product-card [class*="badge"] {
+      font-size: 10px !important;
+      padding: 2px 8px !important;
     }
   }
 
@@ -1330,6 +1448,28 @@ fbq('track', 'PageView');
       padding: 8px !important;
       max-height: 340px !important;
       object-fit: contain !important;
+    }
+
+    /* Hero image: compact square that fills its box (no big empty gray frame) */
+    #dropx-full-page-container [style*="flex: 1 1 500px"] > div:first-child {
+      width: 100% !important;
+      max-width: 360px !important;
+      max-height: 320px !important;
+      aspect-ratio: 1 / 1 !important;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      border-radius: 16px !important;
+      overflow: hidden !important;
+    }
+    #dropx-full-page-container [style*="flex: 1 1 500px"] > div:first-child img {
+      width: 100% !important;
+      height: 100% !important;
+      max-height: none !important;
+      padding: 0 !important;
+      object-fit: cover !important;
+    }
+    #dropx-full-page-container [style*="flex: 1 1 500px"] {
+      gap: 10px !important;
     }
 
     /* Horizontal Thumbnail Swipe Bar */
