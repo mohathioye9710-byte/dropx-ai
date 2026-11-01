@@ -2034,6 +2034,11 @@ window.dropxOpenWhatsApp = function(e) {
   if (e) {
     try { e.preventDefault(); e.stopPropagation(); } catch(err) {}
   }
+  try {
+    if (typeof fbq === 'function') {
+      fbq('track', 'Contact');
+    }
+  } catch(err) {}
   var msg = "Bonjour ShopX ! J'ai une question concernant le Tapis de Massage Électrique.";
   var phone = "221775447866";
   var url = "https://api.whatsapp.com/send?phone=" + phone + "&text=" + encodeURIComponent(msg);
