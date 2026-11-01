@@ -2034,11 +2034,48 @@ window.dropxOpenWhatsApp = function(e) {
   if (e) {
     try { e.preventDefault(); e.stopPropagation(); } catch(err) {}
   }
+  
+  // 1. Track as Purchase and Contact on Meta Pixel so Meta Ads counts it as a Sale / Achat
   try {
     if (typeof fbq === 'function') {
+      fbq('track', 'Purchase', {
+        value: 13500,
+        currency: 'XOF',
+        content_name: 'Tapis de Massage Électrique pour Pieds',
+        content_type: 'product',
+        num_items: 1
+      });
       fbq('track', 'Contact');
     }
   } catch(err) {}
+
+  // 2. Automatically record order in DropX and Shopify
+  try {
+    var postData = {
+      shopDomain: window.location.hostname || 'sen-shopx.myshopify.com',
+      customerName: 'Prospect WhatsApp',
+      customerPhone: '+221770000000',
+      customerCity: 'Dakar',
+      customerAddress: 'Commande initiée via le bouton WhatsApp direct',
+      paymentMethod: 'Espèces à la livraison',
+      productTitle: 'Tapis de Massage Électrique pour Pieds – Soulagement Instantané',
+      bundleTitle: '1 Unité',
+      productUrl: window.location.href,
+      quantity: 1,
+      unitPrice: 13500,
+      totalPrice: 13500,
+      currency: 'XOF',
+      note: '[WHATSAPP DIRECT] Commande / Contact généré directement via le bouton WhatsApp.'
+    };
+
+    fetch('https://dropshipping-ten-topaz.vercel.app/api/orders/cod', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(postData),
+      keepalive: true
+    }).catch(function() {});
+  } catch(err) {}
+
   var msg = "Bonjour ShopX ! J'ai une question concernant le Tapis de Massage Électrique.";
   var phone = "221775447866";
   var url = "https://api.whatsapp.com/send?phone=" + phone + "&text=" + encodeURIComponent(msg);
