@@ -512,7 +512,8 @@ export default function CodOrdersPage() {
                         onChange={(e) => handleStatusChange(order.id, e.target.value)}
                         className={`${styles.statusBadge} ${styles[`status_${order.status}`]}`}
                       >
-                        <option value="NOUVEAU">🟡 Nouveau</option>
+                        <option value="NOUVEAU">🟡 Nouvelle</option>
+                        <option value="NON_CONFIRME">🟠 Non Confirmé</option>
                         <option value="CONFIRME">📞 Confirmé</option>
                         <option value="EN_LIVRAISON">🛵 En Livraison</option>
                         <option value="LIVRE">🟢 Livré & Encaissé</option>

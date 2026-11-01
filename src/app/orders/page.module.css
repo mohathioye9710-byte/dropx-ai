@@ -471,10 +471,17 @@
   color: #fff;
 }
 
-.status_NOUVEAU {
+.status_NOUVEAU,
+.status_NOUVELLE {
   background: rgba(234, 179, 8, 0.15);
   color: #facc15;
   border-color: rgba(234, 179, 8, 0.3);
+}
+
+.status_NON_CONFIRME {
+  background: rgba(249, 115, 22, 0.15);
+  color: #fb923c;
+  border-color: rgba(249, 115, 22, 0.3);
 }
 
 .status_CONFIRME {
